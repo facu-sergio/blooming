@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text;
 using blooming_api.Common;
 using blooming_api.Infrastructure.Auth;
+using blooming_api.Infrastructure.Cloudinary;
 using blooming_api.Infrastructure.Data;
 using blooming_api.Infrastructure.Middleware;
 using blooming_api.Infrastructure.Pipeline;
@@ -47,6 +48,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 // 4. Authorization
 builder.Services.AddAuthorization();
+
+// Cloudinary
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
+builder.Services.AddSingleton<ICloudinaryService, CloudinaryService>();
 
 // 5. MediatR + ValidationBehavior
 builder.Services.AddMediatR(cfg =>

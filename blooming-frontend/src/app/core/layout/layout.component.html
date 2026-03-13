@@ -5,6 +5,15 @@
   @if (isDesktop()) {
     <a
       mat-button
+      routerLink="/products"
+      data-testid="products-btn"
+      aria-label="Productos"
+    >
+      <mat-icon>inventory_2</mat-icon>
+      Productos
+    </a>
+    <a
+      mat-button
       routerLink="/users/register"
       data-testid="register-user-btn"
       aria-label="Registrar usuario"
@@ -13,6 +22,15 @@
       Registrar usuario
     </a>
   } @else {
+    <a
+      mat-icon-button
+      routerLink="/products"
+      data-testid="products-btn"
+      aria-label="Productos"
+      matTooltip="Productos"
+    >
+      <mat-icon>inventory_2</mat-icon>
+    </a>
     <a
       mat-icon-button
       routerLink="/users/register"

@@ -1,0 +1,80 @@
+<div class="product-list-container">
+  <div class="product-list-header">
+    <h1>Productos</h1>
+    <button mat-raised-button color="primary" (click)="navigateToNew()">
+      <mat-icon>add</mat-icon>
+      Nuevo producto
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="48" />
+    </div>
+  } @else if (products().length === 0) {
+    <mat-card>
+      <mat-card-content>
+        <p class="empty-state">No hay productos cargados aún.</p>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <mat-accordion>
+      @for (product of products(); track product.id) {
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <div class="product-header">
+                @if (product.imageUrl) {
+                  <img
+                    [src]="product.imageUrl"
+                    [alt]="product.name"
+                    class="product-thumbnail"
+                  />
+                } @else {
+                  <div class="product-thumbnail-placeholder">
+                    <mat-icon>image_not_supported</mat-icon>
+                  </div>
+                }
+                <div class="product-info">
+                  <span class="product-name">{{ product.name }}</span>
+                  <span class="product-meta">{{ product.category }} · {{ product.variants.length }} variante(s)</span>
+                </div>
+              </div>
+            </mat-panel-title>
+            <mat-panel-description>
+              <button
+                mat-icon-button
+                color="primary"
+                (click)="$event.stopPropagation(); navigateToEdit(product.id)"
+                aria-label="Editar producto"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="variants-table">
+            <div class="variants-header">
+              <span>Talle</span>
+              <span>Color</span>
+              <span>Costo</span>
+              <span>Recargo</span>
+              <span>Venta</span>
+              <span>Stock</span>
+            </div>
+            @for (variant of product.variants; track variant.id) {
+              <div class="variants-row">
+                <span>{{ variant.size }}</span>
+                <span>{{ variant.color }}</span>
+                <span>${{ variant.costPrice | number: '1.2-2' }}</span>
+                <span>{{ variant.markupPercentage }}%</span>
+                <span>${{ variant.sellingPrice | number: '1.2-2' }}</span>
+                <span>{{ variant.stock }}</span>
+              </div>
+            }
+          </div>
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+  }
+</div>

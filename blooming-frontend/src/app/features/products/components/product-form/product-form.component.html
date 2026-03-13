@@ -1,0 +1,161 @@
+<div class="product-form-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>{{ isEditMode() ? 'Editar producto' : 'Nuevo producto' }}</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <!-- Nombre -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="name" [maxlength]="constants.nameMaxLength" />
+          @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+            <mat-error>El nombre es requerido</mat-error>
+          }
+          @if (form.get('name')?.hasError('maxlength')) {
+            <mat-error>Máximo {{ constants.nameMaxLength }} caracteres</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Categoría -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Categoría</mat-label>
+          <input matInput formControlName="category" [maxlength]="constants.categoryMaxLength" />
+          @if (form.get('category')?.hasError('required') && form.get('category')?.touched) {
+            <mat-error>La categoría es requerida</mat-error>
+          }
+          @if (form.get('category')?.hasError('maxlength')) {
+            <mat-error>Máximo {{ constants.categoryMaxLength }} caracteres</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Imagen -->
+        <div class="image-section">
+          <label class="image-label">Imagen (opcional)</label>
+          @if (imagePreviewUrl()) {
+            <div class="image-preview">
+              <img [src]="imagePreviewUrl()!" alt="Preview" class="preview-img" />
+              <button
+                mat-icon-button
+                type="button"
+                color="warn"
+                (click)="onRemoveImage()"
+                aria-label="Eliminar imagen"
+                class="remove-image-btn"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          } @else {
+            <div class="image-upload-area">
+              <input
+                type="file"
+                accept="image/jpeg,image/png"
+                (change)="onImageSelected($event)"
+                #fileInput
+                style="display:none"
+              />
+              <button mat-stroked-button type="button" (click)="fileInput.click()">
+                <mat-icon>upload</mat-icon>
+                Subir imagen
+              </button>
+            </div>
+          }
+          @if (imageError()) {
+            <mat-error class="image-error">{{ imageError() }}</mat-error>
+          }
+        </div>
+
+        <!-- Variantes -->
+        <div class="variants-section">
+          <div class="variants-header">
+            <h3>Variantes</h3>
+            <button mat-stroked-button type="button" (click)="addVariant()">
+              <mat-icon>add</mat-icon>
+              Agregar variante
+            </button>
+          </div>
+
+          <div formArrayName="variants">
+            @for (variant of getVariantControls(); track $index) {
+              <div [formGroupName]="$index" class="variant-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Talle</mat-label>
+                  <input matInput formControlName="size" [maxlength]="constants.sizeMaxLength" />
+                  @if (variant.get('size')?.hasError('required') && variant.get('size')?.touched) {
+                    <mat-error>Requerido</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Color</mat-label>
+                  <input matInput formControlName="color" [maxlength]="constants.colorMaxLength" />
+                  @if (variant.get('color')?.hasError('required') && variant.get('color')?.touched) {
+                    <mat-error>Requerido</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Costo ($)</mat-label>
+                  <input matInput type="number" formControlName="costPrice" min="0.01" step="0.01" />
+                  @if (variant.get('costPrice')?.hasError('required') && variant.get('costPrice')?.touched) {
+                    <mat-error>Requerido</mat-error>
+                  }
+                  @if (variant.get('costPrice')?.hasError('min')) {
+                    <mat-error>Debe ser mayor a 0</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Recargo (%)</mat-label>
+                  <input matInput type="number" formControlName="markupPercentage" min="0" step="0.1" />
+                  @if (variant.get('markupPercentage')?.hasError('min')) {
+                    <mat-error>No puede ser negativo</mat-error>
+                  }
+                </mat-form-field>
+
+                <div class="selling-price">
+                  <span class="selling-price-label">Precio venta</span>
+                  <span class="selling-price-value">${{ getSellingPrice(variant) | number: '1.2-2' }}</span>
+                </div>
+
+                <button
+                  mat-icon-button
+                  type="button"
+                  color="warn"
+                  (click)="removeVariant($index)"
+                  [disabled]="variantsArray.length === 1"
+                  aria-label="Eliminar variante"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="form-actions">
+          <button mat-button type="button" (click)="router.navigate(['/products'])">
+            Cancelar
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="form.invalid || isLoading()"
+          >
+            @if (isLoading()) {
+              <mat-spinner diameter="20" class="btn-spinner" />
+            } @else {
+              {{ isEditMode() ? 'Guardar cambios' : 'Crear producto' }}
+            }
+          </button>
+        </div>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
