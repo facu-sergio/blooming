@@ -2,6 +2,27 @@
   <span class="toolbar-title">Blooming</span>
   <span class="toolbar-spacer"></span>
   <span class="user-email">{{ currentUser()?.email }}</span>
+  @if (isDesktop()) {
+    <a
+      mat-button
+      routerLink="/users/register"
+      data-testid="register-user-btn"
+      aria-label="Registrar usuario"
+    >
+      <mat-icon>person_add</mat-icon>
+      Registrar usuario
+    </a>
+  } @else {
+    <a
+      mat-icon-button
+      routerLink="/users/register"
+      data-testid="register-user-btn"
+      aria-label="Registrar usuario"
+      matTooltip="Registrar usuario"
+    >
+      <mat-icon>person_add</mat-icon>
+    </a>
+  }
   <button
     mat-icon-button
     data-testid="logout-btn"

@@ -1,4 +1,5 @@
 using blooming_api.Modules.Auth.Commands.Login;
+using blooming_api.Modules.Auth.Commands.RegisterUser;
 using blooming_api.Modules.Auth.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -23,5 +24,13 @@ public class AuthController : ControllerBase
     {
         var response = await _mediator.Send(new LoginCommand(request.Email, request.Password));
         return Ok(response);
+    }
+
+    [Authorize]
+    [HttpPost("register")]
+    public async Task<ActionResult<RegisterUserResponse>> Register([FromBody] RegisterUserRequest request)
+    {
+        var response = await _mediator.Send(new RegisterUserCommand(request.Email, request.Password));
+        return CreatedAtAction(nameof(Register), response);
     }
 }

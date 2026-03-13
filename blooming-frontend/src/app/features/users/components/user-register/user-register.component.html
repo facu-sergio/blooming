@@ -1,0 +1,80 @@
+<div class="register-container">
+  <mat-card class="register-card">
+    <mat-card-header>
+      <mat-card-title>Registrar usuario</mat-card-title>
+      <mat-card-subtitle>Creá una nueva cuenta de acceso al sistema</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="email" />
+          @if (form.controls.email.hasError('required')) {
+            <mat-error>El email es requerido</mat-error>
+          } @else if (form.controls.email.hasError('email')) {
+            <mat-error>Ingresá un email válido</mat-error>
+          } @else if (form.controls.email.hasError('maxlength')) {
+            <mat-error>El email no puede superar {{ emailMaxLength }} caracteres</mat-error>
+          } @else if (emailDuplicateError()) {
+            <mat-error>{{ emailDuplicateError() }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contraseña</mat-label>
+          <input matInput type="password" formControlName="password" autocomplete="new-password" />
+          @if (form.controls.password.hasError('required')) {
+            <mat-error>La contraseña es requerida</mat-error>
+          } @else if (form.controls.password.hasError('minlength')) {
+            <mat-error>La contraseña debe tener al menos {{ passwordMinLength }} caracteres</mat-error>
+          }
+        </mat-form-field>
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          class="full-width submit-btn"
+          [disabled]="form.invalid || isSubmitting()"
+        >
+          @if (isSubmitting()) {
+            <mat-spinner diameter="20" />
+          } @else {
+            Crear usuario
+          }
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<style>
+  .register-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 24px 16px;
+    min-height: calc(100vh - 64px);
+    background-color: #f5f5f5;
+  }
+
+  .register-card {
+    width: 100%;
+    max-width: 440px;
+    padding: 16px;
+  }
+
+  .full-width {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+  .submit-btn {
+    min-height: 44px;
+  }
+
+  mat-card-header {
+    margin-bottom: 24px;
+  }
+</style>
