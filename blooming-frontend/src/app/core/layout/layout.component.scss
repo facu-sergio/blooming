@@ -1,0 +1,29 @@
+.app-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.toolbar-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.user-email {
+  margin-right: 8px;
+  font-size: 0.875rem;
+  opacity: 0.9;
+
+  @media (max-width: 430px) {
+    display: none;
+  }
+}
+
+.logout-btn {
+  min-width: 44px;
+  min-height: 44px;
+}
