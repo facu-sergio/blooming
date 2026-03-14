@@ -1,15 +1,17 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormArray, Validators, AbstractControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProductsService } from '../../services/products.service';
+import { CategoriesService } from '../../services/categories.service';
 import { productsConstants } from '../../constants/products.constants';
 import { UpdateVariantDto, CreateVariantDto } from '../../models/product.models';
 
@@ -22,6 +24,7 @@ import { UpdateVariantDto, CreateVariantDto } from '../../models/product.models'
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
@@ -32,12 +35,15 @@ import { UpdateVariantDto, CreateVariantDto } from '../../models/product.models'
 export class ProductFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly productsService = inject(ProductsService);
+  private readonly categoriesService = inject(CategoriesService);
   readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
 
   readonly constants = productsConstants;
+  private readonly cdr = inject(ChangeDetectorRef);
   readonly isLoading = this.productsService.isLoading;
+  readonly categories = this.categoriesService.categories;
 
   readonly isEditMode = signal(false);
   readonly productId = signal<number | null>(null);
@@ -48,8 +54,8 @@ export class ProductFormComponent implements OnInit {
   readonly removeImage = signal(false);
 
   readonly form = this.fb.group({
-    name: ['', { validators: [Validators.required, Validators.maxLength(productsConstants.nameMaxLength)], updateOn: 'change' }],
-    category: ['', { validators: [Validators.required, Validators.maxLength(productsConstants.categoryMaxLength)], updateOn: 'change' }],
+    name: ['', { validators: [Validators.required, Validators.maxLength(productsConstants.nameMaxLength)], updateOn: 'blur' }],
+    categoryId: [null as number | null, [Validators.required]],
     variants: this.fb.array([this.createVariantGroup()]),
   });
 
@@ -60,10 +66,10 @@ export class ProductFormComponent implements OnInit {
   createVariantGroup(data?: { id?: number; size?: string; color?: string; costPrice?: number; markupPercentage?: number }) {
     return this.fb.group({
       id: [data?.id ?? null],
-      size: [data?.size ?? '', { validators: [Validators.required, Validators.maxLength(productsConstants.sizeMaxLength)], updateOn: 'change' }],
-      color: [data?.color ?? '', { validators: [Validators.required, Validators.maxLength(productsConstants.colorMaxLength)], updateOn: 'change' }],
-      costPrice: [data?.costPrice ?? null, { validators: [Validators.required, Validators.min(0.01)], updateOn: 'change' }],
-      markupPercentage: [data?.markupPercentage ?? 0, { validators: [Validators.required, Validators.min(0)], updateOn: 'change' }],
+      size: [data?.size ?? '', [Validators.required, Validators.maxLength(productsConstants.sizeMaxLength)]],
+      color: [data?.color ?? '', [Validators.required, Validators.maxLength(productsConstants.colorMaxLength)]],
+      costPrice: [data?.costPrice ?? null, [Validators.required, Validators.min(0.01)]],
+      markupPercentage: [data?.markupPercentage ?? 0, [Validators.required, Validators.min(0)]],
     });
   }
 
@@ -111,6 +117,8 @@ export class ProductFormComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
+    await this.categoriesService.loadAll();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEditMode.set(true);
@@ -118,11 +126,9 @@ export class ProductFormComponent implements OnInit {
       await this.productsService.loadById(Number(id));
       const product = this.productsService.selectedProduct();
       if (product) {
-        this.form.patchValue({ name: product.name, category: product.category });
+        this.form.patchValue({ name: product.name, categoryId: product.categoryId });
         this.existingImageUrl.set(product.imageUrl ?? null);
         this.imagePreviewUrl.set(product.imageUrl ?? null);
-
-        // Limpiar y poblar variants
         while (this.variantsArray.length > 0) {
           this.variantsArray.removeAt(0);
         }
@@ -135,6 +141,7 @@ export class ProductFormComponent implements OnInit {
             markupPercentage: v.markupPercentage,
           }));
         }
+        this.cdr.detectChanges();
       }
     }
   }
@@ -142,12 +149,12 @@ export class ProductFormComponent implements OnInit {
   async onSubmit(): Promise<void> {
     if (this.form.invalid || this.isLoading()) return;
 
-    const { name, category } = this.form.value;
+    const { name, categoryId } = this.form.value;
     const variants = this.variantsArray.value;
 
     const formData = this.productsService.buildFormData(
       name!,
-      category!,
+      categoryId!,
       this.isEditMode() ? (variants as UpdateVariantDto[]) : (variants as CreateVariantDto[]),
       this.selectedImage() ?? undefined,
       this.isEditMode() ? this.removeImage() : undefined,

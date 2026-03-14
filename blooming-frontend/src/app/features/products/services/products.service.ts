@@ -63,15 +63,26 @@ export class ProductsService {
 
   buildFormData(
     name: string,
-    category: string,
+    categoryId: number,
     variants: CreateVariantDto[] | UpdateVariantDto[],
     image?: File,
     removeImage?: boolean
   ): FormData {
     const fd = new FormData();
     fd.append('name', name);
-    fd.append('category', category);
-    fd.append('variants', JSON.stringify(variants));
+    fd.append('categoryId', String(categoryId));
+
+    const processedVariants = variants.map((variant) => ({
+      ...variant,
+      costPrice:
+        typeof variant.costPrice === 'string' ? parseFloat(variant.costPrice) : variant.costPrice,
+      markupPercentage:
+        typeof variant.markupPercentage === 'string'
+          ? parseFloat(variant.markupPercentage)
+          : variant.markupPercentage,
+    }));
+
+    fd.append('variants', JSON.stringify(processedVariants));
     if (image) {
       fd.append('image', image);
     }

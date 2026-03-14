@@ -27,6 +27,9 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
             .FirstOrDefaultAsync(p => p.Id == request.ProductId, cancellationToken)
             ?? throw new NotFoundException($"Producto {request.ProductId} no encontrado");
 
+        var category = await _db.Categories.FindAsync([request.CategoryId], cancellationToken)
+            ?? throw new NotFoundException($"Categoría {request.CategoryId} no encontrada");
+
         // Manejar imagen
         if (request.Image != null)
         {
@@ -43,7 +46,7 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
         }
 
         product.Name = request.Name;
-        product.Category = request.Category;
+        product.CategoryId = request.CategoryId;
         product.UpdatedAt = DateTime.UtcNow;
 
         // Actualizar variantes
@@ -79,20 +82,16 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
 
         await _db.SaveChangesAsync(cancellationToken);
 
-        return CreateProductHandler.MapToResponse(product);
+        return CreateProductHandler.MapToResponse(product, category.Name);
     }
 
     private async Task DeleteCloudinaryImage(string imageUrl)
     {
-        // Extraer public_id de la URL de Cloudinary
-        // Ejemplo: https://res.cloudinary.com/cloud/image/upload/v123/products/filename.jpg
-        // public_id = products/filename (sin extensión)
         var uri = new Uri(imageUrl);
         var segments = uri.AbsolutePath.Split('/');
         var uploadIndex = Array.IndexOf(segments, "upload");
         if (uploadIndex >= 0 && uploadIndex + 2 < segments.Length)
         {
-            // Saltear el segmento de versión (vXXX)
             var startIndex = uploadIndex + 2;
             if (segments[uploadIndex + 1].StartsWith('v') && int.TryParse(segments[uploadIndex + 1][1..], out _))
                 startIndex = uploadIndex + 2;

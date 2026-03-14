@@ -1,0 +1,183 @@
+import { TestBed } from '@angular/core/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { ProductsService } from './products.service';
+import { ProductResponse } from '../models/product.models';
+
+const mockVariant = {
+  id: 1,
+  size: 'M',
+  color: 'Azul',
+  costPrice: 1000,
+  markupPercentage: 50,
+  sellingPrice: 1500,
+  stock: 0,
+};
+
+const mockProduct: ProductResponse = {
+  id: 1,
+  name: 'Remera',
+  categoryId: 1,
+  categoryName: 'Ropa',
+  imageUrl: undefined,
+  createdAt: '2026-03-14T00:00:00Z',
+  variants: [mockVariant],
+};
+
+describe('ProductsService', () => {
+  let service: ProductsService;
+  let httpMock: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    service = TestBed.inject(ProductsService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+
+  it('should start with empty products signal', () => {
+    expect(service.products()).toEqual([]);
+  });
+
+  it('should start with isLoading false', () => {
+    expect(service.isLoading()).toBe(false);
+  });
+
+  it('should start with selectedProduct null', () => {
+    expect(service.selectedProduct()).toBeNull();
+  });
+
+  describe('loadAll()', () => {
+    it('should GET /api/products and update products signal', async () => {
+      const loadPromise = service.loadAll();
+
+      const req = httpMock.expectOne((r) => r.url.includes('/api/products') && !r.url.includes('/api/products/'));
+      expect(req.request.method).toBe('GET');
+      req.flush([mockProduct]);
+
+      await loadPromise;
+      expect(service.products()).toEqual([mockProduct]);
+    });
+
+    it('should set isLoading to false after successful loadAll', async () => {
+      const loadPromise = service.loadAll();
+      httpMock
+        .expectOne((r) => r.url.includes('/api/products') && !r.url.includes('/api/products/'))
+        .flush([mockProduct]);
+      await loadPromise;
+      expect(service.isLoading()).toBe(false);
+    });
+
+    it('should set isLoading to false after failed loadAll', async () => {
+      const loadPromise = service.loadAll().catch(() => null);
+      httpMock
+        .expectOne((r) => r.url.includes('/api/products') && !r.url.includes('/api/products/'))
+        .flush('error', { status: 500, statusText: 'Server Error' });
+      await loadPromise;
+      expect(service.isLoading()).toBe(false);
+    });
+  });
+
+  describe('loadById()', () => {
+    it('should GET /api/products/:id and update selectedProduct signal', async () => {
+      const loadPromise = service.loadById(1);
+
+      const req = httpMock.expectOne((r) => r.url.includes('/api/products/1'));
+      expect(req.request.method).toBe('GET');
+      req.flush(mockProduct);
+
+      await loadPromise;
+      expect(service.selectedProduct()).toEqual(mockProduct);
+    });
+  });
+
+  describe('create()', () => {
+    it('should POST /api/products with FormData and refresh list', async () => {
+      const fd = new FormData();
+      fd.append('name', 'Remera');
+      fd.append('categoryId', '1');
+      fd.append('variants', JSON.stringify([{ size: 'M', color: 'Azul', costPrice: 1000, markupPercentage: 50 }]));
+
+      const createPromise = service.create(fd);
+
+      const postReq = httpMock.expectOne((r) => r.url.includes('/api/products') && r.method === 'POST');
+      postReq.flush(mockProduct);
+
+      await Promise.resolve();
+
+      const getReq = httpMock.expectOne((r) => r.url.includes('/api/products') && r.method === 'GET');
+      getReq.flush([mockProduct]);
+
+      const result = await createPromise;
+      expect(result).toEqual(mockProduct);
+      expect(service.products()).toEqual([mockProduct]);
+    });
+  });
+
+  describe('update()', () => {
+    it('should PUT /api/products/:id with FormData and refresh list', async () => {
+      const fd = new FormData();
+      fd.append('name', 'Remera Actualizada');
+      fd.append('categoryId', '1');
+      fd.append('variants', JSON.stringify([{ id: 1, size: 'L', color: 'Rojo', costPrice: 1200, markupPercentage: 50 }]));
+
+      const updatePromise = service.update(1, fd);
+
+      const putReq = httpMock.expectOne((r) => r.url.includes('/api/products/1') && r.method === 'PUT');
+      const updatedProduct = { ...mockProduct, name: 'Remera Actualizada' };
+      putReq.flush(updatedProduct);
+
+      await Promise.resolve();
+
+      const getReq = httpMock.expectOne((r) => r.url.includes('/api/products') && r.method === 'GET');
+      getReq.flush([updatedProduct]);
+
+      const result = await updatePromise;
+      expect(result.name).toBe('Remera Actualizada');
+    });
+  });
+
+  describe('buildFormData()', () => {
+    it('should build FormData with name, categoryId and variants as JSON string', () => {
+      const variants = [{ size: 'M', color: 'Azul', costPrice: 1000, markupPercentage: 50 }];
+      const fd = service.buildFormData('Remera', 1, variants);
+
+      expect(fd.get('name')).toBe('Remera');
+      expect(fd.get('categoryId')).toBe('1');
+      expect(fd.get('variants')).toBe(JSON.stringify(variants));
+      expect(fd.get('image')).toBeNull();
+    });
+
+    it('should include image in FormData when provided', () => {
+      const file = new File(['content'], 'test.jpg', { type: 'image/jpeg' });
+      const variants = [{ size: 'M', color: 'Azul', costPrice: 1000, markupPercentage: 50 }];
+      const fd = service.buildFormData('Remera', 1, variants, file);
+
+      expect(fd.get('image')).toBe(file);
+    });
+
+    it('should include removeImage in FormData when provided', () => {
+      const variants = [{ id: 1, size: 'M', color: 'Azul', costPrice: 1000, markupPercentage: 50 }];
+      const fd = service.buildFormData('Remera', 1, variants, undefined, true);
+
+      expect(fd.get('removeImage')).toBe('true');
+    });
+
+    it('should not include removeImage in FormData when not provided', () => {
+      const variants = [{ size: 'M', color: 'Azul', costPrice: 1000, markupPercentage: 50 }];
+      const fd = service.buildFormData('Remera', 1, variants);
+
+      expect(fd.get('removeImage')).toBeNull();
+    });
+  });
+});

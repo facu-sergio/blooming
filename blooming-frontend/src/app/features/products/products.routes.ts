@@ -22,4 +22,11 @@ export const productsRoutes: Routes = [
         (m) => m.ProductFormComponent
       ),
   },
+  {
+    path: 'categories',
+    loadComponent: () =>
+      import('./components/category-list/category-list.component').then(
+        (m) => m.CategoryListComponent
+      ),
+  },
 ];

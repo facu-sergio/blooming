@@ -31,18 +31,28 @@ describe('LayoutComponent', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should display the authenticated user email', () => {
+  it('should display the first letter of the authenticated user email as avatar', () => {
     const fixture = TestBed.createComponent(LayoutComponent);
     fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.textContent).toContain('admin@blooming.com');
+    const avatarBtn = fixture.debugElement.query(By.css('[data-testid="avatar-btn"]'));
+    expect(avatarBtn.nativeElement.textContent.trim()).toBe('A');
   });
 
-  it('should call authService.logout() when logout button is clicked', () => {
+  it('should call authService.logout() when logout() is called', () => {
     const fixture = TestBed.createComponent(LayoutComponent);
     fixture.detectChanges();
-    const button = fixture.debugElement.query(By.css('[data-testid="logout-btn"]'));
-    button.nativeElement.click();
+    fixture.componentInstance.logout();
     expect(logoutSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should toggle sidenav on mobile when hamburger is clicked', () => {
+    const fixture = TestBed.createComponent(LayoutComponent);
+    const component = fixture.componentInstance;
+    // Simulate mobile by spying on isMobile
+    expect(component.sidenavOpened()).toBe(false);
+    component.toggleSidenav();
+    expect(component.sidenavOpened()).toBe(true);
+    component.toggleSidenav();
+    expect(component.sidenavOpened()).toBe(false);
   });
 });

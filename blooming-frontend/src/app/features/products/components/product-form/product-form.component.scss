@@ -9,6 +9,30 @@
   margin-bottom: 8px;
 }
 
+.no-categories-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff3e0;
+  border: 1px solid #ffcc02;
+  border-radius: 4px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #e65100;
+
+  mat-icon {
+    color: #f57c00;
+    flex-shrink: 0;
+  }
+
+  .link {
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: 500;
+  }
+}
+
 .image-section {
   margin-bottom: 24px;
 }

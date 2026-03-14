@@ -1,8 +1,10 @@
 using blooming_api.Common;
+using blooming_api.Common.Exceptions;
 using blooming_api.Infrastructure.Cloudinary;
 using blooming_api.Infrastructure.Data;
 using blooming_api.Modules.Products.DTOs;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace blooming_api.Modules.Products.Commands.CreateProduct;
 
@@ -19,6 +21,9 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
 
     public async Task<ProductResponse> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
+        var category = await _db.Categories.FindAsync([request.CategoryId], cancellationToken)
+            ?? throw new NotFoundException($"Categoría {request.CategoryId} no encontrada");
+
         string? imageUrl = null;
         if (request.Image != null)
         {
@@ -29,7 +34,7 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
         var product = new Product
         {
             Name = request.Name,
-            Category = request.Category,
+            CategoryId = request.CategoryId,
             ImageUrl = imageUrl,
             CreatedAt = DateTime.UtcNow,
             Variants = request.Variants.Select(v => new ProductVariant
@@ -47,14 +52,15 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
         _db.Products.Add(product);
         await _db.SaveChangesAsync(cancellationToken);
 
-        return MapToResponse(product);
+        return MapToResponse(product, category.Name);
     }
 
-    internal static ProductResponse MapToResponse(Product product) => new()
+    internal static ProductResponse MapToResponse(Product product, string categoryName) => new()
     {
         Id = product.Id,
         Name = product.Name,
-        Category = product.Category,
+        CategoryId = product.CategoryId,
+        CategoryName = categoryName,
         ImageUrl = product.ImageUrl,
         CreatedAt = product.CreatedAt,
         Variants = product.Variants.Select(v => new VariantResponse

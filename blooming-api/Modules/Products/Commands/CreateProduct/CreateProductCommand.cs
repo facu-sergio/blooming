@@ -5,7 +5,7 @@ namespace blooming_api.Modules.Products.Commands.CreateProduct;
 
 public record CreateProductCommand(
     string Name,
-    string Category,
+    int CategoryId,
     IFormFile? Image,
     List<CreateVariantDto> Variants
 ) : IRequest<ProductResponse>;

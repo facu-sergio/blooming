@@ -6,7 +6,7 @@ namespace blooming_api.Modules.Products.Commands.UpdateProduct;
 public record UpdateProductCommand(
     int ProductId,
     string Name,
-    string Category,
+    int CategoryId,
     IFormFile? Image,
     bool RemoveImage,
     List<UpdateVariantDto> Variants

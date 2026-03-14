@@ -14,10 +14,8 @@ public class CreateProductValidator : AbstractValidator<CreateProductCommand>
             .MaximumLength(ProductsConstants.NameMaxLength)
                 .WithMessage($"El nombre no puede superar {ProductsConstants.NameMaxLength} caracteres");
 
-        RuleFor(x => x.Category)
-            .NotEmpty().WithMessage("La categoría es requerida")
-            .MaximumLength(ProductsConstants.CategoryMaxLength)
-                .WithMessage($"La categoría no puede superar {ProductsConstants.CategoryMaxLength} caracteres");
+        RuleFor(x => x.CategoryId)
+            .GreaterThan(0).WithMessage("La categoría es requerida");
 
         RuleFor(x => x.Variants)
             .NotEmpty().WithMessage("Se requiere al menos una variante");

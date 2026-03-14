@@ -11,7 +11,8 @@ export interface ProductVariant {
 export interface Product {
   id: number;
   name: string;
-  category: string;
+  categoryId: number;
+  categoryName: string;
   imageUrl?: string;
   createdAt: string;
   variants: ProductVariant[];
@@ -35,7 +36,8 @@ export interface UpdateVariantDto {
 export interface ProductResponse {
   id: number;
   name: string;
-  category: string;
+  categoryId: number;
+  categoryName: string;
   imageUrl?: string;
   createdAt: string;
   variants: VariantResponse[];
@@ -49,4 +51,21 @@ export interface VariantResponse {
   markupPercentage: number;
   sellingPrice: number;
   stock: number;
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  description?: string;
+  createdAt: string;
+}
+
+export interface CreateCategoryDto {
+  name: string;
+  description?: string;
+}
+
+export interface UpdateCategoryDto {
+  name: string;
+  description?: string;
 }

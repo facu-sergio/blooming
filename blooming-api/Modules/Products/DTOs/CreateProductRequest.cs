@@ -3,7 +3,7 @@ namespace blooming_api.Modules.Products.DTOs;
 public class CreateProductRequest
 {
     public string Name { get; set; } = string.Empty;
-    public string Category { get; set; } = string.Empty;
+    public int CategoryId { get; set; }
     public IFormFile? Image { get; set; }
     public string Variants { get; set; } = string.Empty; // JSON string de List<CreateVariantDto>
 }

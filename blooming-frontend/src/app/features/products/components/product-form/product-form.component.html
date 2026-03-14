@@ -20,14 +20,25 @@
         </mat-form-field>
 
         <!-- Categoría -->
+        @if (categories().length === 0) {
+          <div class="no-categories-warning">
+            <mat-icon>warning</mat-icon>
+            <span>
+              No hay categorías disponibles.
+              <a (click)="router.navigate(['/products/categories'])" class="link">Crear una categoría</a>
+              antes de agregar un producto.
+            </span>
+          </div>
+        }
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Categoría</mat-label>
-          <input matInput formControlName="category" [maxlength]="constants.categoryMaxLength" />
-          @if (form.get('category')?.hasError('required') && form.get('category')?.touched) {
+          <mat-select formControlName="categoryId">
+            @for (cat of categories(); track cat.id) {
+              <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+            }
+          </mat-select>
+          @if (form.get('categoryId')?.hasError('required') && form.get('categoryId')?.touched) {
             <mat-error>La categoría es requerida</mat-error>
-          }
-          @if (form.get('category')?.hasError('maxlength')) {
-            <mat-error>Máximo {{ constants.categoryMaxLength }} caracteres</mat-error>
           }
         </mat-form-field>
 
@@ -79,7 +90,7 @@
           </div>
 
           <div formArrayName="variants">
-            @for (variant of getVariantControls(); track $index) {
+            @for (variant of getVariantControls(); track variant) {
               <div [formGroupName]="$index" class="variant-row">
                 <mat-form-field appearance="outline">
                   <mat-label>Talle</mat-label>
@@ -145,7 +156,7 @@
             mat-raised-button
             color="primary"
             type="submit"
-            [disabled]="form.invalid || isLoading()"
+            [disabled]="form.invalid || isLoading() || categories().length === 0"
           >
             @if (isLoading()) {
               <mat-spinner diameter="20" class="btn-spinner" />

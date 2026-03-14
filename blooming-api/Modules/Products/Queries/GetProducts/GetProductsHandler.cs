@@ -19,9 +19,10 @@ public class GetProductsHandler : IRequestHandler<GetProductsQuery, List<Product
     {
         var products = await _db.Products
             .Include(p => p.Variants)
+            .Include(p => p.Category)
             .OrderBy(p => p.Name)
             .ToListAsync(cancellationToken);
 
-        return products.Select(CreateProductHandler.MapToResponse).ToList();
+        return products.Select(p => CreateProductHandler.MapToResponse(p, p.Category.Name)).ToList();
     }
 }

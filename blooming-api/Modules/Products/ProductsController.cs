@@ -42,7 +42,7 @@ public class ProductsController : ControllerBase
         var variants = JsonSerializer.Deserialize<List<CreateVariantDto>>(request.Variants,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
 
-        var command = new CreateProductCommand(request.Name, request.Category, request.Image, variants);
+        var command = new CreateProductCommand(request.Name, request.CategoryId, request.Image, variants);
         var result = await _mediator.Send(command);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
@@ -53,7 +53,7 @@ public class ProductsController : ControllerBase
         var variants = JsonSerializer.Deserialize<List<UpdateVariantDto>>(request.Variants,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
 
-        var command = new UpdateProductCommand(id, request.Name, request.Category, request.Image, request.RemoveImage, variants);
+        var command = new UpdateProductCommand(id, request.Name, request.CategoryId, request.Image, request.RemoveImage, variants);
         var result = await _mediator.Send(command);
         return Ok(result);
     }
