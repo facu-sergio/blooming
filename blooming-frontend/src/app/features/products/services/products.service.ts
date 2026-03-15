@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
-import { ProductResponse, CreateVariantDto, UpdateVariantDto } from '../models/product.models';
+import { ProductResponse, CreateVariantDto, UpdateVariantDto, SearchFilters } from '../models/product.models';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -12,10 +12,12 @@ export class ProductsService {
   private readonly _products = signal<ProductResponse[]>([]);
   private readonly _isLoading = signal(false);
   private readonly _selectedProduct = signal<ProductResponse | null>(null);
+  private readonly _searchFilters = signal<SearchFilters>({});
 
   readonly products = this._products.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
   readonly selectedProduct = this._selectedProduct.asReadonly();
+  readonly searchFilters = this._searchFilters.asReadonly();
 
   async loadAll(): Promise<void> {
     this._isLoading.set(true);
@@ -25,6 +27,30 @@ export class ProductsService {
     } finally {
       this._isLoading.set(false);
     }
+  }
+
+  async search(filters: SearchFilters): Promise<void> {
+    this._searchFilters.set(filters);
+    this._isLoading.set(true);
+    try {
+      let params = new HttpParams();
+      if (filters.searchTerm) params = params.set('searchTerm', filters.searchTerm);
+      if (filters.category) params = params.set('category', filters.category);
+      if (filters.size) params = params.set('size', filters.size);
+      if (filters.color) params = params.set('color', filters.color);
+
+      const result = await firstValueFrom(
+        this.http.get<ProductResponse[]>(`${this.baseUrl}/search`, { params })
+      );
+      this._products.set(result);
+    } finally {
+      this._isLoading.set(false);
+    }
+  }
+
+  async clearSearch(): Promise<void> {
+    this._searchFilters.set({});
+    await this.loadAll();
   }
 
   async loadById(id: number): Promise<void> {

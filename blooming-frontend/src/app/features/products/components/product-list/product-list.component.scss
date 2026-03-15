@@ -11,6 +11,53 @@
   margin-bottom: 24px;
 }
 
+// Filtros
+.filters-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.filters-desktop {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+
+  .filter-field {
+    flex: 1 1 200px;
+  }
+
+  .clear-filters-btn {
+    margin-top: 4px;
+    align-self: center;
+  }
+}
+
+.filter-field {
+  width: 100%;
+}
+
+.clear-filters-btn {
+  width: 100%;
+}
+
+// Stock indicators
+.stock-ok {
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.stock-low {
+  color: #f57c00;
+  font-weight: 500;
+}
+
+.stock-out {
+  color: #c62828;
+  font-weight: 500;
+}
+
 .loading-container {
   display: flex;
   justify-content: center;
@@ -61,6 +108,7 @@
   padding: 24px;
 }
 
+// Desktop: tabla de variantes
 .variants-table {
   margin-top: 8px;
 }
@@ -86,18 +134,39 @@
   border-bottom: 1px solid #f5f5f5;
 }
 
+// Mobile: lista compacta de variantes
+.variants-mobile {
+  margin-top: 8px;
+}
+
+.variant-mobile-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 14px;
+}
+
+.variant-label {
+  flex: 1;
+  color: #333;
+}
+
+.variant-price {
+  margin: 0 12px;
+  color: #555;
+}
+
+.stock-badge {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: #f5f5f5;
+}
+
 @media (max-width: 600px) {
   .product-list-container {
     padding: 16px;
-  }
-
-  .variants-header,
-  .variants-row {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .variants-header span:nth-child(n + 4),
-  .variants-row span:nth-child(n + 4) {
-    display: none;
   }
 }

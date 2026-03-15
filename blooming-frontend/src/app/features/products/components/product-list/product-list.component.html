@@ -7,10 +7,73 @@
     </button>
   </div>
 
+  <!-- Filtros de búsqueda -->
+  <div class="filters-section" [class.filters-desktop]="isDesktop()">
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Buscar por nombre</mat-label>
+      <input
+        matInput
+        [formControl]="searchTermControl"
+        (input)="onFilterChange()"
+        placeholder="Ej: remera"
+      />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Categoría</mat-label>
+      <input
+        matInput
+        [formControl]="categoryControl"
+        [matAutocomplete]="autoCat"
+        (input)="onFilterChange()"
+        placeholder="Ej: Pantalones"
+      />
+      <mat-autocomplete #autoCat="matAutocomplete" (optionSelected)="onFilterChange()">
+        @for (cat of categories(); track cat) {
+          <mat-option [value]="cat">{{ cat }}</mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Talle</mat-label>
+      <input
+        matInput
+        [formControl]="sizeControl"
+        (input)="onFilterChange()"
+        placeholder="Ej: M"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Color</mat-label>
+      <input
+        matInput
+        [formControl]="colorControl"
+        (input)="onFilterChange()"
+        placeholder="Ej: Azul"
+      />
+    </mat-form-field>
+
+    @if (hasActiveFilters()) {
+      <button mat-stroked-button color="warn" class="clear-filters-btn" (click)="clearFilters()">
+        <mat-icon>clear</mat-icon>
+        Limpiar filtros
+      </button>
+    }
+  </div>
+
   @if (isLoading()) {
     <div class="loading-container">
       <mat-spinner diameter="48" />
     </div>
+  } @else if (noResults()) {
+    <mat-card>
+      <mat-card-content>
+        <p class="empty-state">No se encontraron productos</p>
+      </mat-card-content>
+    </mat-card>
   } @else if (products().length === 0) {
     <mat-card>
       <mat-card-content>
@@ -37,7 +100,12 @@
                 }
                 <div class="product-info">
                   <span class="product-name">{{ product.name }}</span>
-                  <span class="product-meta">{{ product.categoryName }} · {{ product.variants.length }} variante(s)</span>
+                  <span class="product-meta">
+                    {{ product.categoryName }} · {{ product.variants.length }} variante(s) ·
+                    <span [class]="getStockClass(getTotalStock(product.variants))">
+                      Stock total: {{ getTotalStock(product.variants) }}
+                    </span>
+                  </span>
                 </div>
               </div>
             </mat-panel-title>
@@ -53,26 +121,42 @@
             </mat-panel-description>
           </mat-expansion-panel-header>
 
-          <div class="variants-table">
-            <div class="variants-header">
-              <span>Talle</span>
-              <span>Color</span>
-              <span>Costo</span>
-              <span>Recargo</span>
-              <span>Venta</span>
-              <span>Stock</span>
-            </div>
-            @for (variant of product.variants; track variant.id) {
-              <div class="variants-row">
-                <span>{{ variant.size }}</span>
-                <span>{{ variant.color }}</span>
-                <span>${{ variant.costPrice | number: '1.2-2' }}</span>
-                <span>{{ variant.markupPercentage }}%</span>
-                <span>${{ variant.sellingPrice | number: '1.2-2' }}</span>
-                <span>{{ variant.stock }}</span>
+          @if (isDesktop()) {
+            <!-- Vista desktop: tabla completa -->
+            <div class="variants-table">
+              <div class="variants-header">
+                <span>Talle</span>
+                <span>Color</span>
+                <span>Costo</span>
+                <span>Recargo</span>
+                <span>Venta</span>
+                <span>Stock</span>
               </div>
-            }
-          </div>
+              @for (variant of product.variants; track variant.id) {
+                <div class="variants-row">
+                  <span>{{ variant.size }}</span>
+                  <span>{{ variant.color }}</span>
+                  <span>${{ variant.costPrice | number: '1.2-2' }}</span>
+                  <span>{{ variant.markupPercentage }}%</span>
+                  <span>${{ variant.sellingPrice | number: '1.2-2' }}</span>
+                  <span [class]="getStockClass(variant.stock)">{{ variant.stock }} u.</span>
+                </div>
+              }
+            </div>
+          } @else {
+            <!-- Vista mobile: lista compacta -->
+            <div class="variants-mobile">
+              @for (variant of product.variants; track variant.id) {
+                <div class="variant-mobile-row">
+                  <span class="variant-label">{{ variant.size }} / {{ variant.color }}</span>
+                  <span class="variant-price">${{ variant.sellingPrice | number: '1.2-2' }}</span>
+                  <span class="stock-badge" [class]="getStockClass(variant.stock)">
+                    {{ variant.stock }} u.
+                  </span>
+                </div>
+              }
+            </div>
+          }
         </mat-expansion-panel>
       }
     </mat-accordion>

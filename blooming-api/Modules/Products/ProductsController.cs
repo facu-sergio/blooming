@@ -4,6 +4,7 @@ using blooming_api.Modules.Products.Commands.UpdateProduct;
 using blooming_api.Modules.Products.DTOs;
 using blooming_api.Modules.Products.Queries.GetProductDetail;
 using blooming_api.Modules.Products.Queries.GetProducts;
+using blooming_api.Modules.Products.Queries.SearchProducts;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +27,24 @@ public class ProductsController : ControllerBase
     public async Task<ActionResult<List<ProductResponse>>> GetAll()
     {
         var result = await _mediator.Send(new GetProductsQuery());
+        return Ok(result);
+    }
+
+    [HttpGet("search")]
+    public async Task<ActionResult<List<ProductResponse>>> Search(
+        [FromQuery] string? searchTerm,
+        [FromQuery] string? category,
+        [FromQuery] string? size,
+        [FromQuery] string? color)
+    {
+        var request = new SearchProductsRequest
+        {
+            SearchTerm = searchTerm,
+            Category = category,
+            Size = size,
+            Color = color
+        };
+        var result = await _mediator.Send(new SearchProductsQuery(request));
         return Ok(result);
     }
 

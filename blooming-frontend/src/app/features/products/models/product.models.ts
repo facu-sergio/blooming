@@ -69,3 +69,10 @@ export interface UpdateCategoryDto {
   name: string;
   description?: string;
 }
+
+export interface SearchFilters {
+  searchTerm?: string;
+  category?: string;
+  size?: string;
+  color?: string;
+}
