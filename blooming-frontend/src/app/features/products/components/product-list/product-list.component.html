@@ -141,6 +141,14 @@
                   <span>${{ variant.sellingPrice | number: '1.2-2' }}</span>
                   <span [class]="getStockClass(variant.stock)">{{ variant.stock }} u.</span>
                 </div>
+                @if (variant.measurements && variant.measurements.length > 0) {
+                  <div class="measurements-row">
+                    <span class="measurements-label">
+                      <mat-icon class="measurements-icon">straighten</mat-icon>
+                      {{ formatMeasurements(variant.measurements) }}
+                    </span>
+                  </div>
+                }
               }
             </div>
           } @else {
@@ -148,11 +156,21 @@
             <div class="variants-mobile">
               @for (variant of product.variants; track variant.id) {
                 <div class="variant-mobile-row">
-                  <span class="variant-label">{{ variant.size }} / {{ variant.color }}</span>
-                  <span class="variant-price">${{ variant.sellingPrice | number: '1.2-2' }}</span>
-                  <span class="stock-badge" [class]="getStockClass(variant.stock)">
-                    {{ variant.stock }} u.
-                  </span>
+                  <div class="variant-mobile-info">
+                    <div class="variant-mobile-main">
+                      <span class="variant-label">{{ variant.size }} / {{ variant.color }}</span>
+                      <span class="variant-price">${{ variant.sellingPrice | number: '1.2-2' }}</span>
+                      <span class="stock-badge" [class]="getStockClass(variant.stock)">
+                        {{ variant.stock }} u.
+                      </span>
+                    </div>
+                    @if (variant.measurements && variant.measurements.length > 0) {
+                      <div class="variant-measurements-mobile">
+                        <mat-icon class="measurements-icon-sm">straighten</mat-icon>
+                        <span>{{ formatMeasurements(variant.measurements) }}</span>
+                      </div>
+                    }
+                  </div>
                 </div>
               }
             </div>

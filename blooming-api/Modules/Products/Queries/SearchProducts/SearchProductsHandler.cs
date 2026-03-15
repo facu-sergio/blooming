@@ -22,6 +22,7 @@ public class SearchProductsHandler : IRequestHandler<SearchProductsQuery, List<P
 
         IQueryable<Product> q = _db.Products
             .Include(p => p.Variants)
+                .ThenInclude(v => v.Measurements)
             .Include(p => p.Category)
             .AsQueryable();
 

@@ -13,7 +13,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProductsService } from '../../services/products.service';
 import { CategoriesService } from '../../services/categories.service';
 import { productsConstants } from '../../constants/products.constants';
-import { UpdateVariantDto, CreateVariantDto } from '../../models/product.models';
+import { UpdateVariantDto, CreateVariantDto, ProductVariantMeasurement } from '../../models/product.models';
 
 @Component({
   selector: 'app-product-form',
@@ -63,14 +63,45 @@ export class ProductFormComponent implements OnInit {
     return this.form.get('variants') as FormArray;
   }
 
-  createVariantGroup(data?: { id?: number; size?: string; color?: string; costPrice?: number; markupPercentage?: number }) {
+  createVariantGroup(data?: {
+    id?: number;
+    size?: string;
+    color?: string;
+    costPrice?: number;
+    markupPercentage?: number;
+    measurements?: ProductVariantMeasurement[];
+  }) {
     return this.fb.group({
       id: [data?.id ?? null],
       size: [data?.size ?? '', [Validators.required, Validators.maxLength(productsConstants.sizeMaxLength)]],
       color: [data?.color ?? '', [Validators.required, Validators.maxLength(productsConstants.colorMaxLength)]],
       costPrice: [data?.costPrice ?? null, [Validators.required, Validators.min(0.01)]],
       markupPercentage: [data?.markupPercentage ?? 0, [Validators.required, Validators.min(0)]],
+      measurements: this.fb.array(
+        (data?.measurements ?? []).map((m) => this.createMeasurementGroup(m))
+      ),
     });
+  }
+
+  createMeasurementGroup(data?: { name?: string; valueInCm?: number }) {
+    return this.fb.group({
+      name: [data?.name ?? '', [Validators.required, Validators.maxLength(productsConstants.measurementNameMaxLength)]],
+      valueInCm: [data?.valueInCm ?? null, [Validators.required, Validators.min(0.01)]],
+    });
+  }
+
+  getMeasurementsArray(variantControl: AbstractControl): FormArray {
+    return variantControl.get('measurements') as FormArray;
+  }
+
+  addMeasurement(variantIndex: number): void {
+    const variant = this.variantsArray.at(variantIndex);
+    this.getMeasurementsArray(variant).push(this.createMeasurementGroup());
+  }
+
+  removeMeasurement(variantIndex: number, measurementIndex: number): void {
+    const variant = this.variantsArray.at(variantIndex);
+    this.getMeasurementsArray(variant).removeAt(measurementIndex);
   }
 
   getSellingPrice(variantControl: AbstractControl): number {
@@ -139,6 +170,7 @@ export class ProductFormComponent implements OnInit {
             color: v.color,
             costPrice: v.costPrice,
             markupPercentage: v.markupPercentage,
+            measurements: v.measurements ?? [],
           }));
         }
         this.cdr.detectChanges();

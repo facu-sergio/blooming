@@ -106,6 +106,10 @@ export class ProductsService {
         typeof variant.markupPercentage === 'string'
           ? parseFloat(variant.markupPercentage)
           : variant.markupPercentage,
+      measurements: (variant.measurements ?? []).map((m) => ({
+        name: m.name,
+        valueInCm: typeof m.valueInCm === 'string' ? parseFloat(m.valueInCm) : m.valueInCm,
+      })),
     }));
 
     fd.append('variants', JSON.stringify(processedVariants));

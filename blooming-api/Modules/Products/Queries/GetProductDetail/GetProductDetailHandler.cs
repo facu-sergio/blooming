@@ -20,6 +20,7 @@ public class GetProductDetailHandler : IRequestHandler<GetProductDetailQuery, Pr
     {
         var product = await _db.Products
             .Include(p => p.Variants)
+                .ThenInclude(v => v.Measurements)
             .Include(p => p.Category)
             .FirstOrDefaultAsync(p => p.Id == request.ProductId, cancellationToken)
             ?? throw new NotFoundException($"Producto {request.ProductId} no encontrado");

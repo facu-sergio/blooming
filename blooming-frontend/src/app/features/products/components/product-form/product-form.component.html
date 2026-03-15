@@ -90,8 +90,8 @@
           </div>
 
           <div formArrayName="variants">
-            @for (variant of getVariantControls(); track variant) {
-              <div [formGroupName]="$index" class="variant-row">
+            @for (variant of getVariantControls(); track variant; let variantIndex = $index) {
+              <div [formGroupName]="variantIndex" class="variant-row">
                 <mat-form-field appearance="outline">
                   <mat-label>Talle</mat-label>
                   <input matInput formControlName="size" [maxlength]="constants.sizeMaxLength" />
@@ -136,12 +136,59 @@
                   mat-icon-button
                   type="button"
                   color="warn"
-                  (click)="removeVariant($index)"
+                  (click)="removeVariant(variantIndex)"
                   [disabled]="variantsArray.length === 1"
                   aria-label="Eliminar variante"
                 >
                   <mat-icon>delete</mat-icon>
                 </button>
+
+                <!-- Medidas -->
+                <div class="measurements-section" formArrayName="measurements">
+                  <div class="measurements-header">
+                    <span class="measurements-label">
+                      <mat-icon class="measurements-icon">straighten</mat-icon>
+                      Medidas (cm)
+                    </span>
+                    <button mat-stroked-button type="button" class="add-measurement-btn" (click)="addMeasurement(variantIndex)">
+                      <mat-icon>add</mat-icon>
+                      Agregar medida
+                    </button>
+                  </div>
+                  @for (measurement of getMeasurementsArray(variant).controls; track measurement; let measIndex = $index) {
+                    <div [formGroupName]="measIndex" class="measurement-row">
+                      <mat-form-field appearance="outline" class="measurement-name-field">
+                        <mat-label>Nombre (ej: Busto)</mat-label>
+                        <input matInput formControlName="name" [maxlength]="constants.measurementNameMaxLength" />
+                        @if (measurement.get('name')?.hasError('required') && measurement.get('name')?.touched) {
+                          <mat-error>Requerido</mat-error>
+                        }
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" class="measurement-value-field">
+                        <mat-label>Valor (cm)</mat-label>
+                        <input matInput type="number" formControlName="valueInCm" min="0.01" step="0.5" />
+                        @if (measurement.get('valueInCm')?.hasError('required') && measurement.get('valueInCm')?.touched) {
+                          <mat-error>Requerido</mat-error>
+                        }
+                        @if (measurement.get('valueInCm')?.hasError('min')) {
+                          <mat-error>Debe ser mayor a 0</mat-error>
+                        }
+                      </mat-form-field>
+                      <button
+                        mat-icon-button
+                        type="button"
+                        color="warn"
+                        (click)="removeMeasurement(variantIndex, measIndex)"
+                        aria-label="Eliminar medida"
+                      >
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </div>
+                  }
+                  @if (getMeasurementsArray(variant).length === 0) {
+                    <p class="no-measurements-hint">Sin medidas registradas</p>
+                  }
+                </div>
               </div>
             }
           </div>

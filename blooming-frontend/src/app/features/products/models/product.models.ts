@@ -1,3 +1,8 @@
+export interface ProductVariantMeasurement {
+  name: string;
+  valueInCm: number;
+}
+
 export interface ProductVariant {
   id: number;
   size: string;
@@ -6,6 +11,7 @@ export interface ProductVariant {
   markupPercentage: number;
   sellingPrice: number;
   stock: number;
+  measurements?: ProductVariantMeasurement[];
 }
 
 export interface Product {
@@ -23,6 +29,7 @@ export interface CreateVariantDto {
   color: string;
   costPrice: number;
   markupPercentage: number;
+  measurements?: ProductVariantMeasurement[];
 }
 
 export interface UpdateVariantDto {
@@ -31,6 +38,7 @@ export interface UpdateVariantDto {
   color: string;
   costPrice: number;
   markupPercentage: number;
+  measurements?: ProductVariantMeasurement[];
 }
 
 export interface ProductResponse {
@@ -51,6 +59,7 @@ export interface VariantResponse {
   markupPercentage: number;
   sellingPrice: number;
   stock: number;
+  measurements: ProductVariantMeasurement[];
 }
 
 export interface Category {

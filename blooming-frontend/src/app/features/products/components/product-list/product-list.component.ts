@@ -10,11 +10,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { ProductsService } from '../../services/products.service';
-import { SearchFilters } from '../../models/product.models';
+import { SearchFilters, ProductVariantMeasurement } from '../../models/product.models';
 
 @Component({
   selector: 'app-product-list',
@@ -44,7 +44,7 @@ export class ProductListComponent implements OnInit {
   readonly searchFilters = this.productsService.searchFilters;
 
   readonly isDesktop = toSignal(
-    this.breakpointObserver.observe(Breakpoints.Large).pipe(map((r) => r.matches)),
+    this.breakpointObserver.observe('(min-width: 1280px)').pipe(map((r) => r.matches)),
     { initialValue: false }
   );
 
@@ -114,5 +114,11 @@ export class ProductListComponent implements OnInit {
 
   navigateToEdit(id: number): void {
     this.router.navigate(['/products', id, 'edit']);
+  }
+
+  formatMeasurements(measurements: ProductVariantMeasurement[]): string {
+    return measurements
+      .map((m) => `${m.name}: ${m.valueInCm % 1 === 0 ? m.valueInCm : m.valueInCm.toFixed(1)}cm`)
+      .join(', ');
   }
 }

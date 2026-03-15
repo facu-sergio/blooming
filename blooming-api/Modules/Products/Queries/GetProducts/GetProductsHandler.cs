@@ -19,6 +19,7 @@ public class GetProductsHandler : IRequestHandler<GetProductsQuery, List<Product
     {
         var products = await _db.Products
             .Include(p => p.Variants)
+                .ThenInclude(v => v.Measurements)
             .Include(p => p.Category)
             .OrderBy(p => p.Name)
             .ToListAsync(cancellationToken);

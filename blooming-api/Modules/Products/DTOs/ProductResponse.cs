@@ -20,4 +20,11 @@ public class VariantResponse
     public decimal MarkupPercentage { get; set; }
     public decimal SellingPrice { get; set; }
     public int Stock { get; set; }
+    public List<MeasurementResponse> Measurements { get; set; } = new();
+}
+
+public class MeasurementResponse
+{
+    public string Name { get; set; } = string.Empty;
+    public decimal ValueInCm { get; set; }
 }

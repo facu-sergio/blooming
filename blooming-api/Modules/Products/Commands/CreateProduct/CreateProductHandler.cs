@@ -45,7 +45,13 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
                 MarkupPercentage = v.MarkupPercentage,
                 SellingPrice = v.CostPrice * (1 + v.MarkupPercentage / 100),
                 Stock = 0,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                Measurements = (v.Measurements ?? []).Select(m => new ProductVariantMeasurement
+                {
+                    MeasurementName = m.Name,
+                    ValueInCm = m.ValueInCm,
+                    CreatedAt = DateTime.UtcNow
+                }).ToList()
             }).ToList()
         };
 
@@ -71,7 +77,12 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
             CostPrice = v.CostPrice,
             MarkupPercentage = v.MarkupPercentage,
             SellingPrice = v.SellingPrice,
-            Stock = v.Stock
+            Stock = v.Stock,
+            Measurements = v.Measurements.Select(m => new MeasurementResponse
+            {
+                Name = m.MeasurementName,
+                ValueInCm = m.ValueInCm
+            }).ToList()
         }).ToList()
     };
 }

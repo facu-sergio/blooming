@@ -14,4 +14,11 @@ public class CreateVariantDto
     public string Color { get; set; } = string.Empty;
     public decimal CostPrice { get; set; }
     public decimal MarkupPercentage { get; set; }
+    public List<MeasurementDto>? Measurements { get; set; }
+}
+
+public class MeasurementDto
+{
+    public string Name { get; set; } = string.Empty;
+    public decimal ValueInCm { get; set; }
 }

@@ -24,6 +24,7 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
     {
         var product = await _db.Products
             .Include(p => p.Variants)
+                .ThenInclude(v => v.Measurements)
             .FirstOrDefaultAsync(p => p.Id == request.ProductId, cancellationToken)
             ?? throw new NotFoundException($"Producto {request.ProductId} no encontrado");
 
@@ -63,6 +64,16 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
                     existing.MarkupPercentage = variantDto.MarkupPercentage;
                     existing.SellingPrice = variantDto.CostPrice * (1 + variantDto.MarkupPercentage / 100);
                     existing.UpdatedAt = DateTime.UtcNow;
+                    existing.Measurements.Clear();
+                    foreach (var m in variantDto.Measurements ?? [])
+                    {
+                        existing.Measurements.Add(new ProductVariantMeasurement
+                        {
+                            MeasurementName = m.Name,
+                            ValueInCm = m.ValueInCm,
+                            CreatedAt = DateTime.UtcNow
+                        });
+                    }
                 }
             }
             else
@@ -75,7 +86,13 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
                     MarkupPercentage = variantDto.MarkupPercentage,
                     SellingPrice = variantDto.CostPrice * (1 + variantDto.MarkupPercentage / 100),
                     Stock = 0,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    Measurements = (variantDto.Measurements ?? []).Select(m => new ProductVariantMeasurement
+                    {
+                        MeasurementName = m.Name,
+                        ValueInCm = m.ValueInCm,
+                        CreatedAt = DateTime.UtcNow
+                    }).ToList()
                 });
             }
         }
