@@ -1,6 +1,8 @@
 using blooming_api.Modules.Customers.Commands.CreateCustomer;
 using blooming_api.Modules.Customers.Commands.UpdateCustomer;
 using blooming_api.Modules.Customers.DTOs;
+using blooming_api.Modules.Customers.Queries.GetCustomerMetrics;
+using blooming_api.Modules.Customers.Queries.GetCustomerOrders;
 using blooming_api.Modules.Customers.Queries.GetCustomers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -40,6 +42,28 @@ public class CustomersController : ControllerBase
     {
         var command = new UpdateCustomerCommand(id, request.Name, request.Phone, request.Address, request.Notes);
         var result = await _mediator.Send(command);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Retorna el historial de pedidos de un cliente ordenado por fecha descendente.
+    /// [Historia 3.3] Agregado para vista de detalle de cliente.
+    /// </summary>
+    [HttpGet("{id}/orders")]
+    public async Task<ActionResult<GetCustomerOrdersResult>> GetCustomerOrders(int id)
+    {
+        var result = await _mediator.Send(new GetCustomerOrdersQuery(id));
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Retorna métricas del cliente: total de pedidos y monto total gastado.
+    /// [Historia 3.3] Agregado para vista de detalle de cliente.
+    /// </summary>
+    [HttpGet("{id}/metrics")]
+    public async Task<ActionResult<GetCustomerMetricsResult>> GetCustomerMetrics(int id)
+    {
+        var result = await _mediator.Send(new GetCustomerMetricsQuery(id));
         return Ok(result);
     }
 }

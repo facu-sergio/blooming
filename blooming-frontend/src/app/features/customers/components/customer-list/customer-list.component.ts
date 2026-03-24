@@ -78,6 +78,10 @@ export class CustomerListComponent implements OnInit {
     this.router.navigate(['/customers', customer.id, 'edit']);
   }
 
+  viewCustomer(customer: Customer): void {
+    this.router.navigate(['/customers', customer.id]);
+  }
+
   truncate(value: string | undefined, max = 40): string {
     if (!value) return '—';
     return value.length > max ? value.substring(0, max) + '…' : value;

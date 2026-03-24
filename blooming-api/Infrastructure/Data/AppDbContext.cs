@@ -1,6 +1,7 @@
 using System.Reflection;
 using blooming_api.Common;
 using blooming_api.Modules.Customers.Entities;
+using blooming_api.Modules.Orders.Entities;
 using blooming_api.Modules.Products.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,10 @@ public class AppDbContext : DbContext
     public DbSet<ProductVariantMeasurement> ProductVariantMeasurements { get; set; }
     public DbSet<StockMovement> StockMovements { get; set; }
     public DbSet<Customer> Customers { get; set; }
+
+    // [Historia 3.3] Stub mínimo para historial de cliente.
+    // Epic 4 expandirá este módulo con OrderItems, descuentos, envíos, etc.
+    public DbSet<Order> Orders { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
