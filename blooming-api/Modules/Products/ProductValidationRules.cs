@@ -10,10 +10,20 @@ public static class ProductValidationRules
     public const long MaxImageSizeBytes = 5 * 1024 * 1024;
 
     public static void ApplyVariantRules(AbstractValidator<CreateVariantDto> v)
-        => ApplyVariantRulesCore(v, x => x.Size, x => x.Color, x => x.CostPrice, x => x.MarkupPercentage);
+    {
+        ApplyVariantRulesCore(v, x => x.Size, x => x.Color, x => x.CostPrice, x => x.MarkupPercentage);
+        v.RuleFor(x => x.LowStockThreshold)
+            .GreaterThanOrEqualTo(0).WithMessage("El umbral de stock bajo no puede ser negativo")
+            .When(x => x.LowStockThreshold.HasValue);
+    }
 
     public static void ApplyVariantRules(AbstractValidator<UpdateVariantDto> v)
-        => ApplyVariantRulesCore(v, x => x.Size, x => x.Color, x => x.CostPrice, x => x.MarkupPercentage);
+    {
+        ApplyVariantRulesCore(v, x => x.Size, x => x.Color, x => x.CostPrice, x => x.MarkupPercentage);
+        v.RuleFor(x => x.LowStockThreshold)
+            .GreaterThanOrEqualTo(0).WithMessage("El umbral de stock bajo no puede ser negativo")
+            .When(x => x.LowStockThreshold.HasValue);
+    }
 
     public static void ApplyImageRules<TCommand>(
         AbstractValidator<TCommand> validator,

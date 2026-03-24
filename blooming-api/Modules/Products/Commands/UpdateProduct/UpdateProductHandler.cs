@@ -63,6 +63,7 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
                     existing.CostPrice = variantDto.CostPrice;
                     existing.MarkupPercentage = variantDto.MarkupPercentage;
                     existing.SellingPrice = variantDto.CostPrice * (1 + variantDto.MarkupPercentage / 100);
+                    existing.LowStockThreshold = variantDto.LowStockThreshold;
                     existing.UpdatedAt = DateTime.UtcNow;
                     existing.Measurements.Clear();
                     foreach (var m in variantDto.Measurements ?? [])
@@ -86,6 +87,7 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
                     MarkupPercentage = variantDto.MarkupPercentage,
                     SellingPrice = variantDto.CostPrice * (1 + variantDto.MarkupPercentage / 100),
                     Stock = 0,
+                    LowStockThreshold = variantDto.LowStockThreshold,
                     CreatedAt = DateTime.UtcNow,
                     Measurements = (variantDto.Measurements ?? []).Select(m => new ProductVariantMeasurement
                     {

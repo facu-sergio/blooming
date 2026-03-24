@@ -45,6 +45,7 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
                 MarkupPercentage = v.MarkupPercentage,
                 SellingPrice = v.CostPrice * (1 + v.MarkupPercentage / 100),
                 Stock = 0,
+                LowStockThreshold = v.LowStockThreshold,
                 CreatedAt = DateTime.UtcNow,
                 Measurements = (v.Measurements ?? []).Select(m => new ProductVariantMeasurement
                 {
@@ -78,6 +79,7 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
             MarkupPercentage = v.MarkupPercentage,
             SellingPrice = v.SellingPrice,
             Stock = v.Stock,
+            LowStockThreshold = v.LowStockThreshold,
             Measurements = v.Measurements.Select(m => new MeasurementResponse
             {
                 Name = m.MeasurementName,

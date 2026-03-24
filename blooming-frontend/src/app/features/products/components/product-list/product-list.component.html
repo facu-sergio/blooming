@@ -139,7 +139,18 @@
                   <span>${{ variant.costPrice | number: '1.2-2' }}</span>
                   <span>{{ variant.markupPercentage }}%</span>
                   <span>${{ variant.sellingPrice | number: '1.2-2' }}</span>
-                  <span [class]="getStockClass(variant.stock)">{{ variant.stock }} u.</span>
+                  <span class="stock-cell">
+                    <span [class]="getStockClass(variant.stock)">{{ variant.stock }} u.</span>
+                    @if (isLowStock(variant)) {
+                      <span
+                        class="low-stock-badge"
+                        [matTooltip]="getLowStockTooltip(variant)"
+                      >
+                        <mat-icon class="low-stock-icon">warning</mat-icon>
+                        Stock bajo
+                      </span>
+                    }
+                  </span>
                 </div>
                 @if (variant.measurements && variant.measurements.length > 0) {
                   <div class="measurements-row">
@@ -163,6 +174,12 @@
                       <span class="stock-badge" [class]="getStockClass(variant.stock)">
                         {{ variant.stock }} u.
                       </span>
+                      @if (isLowStock(variant)) {
+                        <mat-icon
+                          class="low-stock-icon-sm"
+                          [matTooltip]="getLowStockTooltip(variant)"
+                        >warning</mat-icon>
+                      }
                     </div>
                     @if (variant.measurements && variant.measurements.length > 0) {
                       <div class="variant-measurements-mobile">

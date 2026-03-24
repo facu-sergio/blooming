@@ -11,6 +11,7 @@ export interface ProductVariant {
   markupPercentage: number;
   sellingPrice: number;
   stock: number;
+  lowStockThreshold?: number;
   measurements?: ProductVariantMeasurement[];
 }
 
@@ -29,6 +30,7 @@ export interface CreateVariantDto {
   color: string;
   costPrice: number;
   markupPercentage: number;
+  lowStockThreshold?: number;
   measurements?: ProductVariantMeasurement[];
 }
 
@@ -38,6 +40,7 @@ export interface UpdateVariantDto {
   color: string;
   costPrice: number;
   markupPercentage: number;
+  lowStockThreshold?: number;
   measurements?: ProductVariantMeasurement[];
 }
 
@@ -59,6 +62,7 @@ export interface VariantResponse {
   markupPercentage: number;
   sellingPrice: number;
   stock: number;
+  lowStockThreshold?: number;
   measurements: ProductVariantMeasurement[];
 }
 

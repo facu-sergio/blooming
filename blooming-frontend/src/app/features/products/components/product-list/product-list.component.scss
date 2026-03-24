@@ -214,6 +214,42 @@
   color: #aaa;
 }
 
+// Stock bajo indicators
+.stock-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.low-stock-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: #ffebee;
+  color: #c62828;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 10px;
+  cursor: default;
+}
+
+.low-stock-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: #c62828;
+}
+
+.low-stock-icon-sm {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: #c62828;
+  cursor: default;
+}
+
 @media (max-width: 600px) {
   .product-list-container {
     padding: 16px;

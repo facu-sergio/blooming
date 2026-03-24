@@ -127,6 +127,16 @@
                   }
                 </mat-form-field>
 
+                <mat-form-field appearance="outline">
+                  <mat-label>Umbral de stock bajo (opcional)</mat-label>
+                  <input matInput type="number" formControlName="lowStockThreshold" min="0" step="1"
+                    placeholder="Ej: 2 (dejar vacío para desactivar)" />
+                  <mat-hint>Alerta se activa cuando stock ≤ este valor. Dejar vacío para desactivar.</mat-hint>
+                  @if (variant.get('lowStockThreshold')?.hasError('min')) {
+                    <mat-error>No puede ser negativo</mat-error>
+                  }
+                </mat-form-field>
+
                 <div class="selling-price">
                   <span class="selling-price-label">Precio venta</span>
                   <span class="selling-price-value">${{ getSellingPrice(variant) | number: '1.2-2' }}</span>

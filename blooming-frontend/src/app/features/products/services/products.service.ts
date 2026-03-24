@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
-import { ProductResponse, CreateVariantDto, UpdateVariantDto, SearchFilters } from '../models/product.models';
+import { ProductResponse, CreateVariantDto, UpdateVariantDto, SearchFilters, VariantResponse } from '../models/product.models';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -87,6 +87,14 @@ export class ProductsService {
     }
   }
 
+  isLowStock(variant: VariantResponse): boolean {
+    return (
+      variant.lowStockThreshold !== null &&
+      variant.lowStockThreshold !== undefined &&
+      variant.stock <= variant.lowStockThreshold
+    );
+  }
+
   buildFormData(
     name: string,
     categoryId: number,
@@ -98,19 +106,29 @@ export class ProductsService {
     fd.append('name', name);
     fd.append('categoryId', String(categoryId));
 
-    const processedVariants = variants.map((variant) => ({
-      ...variant,
-      costPrice:
-        typeof variant.costPrice === 'string' ? parseFloat(variant.costPrice) : variant.costPrice,
-      markupPercentage:
-        typeof variant.markupPercentage === 'string'
-          ? parseFloat(variant.markupPercentage)
-          : variant.markupPercentage,
-      measurements: (variant.measurements ?? []).map((m) => ({
-        name: m.name,
-        valueInCm: typeof m.valueInCm === 'string' ? parseFloat(m.valueInCm) : m.valueInCm,
-      })),
-    }));
+    const processedVariants = variants.map((variant) => {
+      const rawThreshold = variant.lowStockThreshold;
+      const threshold =
+        rawThreshold === null || rawThreshold === undefined || rawThreshold === ('' as unknown)
+          ? null
+          : typeof rawThreshold === 'string'
+            ? parseInt(rawThreshold, 10)
+            : rawThreshold;
+      return {
+        ...variant,
+        costPrice:
+          typeof variant.costPrice === 'string' ? parseFloat(variant.costPrice) : variant.costPrice,
+        markupPercentage:
+          typeof variant.markupPercentage === 'string'
+            ? parseFloat(variant.markupPercentage)
+            : variant.markupPercentage,
+        lowStockThreshold: threshold,
+        measurements: (variant.measurements ?? []).map((m) => ({
+          name: m.name,
+          valueInCm: typeof m.valueInCm === 'string' ? parseFloat(m.valueInCm) : m.valueInCm,
+        })),
+      };
+    });
 
     fd.append('variants', JSON.stringify(processedVariants));
     if (image) {

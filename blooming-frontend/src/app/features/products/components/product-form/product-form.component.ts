@@ -69,6 +69,7 @@ export class ProductFormComponent implements OnInit {
     color?: string;
     costPrice?: number;
     markupPercentage?: number;
+    lowStockThreshold?: number;
     measurements?: ProductVariantMeasurement[];
   }) {
     return this.fb.group({
@@ -77,6 +78,7 @@ export class ProductFormComponent implements OnInit {
       color: [data?.color ?? '', [Validators.required, Validators.maxLength(productsConstants.colorMaxLength)]],
       costPrice: [data?.costPrice ?? null, [Validators.required, Validators.min(0.01)]],
       markupPercentage: [data?.markupPercentage ?? 0, [Validators.required, Validators.min(0)]],
+      lowStockThreshold: [data?.lowStockThreshold ?? null, [Validators.min(0)]],
       measurements: this.fb.array(
         (data?.measurements ?? []).map((m) => this.createMeasurementGroup(m))
       ),
@@ -170,6 +172,7 @@ export class ProductFormComponent implements OnInit {
             color: v.color,
             costPrice: v.costPrice,
             markupPercentage: v.markupPercentage,
+            lowStockThreshold: v.lowStockThreshold,
             measurements: v.measurements ?? [],
           }));
         }

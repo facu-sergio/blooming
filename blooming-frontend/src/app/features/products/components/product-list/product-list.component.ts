@@ -10,11 +10,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { ProductsService } from '../../services/products.service';
-import { SearchFilters, ProductVariantMeasurement } from '../../models/product.models';
+import { SearchFilters, ProductVariantMeasurement, VariantResponse } from '../../models/product.models';
 
 @Component({
   selector: 'app-product-list',
@@ -30,6 +31,7 @@ import { SearchFilters, ProductVariantMeasurement } from '../../models/product.m
     MatFormFieldModule,
     MatInputModule,
     MatAutocompleteModule,
+    MatTooltipModule,
   ],
   templateUrl: './product-list.component.html',
   styleUrl: './product-list.component.scss',
@@ -114,6 +116,14 @@ export class ProductListComponent implements OnInit {
 
   navigateToEdit(id: number): void {
     this.router.navigate(['/products', id, 'edit']);
+  }
+
+  isLowStock(variant: VariantResponse): boolean {
+    return this.productsService.isLowStock(variant);
+  }
+
+  getLowStockTooltip(variant: VariantResponse): string {
+    return `Stock bajo: ${variant.stock} unidades (umbral: ${variant.lowStockThreshold})`;
   }
 
   formatMeasurements(measurements: ProductVariantMeasurement[]): string {

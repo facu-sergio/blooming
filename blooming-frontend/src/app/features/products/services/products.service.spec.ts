@@ -12,6 +12,7 @@ const mockVariant = {
   markupPercentage: 50,
   sellingPrice: 1500,
   stock: 0,
+  measurements: [],
 };
 
 const mockProduct: ProductResponse = {
@@ -154,8 +155,29 @@ describe('ProductsService', () => {
 
       expect(fd.get('name')).toBe('Remera');
       expect(fd.get('categoryId')).toBe('1');
-      expect(fd.get('variants')).toBe(JSON.stringify(variants));
+      const parsedVariants = JSON.parse(fd.get('variants') as string);
+      expect(parsedVariants[0].size).toBe('M');
+      expect(parsedVariants[0].color).toBe('Azul');
+      expect(parsedVariants[0].costPrice).toBe(1000);
+      expect(parsedVariants[0].markupPercentage).toBe(50);
+      expect(parsedVariants[0].lowStockThreshold).toBeNull();
       expect(fd.get('image')).toBeNull();
+    });
+
+    it('should include lowStockThreshold in processed variants', () => {
+      const variants = [{ size: 'M', color: 'Azul', costPrice: 1000, markupPercentage: 50, lowStockThreshold: 3 }];
+      const fd = service.buildFormData('Remera', 1, variants);
+
+      const parsedVariants = JSON.parse(fd.get('variants') as string);
+      expect(parsedVariants[0].lowStockThreshold).toBe(3);
+    });
+
+    it('should set lowStockThreshold to null when empty string', () => {
+      const variants = [{ size: 'M', color: 'Azul', costPrice: 1000, markupPercentage: 50, lowStockThreshold: '' as unknown as number }];
+      const fd = service.buildFormData('Remera', 1, variants);
+
+      const parsedVariants = JSON.parse(fd.get('variants') as string);
+      expect(parsedVariants[0].lowStockThreshold).toBeNull();
     });
 
     it('should include image in FormData when provided', () => {
@@ -178,6 +200,38 @@ describe('ProductsService', () => {
       const fd = service.buildFormData('Remera', 1, variants);
 
       expect(fd.get('removeImage')).toBeNull();
+    });
+  });
+
+  describe('isLowStock()', () => {
+    const baseVariant = { id: 1, size: 'M', color: 'Azul', costPrice: 1000, markupPercentage: 50, sellingPrice: 1500, stock: 5, measurements: [] };
+
+    it('should return false when lowStockThreshold is undefined', () => {
+      expect(service.isLowStock({ ...baseVariant, lowStockThreshold: undefined })).toBe(false);
+    });
+
+    it('should return false when lowStockThreshold is null', () => {
+      expect(service.isLowStock({ ...baseVariant, lowStockThreshold: undefined })).toBe(false);
+    });
+
+    it('should return false when stock is above threshold', () => {
+      expect(service.isLowStock({ ...baseVariant, stock: 5, lowStockThreshold: 3 })).toBe(false);
+    });
+
+    it('should return true when stock equals threshold', () => {
+      expect(service.isLowStock({ ...baseVariant, stock: 3, lowStockThreshold: 3 })).toBe(true);
+    });
+
+    it('should return true when stock is below threshold', () => {
+      expect(service.isLowStock({ ...baseVariant, stock: 1, lowStockThreshold: 3 })).toBe(true);
+    });
+
+    it('should return true when threshold is 0 and stock is 0', () => {
+      expect(service.isLowStock({ ...baseVariant, stock: 0, lowStockThreshold: 0 })).toBe(true);
+    });
+
+    it('should return false when threshold is 0 and stock is 1', () => {
+      expect(service.isLowStock({ ...baseVariant, stock: 1, lowStockThreshold: 0 })).toBe(false);
     });
   });
 });
