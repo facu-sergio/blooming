@@ -16,6 +16,13 @@ export const productsRoutes: Routes = [
       ),
   },
   {
+    path: 'categories',
+    loadComponent: () =>
+      import('./components/category-list/category-list.component').then(
+        (m) => m.CategoryListComponent
+      ),
+  },
+  {
     path: ':id',
     loadComponent: () =>
       import('./components/product-detail/product-detail.component').then(
@@ -27,13 +34,6 @@ export const productsRoutes: Routes = [
     loadComponent: () =>
       import('./components/product-form/product-form.component').then(
         (m) => m.ProductFormComponent
-      ),
-  },
-  {
-    path: 'categories',
-    loadComponent: () =>
-      import('./components/category-list/category-list.component').then(
-        (m) => m.CategoryListComponent
       ),
   },
 ];

@@ -1,0 +1,19 @@
+.customer-form-container {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+
+  mat-card-header {
+    margin-bottom: 16px;
+  }
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+mat-card-actions {
+  padding: 16px;
+  gap: 8px;
+}

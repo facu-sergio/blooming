@@ -1,5 +1,6 @@
 using System.Reflection;
 using blooming_api.Common;
+using blooming_api.Modules.Customers.Entities;
 using blooming_api.Modules.Products.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<Category> Categories { get; set; }
     public DbSet<ProductVariantMeasurement> ProductVariantMeasurements { get; set; }
     public DbSet<StockMovement> StockMovements { get; set; }
+    public DbSet<Customer> Customers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
