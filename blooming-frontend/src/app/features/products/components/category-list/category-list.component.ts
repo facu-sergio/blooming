@@ -9,7 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { CategoriesService } from '../../services/categories.service';
-import { Category } from '../../models/product.models';
+import { Category } from '../../models/category.models';
 import { CategoryFormComponent } from '../category-form/category-form.component';
 
 @Component({

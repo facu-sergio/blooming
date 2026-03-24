@@ -4,6 +4,7 @@ using blooming_api.Modules.Products.Commands.UpdateProduct;
 using blooming_api.Modules.Products.DTOs;
 using blooming_api.Modules.Products.Queries.GetProductDetail;
 using blooming_api.Modules.Products.Queries.GetProducts;
+using blooming_api.Modules.Products.Queries.GetStockMovements;
 using blooming_api.Modules.Products.Queries.SearchProducts;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -64,6 +65,16 @@ public class ProductsController : ControllerBase
         var command = new CreateProductCommand(request.Name, request.CategoryId, request.Image, variants);
         var result = await _mediator.Send(command);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+    }
+
+    [HttpGet("variants/{variantId}/stock-movements")]
+    public async Task<ActionResult<StockMovementListResponse>> GetStockMovements(
+        int variantId,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        var result = await _mediator.Send(new GetStockMovementsQuery(variantId, pageNumber, pageSize));
+        return Ok(result);
     }
 
     [HttpPut("{id}")]

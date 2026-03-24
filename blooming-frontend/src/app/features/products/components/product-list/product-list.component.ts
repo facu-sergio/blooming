@@ -15,7 +15,8 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { ProductsService } from '../../services/products.service';
-import { SearchFilters, ProductVariantMeasurement, VariantResponse } from '../../models/product.models';
+import { SearchFilters, VariantResponse } from '../../models/product.models';
+import { FormatMeasurementsPipe } from '../../pipes/format-measurements.pipe';
 
 @Component({
   selector: 'app-product-list',
@@ -32,6 +33,7 @@ import { SearchFilters, ProductVariantMeasurement, VariantResponse } from '../..
     MatInputModule,
     MatAutocompleteModule,
     MatTooltipModule,
+    FormatMeasurementsPipe,
   ],
   templateUrl: './product-list.component.html',
   styleUrl: './product-list.component.scss',
@@ -114,6 +116,10 @@ export class ProductListComponent implements OnInit {
     this.router.navigate(['/products/new']);
   }
 
+  navigateToDetail(id: number): void {
+    this.router.navigate(['/products', id]);
+  }
+
   navigateToEdit(id: number): void {
     this.router.navigate(['/products', id, 'edit']);
   }
@@ -126,9 +132,4 @@ export class ProductListComponent implements OnInit {
     return `Stock bajo: ${variant.stock} unidades (umbral: ${variant.lowStockThreshold})`;
   }
 
-  formatMeasurements(measurements: ProductVariantMeasurement[]): string {
-    return measurements
-      .map((m) => `${m.name}: ${m.valueInCm % 1 === 0 ? m.valueInCm : m.valueInCm.toFixed(1)}cm`)
-      .join(', ');
-  }
 }

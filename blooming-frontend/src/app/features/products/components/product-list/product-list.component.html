@@ -113,8 +113,18 @@
               <button
                 mat-icon-button
                 color="primary"
+                (click)="$event.stopPropagation(); navigateToDetail(product.id)"
+                aria-label="Ver detalle"
+                matTooltip="Ver detalle"
+              >
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                color="primary"
                 (click)="$event.stopPropagation(); navigateToEdit(product.id)"
                 aria-label="Editar producto"
+                matTooltip="Editar"
               >
                 <mat-icon>edit</mat-icon>
               </button>
@@ -156,7 +166,7 @@
                   <div class="measurements-row">
                     <span class="measurements-label">
                       <mat-icon class="measurements-icon">straighten</mat-icon>
-                      {{ formatMeasurements(variant.measurements) }}
+                      {{ variant.measurements | formatMeasurements }}
                     </span>
                   </div>
                 }
@@ -184,7 +194,7 @@
                     @if (variant.measurements && variant.measurements.length > 0) {
                       <div class="variant-measurements-mobile">
                         <mat-icon class="measurements-icon-sm">straighten</mat-icon>
-                        <span>{{ formatMeasurements(variant.measurements) }}</span>
+                        <span>{{ variant.measurements | formatMeasurements }}</span>
                       </div>
                     }
                   </div>

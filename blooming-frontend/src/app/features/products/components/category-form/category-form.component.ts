@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CategoriesService } from '../../services/categories.service';
-import { Category } from '../../models/product.models';
+import { Category } from '../../models/category.models';
 import { categoriesConstants } from '../../constants/categories.constants';
 
 @Component({

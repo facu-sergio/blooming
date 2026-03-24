@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<ProductVariant> ProductVariants { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<ProductVariantMeasurement> ProductVariantMeasurements { get; set; }
+    public DbSet<StockMovement> StockMovements { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
