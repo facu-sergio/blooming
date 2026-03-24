@@ -11,9 +11,33 @@
     </mat-card-header>
 
     <mat-card-content>
+      <div class="search-section">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Buscar por nombre o teléfono</mat-label>
+          <input
+            matInput
+            [formControl]="searchControl"
+            (input)="onSearchChange()"
+            placeholder="Buscar por nombre o teléfono..."
+            aria-label="Buscar clientes"
+          />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        @if (searchTerm()) {
+          <button mat-icon-button (click)="clearSearch()" aria-label="Limpiar búsqueda">
+            <mat-icon>clear</mat-icon>
+          </button>
+        }
+      </div>
+
       @if (isLoading()) {
         <div class="loading-container">
           <mat-spinner diameter="40" />
+        </div>
+      } @else if (noResults()) {
+        <div class="empty-state">
+          <mat-icon>search_off</mat-icon>
+          <p>No se encontraron clientes para "{{ searchTerm() }}"</p>
         </div>
       } @else if (customers().length === 0) {
         <div class="empty-state">

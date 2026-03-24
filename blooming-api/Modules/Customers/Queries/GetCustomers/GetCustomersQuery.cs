@@ -3,4 +3,4 @@ using MediatR;
 
 namespace blooming_api.Modules.Customers.Queries.GetCustomers;
 
-public record GetCustomersQuery() : IRequest<List<CustomerResponse>>;
+public record GetCustomersQuery(string? SearchTerm = null) : IRequest<List<CustomerResponse>>;

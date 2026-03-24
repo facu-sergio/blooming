@@ -45,6 +45,10 @@ describe('CustomersService', () => {
     expect(service.selectedCustomer()).toBeNull();
   });
 
+  it('should start with empty searchTerm signal', () => {
+    expect(service.searchTerm()).toBe('');
+  });
+
   describe('loadAll()', () => {
     it('should GET /api/customers and update customers signal', async () => {
       const loadPromise = service.loadAll();
@@ -71,6 +75,52 @@ describe('CustomersService', () => {
         .flush('error', { status: 500, statusText: 'Server Error' });
       await loadPromise;
       expect(service.isLoading()).toBe(false);
+    });
+
+    it('should pass searchTerm as query param when provided', async () => {
+      const loadPromise = service.loadAll('Ana');
+
+      const req = httpMock.expectOne((r) =>
+        r.url.includes('/api/customers') && r.params.get('searchTerm') === 'Ana'
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush([mockCustomer]);
+
+      await loadPromise;
+      expect(service.customers()).toEqual([mockCustomer]);
+      expect(service.searchTerm()).toBe('Ana');
+    });
+
+    it('should NOT include searchTerm param when not provided', async () => {
+      const loadPromise = service.loadAll();
+
+      const req = httpMock.expectOne((r) => r.url.includes('/api/customers'));
+      expect(req.request.params.has('searchTerm')).toBe(false);
+      req.flush([mockCustomer]);
+
+      await loadPromise;
+      expect(service.searchTerm()).toBe('');
+    });
+
+    it('should update searchTerm signal when searching', async () => {
+      const loadPromise = service.loadAll('García');
+      httpMock
+        .expectOne((r) => r.url.includes('/api/customers') && r.params.get('searchTerm') === 'García')
+        .flush([]);
+      await loadPromise;
+      expect(service.searchTerm()).toBe('García');
+    });
+
+    it('should clear searchTerm signal when called without term', async () => {
+      // first search
+      let p = service.loadAll('test');
+      httpMock.expectOne((r) => r.params.has('searchTerm')).flush([]);
+      await p;
+      // then clear
+      p = service.loadAll();
+      httpMock.expectOne((r) => r.url.includes('/api/customers')).flush([mockCustomer]);
+      await p;
+      expect(service.searchTerm()).toBe('');
     });
   });
 

@@ -17,7 +17,17 @@ public class GetCustomersHandler : IRequestHandler<GetCustomersQuery, List<Custo
 
     public async Task<List<CustomerResponse>> Handle(GetCustomersQuery request, CancellationToken cancellationToken)
     {
-        var customers = await _db.Customers
+        var query = _db.Customers.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        {
+            var term = request.SearchTerm.ToLower();
+            query = query.Where(c =>
+                c.Name.ToLower().Contains(term) ||
+                c.Phone.ToLower().Contains(term));
+        }
+
+        var customers = await query
             .OrderBy(c => c.Name)
             .ToListAsync(cancellationToken);
 

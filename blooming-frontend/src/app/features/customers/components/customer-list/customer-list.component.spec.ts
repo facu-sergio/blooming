@@ -14,17 +14,23 @@ const mockCustomer: Customer = {
   createdAt: '2026-03-24T00:00:00Z',
 };
 
+function buildMockService(overrides: Partial<CustomersService> = {}): Partial<CustomersService> {
+  return {
+    customers: signal<Customer[]>([]).asReadonly(),
+    isLoading: signal(false).asReadonly(),
+    selectedCustomer: signal<Customer | null>(null).asReadonly(),
+    searchTerm: signal<string>('').asReadonly(),
+    loadAll: async () => {},
+    selectCustomer: () => {},
+    ...overrides,
+  };
+}
+
 describe('CustomerListComponent', () => {
   let mockCustomersService: Partial<CustomersService>;
 
   beforeEach(() => {
-    mockCustomersService = {
-      customers: signal<Customer[]>([]).asReadonly(),
-      isLoading: signal(false).asReadonly(),
-      selectedCustomer: signal<Customer | null>(null).asReadonly(),
-      loadAll: async () => {},
-      selectCustomer: () => {},
-    };
+    mockCustomersService = buildMockService();
 
     TestBed.configureTestingModule({
       imports: [CustomerListComponent],
@@ -41,27 +47,65 @@ describe('CustomerListComponent', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should show empty state when no customers', () => {
+  it('should show empty state when no customers and no search term', () => {
     const fixture = TestBed.createComponent(CustomerListComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.empty-state')).toBeTruthy();
+    const emptyMsg = compiled.querySelector('.empty-state p')?.textContent;
+    expect(emptyMsg).toContain('No hay clientes registrados');
+  });
+
+  it('should show no-results message when customers is empty and search term is active', () => {
+    TestBed.overrideProvider(CustomersService, {
+      useValue: buildMockService({
+        customers: signal<Customer[]>([]).asReadonly(),
+        searchTerm: signal<string>('Ana').asReadonly(),
+      }),
+    });
+    const fixture = TestBed.createComponent(CustomerListComponent);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    const emptyMsg = compiled.querySelector('.empty-state p')?.textContent;
+    expect(emptyMsg).toContain('No se encontraron clientes');
   });
 
   it('should show table when customers exist (desktop)', () => {
-    const customersWithData: Partial<CustomersService> = {
-      customers: signal<Customer[]>([mockCustomer]).asReadonly(),
-      isLoading: signal(false).asReadonly(),
-      selectedCustomer: signal<Customer | null>(null).asReadonly(),
-      loadAll: async () => {},
-      selectCustomer: () => {},
-    };
-    TestBed.overrideProvider(CustomersService, { useValue: customersWithData });
+    TestBed.overrideProvider(CustomersService, {
+      useValue: buildMockService({
+        customers: signal<Customer[]>([mockCustomer]).asReadonly(),
+      }),
+    });
     const fixture = TestBed.createComponent(CustomerListComponent);
     fixture.componentInstance.isMobile = false;
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('table')).toBeTruthy();
+  });
+
+  it('should render search input', () => {
+    const fixture = TestBed.createComponent(CustomerListComponent);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('input[aria-label="Buscar clientes"]')).toBeTruthy();
+  });
+
+  it('should show clear button when searchTerm is active', () => {
+    TestBed.overrideProvider(CustomersService, {
+      useValue: buildMockService({
+        searchTerm: signal<string>('test').asReadonly(),
+      }),
+    });
+    const fixture = TestBed.createComponent(CustomerListComponent);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('button[aria-label="Limpiar búsqueda"]')).toBeTruthy();
+  });
+
+  it('should NOT show clear button when searchTerm is empty', () => {
+    const fixture = TestBed.createComponent(CustomerListComponent);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('button[aria-label="Limpiar búsqueda"]')).toBeNull();
   });
 
   it('truncate should return dash for undefined', () => {
