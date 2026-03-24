@@ -19,9 +19,8 @@ public class AppDbContext : DbContext
     public DbSet<StockMovement> StockMovements { get; set; }
     public DbSet<Customer> Customers { get; set; }
 
-    // [Historia 3.3] Stub mínimo para historial de cliente.
-    // Epic 4 expandirá este módulo con OrderItems, descuentos, envíos, etc.
     public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -4,12 +4,6 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace blooming_api.Infrastructure.Data.Configurations;
 
-/// <summary>
-/// Configuración EF Core para la entidad Order.
-///
-/// [STUB - Historia 3.3] Campos mínimos para historial de cliente.
-/// Epic 4 debe agregar configuración para OrderItems y campos adicionales.
-/// </summary>
 public class OrderConfiguration : IEntityTypeConfiguration<Order>
 {
     public void Configure(EntityTypeBuilder<Order> builder)
@@ -32,6 +26,24 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .IsRequired()
             .HasColumnType("numeric(12,2)");
 
+        builder.Property(o => o.Discount)
+            .HasColumnName("discount")
+            .HasColumnType("numeric(12,2)");
+
+        builder.Property(o => o.ShippingAddress)
+            .HasColumnName("shipping_address")
+            .HasMaxLength(500);
+
+        builder.Property(o => o.Notes)
+            .HasColumnName("notes")
+            .HasMaxLength(2000);
+
+        builder.Property(o => o.EstimatedDeliveryDate)
+            .HasColumnName("estimated_delivery_date");
+
+        builder.Property(o => o.CreatedByUserId)
+            .HasColumnName("created_by_user_id");
+
         builder.Property(o => o.CreatedAt)
             .HasColumnName("created_at")
             .IsRequired();
@@ -39,8 +51,18 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(o => o.UpdatedAt)
             .HasColumnName("updated_at");
 
-        // Relación Customer → Orders (one-to-many)
-        // Epic 4: si se agrega cascade delete, considerar el impacto en el historial
+        builder.Property(o => o.ConfirmedAt)
+            .HasColumnName("confirmed_at");
+
+        builder.Property(o => o.ShippedAt)
+            .HasColumnName("shipped_at");
+
+        builder.Property(o => o.DeliveredAt)
+            .HasColumnName("delivered_at");
+
+        builder.Property(o => o.CancelledAt)
+            .HasColumnName("cancelled_at");
+
         builder.HasOne(o => o.Customer)
             .WithMany()
             .HasForeignKey(o => o.CustomerId)
