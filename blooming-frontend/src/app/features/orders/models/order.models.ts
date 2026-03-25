@@ -23,3 +23,34 @@ export interface OrderItemFormEntry {
   quantity: number;
   lineTotal: number;
 }
+
+export interface OrderItemDetailDto {
+  id: number;
+  productVariantId: number;
+  productName: string;
+  variantLabel: string;
+  unitPrice: number;
+  quantity: number;
+  lineTotal: number;
+}
+
+export interface OrderDetailDto {
+  id: number;
+  customerId: number;
+  customerName: string;
+  status: string;
+  total: number;
+  discount?: number;
+  shippingAddress?: string;
+  notes?: string;
+  estimatedDeliveryDate?: string;
+  createdAt: string;
+  confirmedAt?: string;
+  items: OrderItemDetailDto[];
+}
+
+export interface ConfirmOrderResult {
+  orderId: number;
+  status: string;
+  confirmedAt: string;
+}

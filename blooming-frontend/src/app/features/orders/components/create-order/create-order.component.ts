@@ -206,7 +206,7 @@ export class CreateOrderComponent implements OnInit {
 
     const result = await this.ordersService.createOrder(dto);
     this.snackBar.open('Pedido creado correctamente', 'Cerrar', { duration: 3000 });
-    this.router.navigate(['/orders']);
+    this.router.navigate(['/orders', result.orderId]);
   }
 
   onCancel(): void {

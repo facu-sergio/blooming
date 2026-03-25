@@ -8,5 +8,12 @@ export const ordersRoutes: Routes = [
         (m) => m.CreateOrderComponent
       ),
   },
+  {
+    path: ':id',
+    loadComponent: () =>
+      import('./components/order-detail/order-detail.component').then(
+        (m) => m.OrderDetailComponent
+      ),
+  },
   { path: '', redirectTo: 'create', pathMatch: 'full' },
 ];
