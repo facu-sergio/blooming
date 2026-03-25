@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using blooming_api.Modules.Orders.Commands.ChangeOrderStatus;
 using blooming_api.Modules.Orders.Commands.ConfirmOrder;
 using blooming_api.Modules.Orders.Commands.CreateOrder;
 using blooming_api.Modules.Orders.DTOs;
@@ -51,6 +52,14 @@ public class OrdersController : ControllerBase
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
         var result = await _mediator.Send(new ConfirmOrderCommand(id, userId));
+        return Ok(result);
+    }
+
+    [HttpPost("{id:int}/change-status")]
+    public async Task<ActionResult<ChangeOrderStatusResult>> ChangeStatus(int id, [FromBody] ChangeOrderStatusRequest request)
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+        var result = await _mediator.Send(new ChangeOrderStatusCommand(id, request.NewStatus, userId));
         return Ok(result);
     }
 }

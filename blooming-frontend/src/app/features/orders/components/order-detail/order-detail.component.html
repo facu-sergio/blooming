@@ -38,6 +38,24 @@
               <span class="value">{{ order()!.confirmedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
             </div>
           }
+          @if (order()!.shippedAt) {
+            <div class="info-item">
+              <span class="label">Enviado</span>
+              <span class="value">{{ order()!.shippedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          }
+          @if (order()!.deliveredAt) {
+            <div class="info-item">
+              <span class="label">Entregado</span>
+              <span class="value">{{ order()!.deliveredAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          }
+          @if (order()!.cancelledAt) {
+            <div class="info-item">
+              <span class="label">Cancelado</span>
+              <span class="value">{{ order()!.cancelledAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          }
           @if (order()!.shippingAddress) {
             <div class="info-item">
               <span class="label">Dirección de envío</span>
@@ -90,6 +108,42 @@
           <span class="total-label">Total</span>
           <span class="total-value">{{ order()!.total | currency: 'ARS' : 'symbol' : '1.0-0' }}</span>
         </div>
+
+        @if (hasValidTransitions()) {
+          <mat-divider></mat-divider>
+          <div class="status-change-section">
+            <h3 class="status-change-title">Cambiar estado</h3>
+            <div class="status-change-row">
+              <mat-form-field appearance="outline" class="status-select">
+                <mat-label>Nuevo estado</mat-label>
+                <mat-select
+                  [value]="selectedNewStatus()"
+                  (valueChange)="onSelectNewStatus($event)"
+                  [disabled]="isLoading()"
+                >
+                  @for (transition of validTransitions(); track transition) {
+                    <mat-option [value]="transition">
+                      {{ mapStatusToSpanish(transition) }}
+                    </mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <button
+                mat-flat-button
+                color="primary"
+                [disabled]="!selectedNewStatus() || isLoading()"
+                (click)="onChangeStatus()"
+              >
+                @if (isLoading()) {
+                  <mat-spinner diameter="20"></mat-spinner>
+                } @else {
+                  <mat-icon>swap_horiz</mat-icon>
+                  Cambiar Estado
+                }
+              </button>
+            </div>
+          </div>
+        }
       </mat-card-content>
 
       <mat-card-actions>

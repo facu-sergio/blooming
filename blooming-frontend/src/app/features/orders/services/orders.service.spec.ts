@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideHttpClient } from '@angular/common/http';
 import { OrdersService } from './orders.service';
 import {
+  ChangeOrderStatusResult,
   ConfirmOrderResult,
   CreateOrderDto,
   CreateOrderResult,
@@ -25,9 +26,11 @@ const mockOrderDetail: OrderDetailDto = {
   id: 42,
   customerId: 1,
   customerName: 'Ana García',
-  status: 'Pendiente',
+  status: 'Confirmado',
+  statusKey: 'Confirmed',
   total: 5000,
   createdAt: '2026-03-24T10:00:00Z',
+  confirmedAt: '2026-03-24T11:00:00Z',
   items: [
     {
       id: 1,
@@ -39,6 +42,12 @@ const mockOrderDetail: OrderDetailDto = {
       lineTotal: 5000,
     },
   ],
+};
+
+const mockChangeStatusResult: ChangeOrderStatusResult = {
+  orderId: 42,
+  status: 'Enviado',
+  changedAt: '2026-03-24T14:00:00Z',
 };
 
 const mockConfirmResult: ConfirmOrderResult = {
@@ -220,6 +229,71 @@ describe('OrdersService', () => {
 
       service.clearSelectedOrder();
       expect(service.selectedOrder()).toBeNull();
+    });
+  });
+
+  describe('changeOrderStatus()', () => {
+    it('should POST /api/orders/:id/change-status with newStatus and return result', async () => {
+      const changePromise = service.changeOrderStatus(42, 'Shipped');
+
+      const req = httpMock.expectOne((r) =>
+        r.url.includes('/api/orders/42/change-status') && r.method === 'POST'
+      );
+      expect(req.request.body).toEqual({ newStatus: 'Shipped' });
+      req.flush(mockChangeStatusResult);
+
+      const result = await changePromise;
+      expect(result).toEqual(mockChangeStatusResult);
+    });
+
+    it('should set isLoading to false after successful changeOrderStatus', async () => {
+      const changePromise = service.changeOrderStatus(42, 'Shipped');
+      httpMock
+        .expectOne((r) => r.url.includes('/api/orders/42/change-status') && r.method === 'POST')
+        .flush(mockChangeStatusResult);
+      await changePromise;
+      expect(service.isLoading()).toBe(false);
+    });
+
+    it('should set isLoading to false after failed changeOrderStatus (transición inválida)', async () => {
+      const changePromise = service.changeOrderStatus(42, 'Pending').catch(() => null);
+      httpMock
+        .expectOne((r) => r.url.includes('/api/orders/42/change-status') && r.method === 'POST')
+        .flush(
+          { title: 'No se puede cambiar el estado de Confirmado a Pendiente.' },
+          { status: 400, statusText: 'Bad Request' }
+        );
+      await changePromise;
+      expect(service.isLoading()).toBe(false);
+    });
+
+    it('should send Cancelled as newStatus when cancelling', async () => {
+      const changePromise = service.changeOrderStatus(42, 'Cancelled');
+
+      const req = httpMock.expectOne((r) =>
+        r.url.includes('/api/orders/42/change-status') && r.method === 'POST'
+      );
+      expect(req.request.body.newStatus).toBe('Cancelled');
+      req.flush({ orderId: 42, status: 'Cancelado', changedAt: '2026-03-24T15:00:00Z' });
+
+      await changePromise;
+    });
+  });
+
+  describe('getValidTransitionsForCurrentOrder()', () => {
+    it('should return empty array when no order is loaded', () => {
+      expect(service.getValidTransitionsForCurrentOrder()).toEqual([]);
+    });
+
+    it('should return valid transitions for Confirmed order', async () => {
+      const getPromise = service.getOrder(42);
+      httpMock.expectOne((r) => r.url.includes('/api/orders/42') && r.method === 'GET').flush(mockOrderDetail);
+      await getPromise;
+
+      const transitions = service.getValidTransitionsForCurrentOrder();
+      expect(transitions).toContain('Shipped');
+      expect(transitions).toContain('Cancelled');
+      expect(transitions).not.toContain('Pending');
     });
   });
 });

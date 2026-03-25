@@ -9,6 +9,7 @@ public record OrderDetailDto(
     int CustomerId,
     string CustomerName,
     string Status,
+    string StatusKey,
     decimal Total,
     decimal? Discount,
     string? ShippingAddress,
@@ -16,6 +17,9 @@ public record OrderDetailDto(
     DateTime? EstimatedDeliveryDate,
     DateTime CreatedAt,
     DateTime? ConfirmedAt,
+    DateTime? ShippedAt,
+    DateTime? DeliveredAt,
+    DateTime? CancelledAt,
     List<OrderItemDetailDto> Items
 );
 

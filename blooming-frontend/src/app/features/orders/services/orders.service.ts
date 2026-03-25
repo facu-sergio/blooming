@@ -2,10 +2,14 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import {
+  ChangeOrderStatusRequest,
+  ChangeOrderStatusResult,
   ConfirmOrderResult,
   CreateOrderDto,
   CreateOrderResult,
   OrderDetailDto,
+  OrderStatus,
+  getValidTransitions,
 } from '../models/order.models';
 import { firstValueFrom } from 'rxjs';
 
@@ -51,6 +55,26 @@ export class OrdersService {
     } finally {
       this._isLoading.set(false);
     }
+  }
+
+  async changeOrderStatus(orderId: number, newStatus: OrderStatus): Promise<ChangeOrderStatusResult> {
+    this._isLoading.set(true);
+    try {
+      const result = await firstValueFrom(
+        this.http.post<ChangeOrderStatusResult>(`${this.baseUrl}/${orderId}/change-status`, {
+          newStatus,
+        } satisfies ChangeOrderStatusRequest)
+      );
+      return result;
+    } finally {
+      this._isLoading.set(false);
+    }
+  }
+
+  getValidTransitionsForCurrentOrder(): OrderStatus[] {
+    const order = this._selectedOrder();
+    if (!order) return [];
+    return getValidTransitions(order.statusKey);
   }
 
   clearSelectedOrder(): void {

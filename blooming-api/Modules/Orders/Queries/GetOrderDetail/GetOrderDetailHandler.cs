@@ -3,6 +3,7 @@ using blooming_api.Infrastructure.Data;
 using blooming_api.Modules.Orders.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using static blooming_api.Modules.Orders.Entities.OrderStatusTransitions;
 
 namespace blooming_api.Modules.Orders.Queries.GetOrderDetail;
 
@@ -27,15 +28,8 @@ public class GetOrderDetailHandler : IRequestHandler<GetOrderDetailQuery, OrderD
         if (order == null)
             throw new NotFoundException($"Pedido con ID {request.OrderId} no encontrado");
 
-        var statusLabel = order.Status switch
-        {
-            OrderStatus.Pending => "Pendiente",
-            OrderStatus.Confirmed => "Confirmado",
-            OrderStatus.Shipped => "Enviado",
-            OrderStatus.Delivered => "Entregado",
-            OrderStatus.Cancelled => "Cancelado",
-            _ => order.Status.ToString()
-        };
+        var statusLabel = MapToSpanish(order.Status);
+        var statusKey = order.Status.ToString();
 
         var items = order.Items.Select(i => new OrderItemDetailDto(
             i.Id,
@@ -52,6 +46,7 @@ public class GetOrderDetailHandler : IRequestHandler<GetOrderDetailQuery, OrderD
             order.CustomerId,
             order.Customer.Name,
             statusLabel,
+            statusKey,
             order.Total,
             order.Discount,
             order.ShippingAddress,
@@ -59,6 +54,9 @@ public class GetOrderDetailHandler : IRequestHandler<GetOrderDetailQuery, OrderD
             order.EstimatedDeliveryDate,
             order.CreatedAt,
             order.ConfirmedAt,
+            order.ShippedAt,
+            order.DeliveredAt,
+            order.CancelledAt,
             items
         );
     }

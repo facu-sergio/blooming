@@ -1,3 +1,38 @@
+export type OrderStatus = 'Pending' | 'Confirmed' | 'Shipped' | 'Delivered' | 'Cancelled';
+
+export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  Pending: ['Confirmed', 'Cancelled'],
+  Confirmed: ['Shipped', 'Cancelled'],
+  Shipped: ['Delivered', 'Cancelled'],
+  Delivered: [],
+  Cancelled: [],
+};
+
+export function mapOrderStatusToSpanish(status: OrderStatus): string {
+  const map: Record<OrderStatus, string> = {
+    Pending: 'Pendiente',
+    Confirmed: 'Confirmado',
+    Shipped: 'Enviado',
+    Delivered: 'Entregado',
+    Cancelled: 'Cancelado',
+  };
+  return map[status];
+}
+
+export function getValidTransitions(currentStatus: OrderStatus): OrderStatus[] {
+  return ORDER_STATUS_TRANSITIONS[currentStatus] ?? [];
+}
+
+export interface ChangeOrderStatusRequest {
+  newStatus: OrderStatus;
+}
+
+export interface ChangeOrderStatusResult {
+  orderId: number;
+  status: string;
+  changedAt: string;
+}
+
 export interface CreateOrderItemDto {
   productVariantId: number;
   quantity: number;
@@ -39,6 +74,7 @@ export interface OrderDetailDto {
   customerId: number;
   customerName: string;
   status: string;
+  statusKey: OrderStatus;
   total: number;
   discount?: number;
   shippingAddress?: string;
@@ -46,6 +82,9 @@ export interface OrderDetailDto {
   estimatedDeliveryDate?: string;
   createdAt: string;
   confirmedAt?: string;
+  shippedAt?: string;
+  deliveredAt?: string;
+  cancelledAt?: string;
   items: OrderItemDetailDto[];
 }
 
