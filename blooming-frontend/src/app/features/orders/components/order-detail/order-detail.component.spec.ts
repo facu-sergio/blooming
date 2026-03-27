@@ -1,11 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import { Router, provideRouter } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { WritableSignal, signal } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { of } from 'rxjs';
 import { OrderDetailComponent } from './order-detail.component';
 import { OrdersService } from '../../services/orders.service';
-import { OrderDetailDto, OrderStatus } from '../../models/order.models';
+import { OrderDetailDto } from '../../models/order.models';
 
 const mockPendingOrder: OrderDetailDto = {
   id: 42,
@@ -61,9 +63,11 @@ describe('OrderDetailComponent', () => {
     getOrder: ReturnType<typeof vi.fn>;
     confirmOrder: ReturnType<typeof vi.fn>;
     changeOrderStatus: ReturnType<typeof vi.fn>;
+    cancelOrder: ReturnType<typeof vi.fn>;
     clearSelectedOrder: ReturnType<typeof vi.fn>;
   };
   let snackBarSpy: { open: ReturnType<typeof vi.fn> };
+  let dialogOpenFn: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     isLoadingWritable = signal(false);
@@ -83,10 +87,16 @@ describe('OrderDetailComponent', () => {
         status: 'Enviado',
         changedAt: '2026-03-24T14:00:00Z',
       }),
+      cancelOrder: vi.fn().mockResolvedValue({
+        orderId: 42,
+        status: 'Cancelado',
+        changedAt: '2026-03-24T16:00:00Z',
+      }),
       clearSelectedOrder: vi.fn(),
     };
 
     snackBarSpy = { open: vi.fn() };
+    dialogOpenFn = vi.fn().mockReturnValue({ afterClosed: () => of(true) });
 
     await TestBed.configureTestingModule({
       imports: [OrderDetailComponent],
@@ -96,7 +106,13 @@ describe('OrderDetailComponent', () => {
         { provide: OrdersService, useValue: ordersServiceSpy },
         { provide: MatSnackBar, useValue: snackBarSpy },
       ],
-    }).compileComponents();
+    })
+      .overrideComponent(OrderDetailComponent, {
+        add: {
+          providers: [{ provide: MatDialog, useValue: { open: dialogOpenFn } }],
+        },
+      })
+      .compileComponents();
 
     const fixture = TestBed.createComponent(OrderDetailComponent);
     component = fixture.componentInstance;
@@ -278,6 +294,101 @@ describe('OrderDetailComponent', () => {
       await component.onChangeStatus();
 
       expect(component.order()?.cancelledAt).toBe('2026-03-24T16:00:00Z');
+    });
+  });
+
+  describe('isCancellable', () => {
+    it('should return true for Pending order', () => {
+      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
+        ['_order'].set(mockPendingOrder);
+      expect(component.isCancellable()).toBe(true);
+    });
+
+    it('should return true for Confirmed order', () => {
+      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
+        ['_order'].set(mockConfirmedOrder);
+      expect(component.isCancellable()).toBe(true);
+    });
+
+    it('should return true for Shipped order', () => {
+      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
+        ['_order'].set(mockShippedOrder);
+      expect(component.isCancellable()).toBe(true);
+    });
+
+    it('should return false for Delivered order', () => {
+      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
+        ['_order'].set(mockDeliveredOrder);
+      expect(component.isCancellable()).toBe(false);
+    });
+
+    it('should return false when no order is loaded', () => {
+      expect(component.isCancellable()).toBe(false);
+    });
+  });
+
+  describe('onCancelOrder()', () => {
+    it('should open confirmation dialog before cancelling', async () => {
+      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
+        ['_order'].set(mockConfirmedOrder);
+
+      await component.onCancelOrder();
+
+      expect(dialogOpenFn).toHaveBeenCalled();
+    });
+
+    it('should call ordersService.cancelOrder when dialog is confirmed', async () => {
+      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
+        ['_order'].set(mockConfirmedOrder);
+
+      await component.onCancelOrder();
+
+      expect(ordersServiceSpy.cancelOrder).toHaveBeenCalledWith(42);
+    });
+
+    it('should not call cancelOrder when dialog is dismissed', async () => {
+      dialogOpenFn.mockReturnValueOnce({ afterClosed: () => of(false) });
+      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
+        ['_order'].set(mockConfirmedOrder);
+
+      await component.onCancelOrder();
+
+      expect(ordersServiceSpy.cancelOrder).not.toHaveBeenCalled();
+    });
+
+    it('should update order status to Cancelado after cancellation', async () => {
+      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
+        ['_order'].set(mockConfirmedOrder);
+
+      await component.onCancelOrder();
+
+      expect(component.order()?.status).toBe('Cancelado');
+      expect(component.order()?.statusKey).toBe('Cancelled');
+      expect(component.order()?.cancelledAt).toBe('2026-03-24T16:00:00Z');
+    });
+
+    it('should show success snackbar after cancellation', async () => {
+      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
+        ['_order'].set(mockConfirmedOrder);
+
+      await component.onCancelOrder();
+
+      expect(snackBarSpy.open).toHaveBeenCalledWith(
+        'Pedido cancelado correctamente',
+        'Cerrar',
+        { duration: 3000 }
+      );
+    });
+
+    it('should not call cancelOrder if isLoading is true', async () => {
+      isLoadingWritable.set(true);
+      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
+        ['_order'].set(mockConfirmedOrder);
+
+      await component.onCancelOrder();
+
+      expect(dialogOpenFn).not.toHaveBeenCalled();
+      expect(ordersServiceSpy.cancelOrder).not.toHaveBeenCalled();
     });
   });
 });

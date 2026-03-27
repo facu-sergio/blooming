@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -15,6 +16,7 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { OrdersService } from '../../services/orders.service';
 import { OrderDetailDto, OrderStatus, getValidTransitions, mapOrderStatusToSpanish } from '../../models/order.models';
+import { ConfirmCancelDialogComponent } from './confirm-cancel-dialog.component';
 
 @Component({
   selector: 'app-order-detail',
@@ -41,6 +43,7 @@ export class OrderDetailComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
   private readonly ordersService = inject(OrdersService);
+  private readonly dialog = inject(MatDialog);
 
   readonly isLoading = this.ordersService.isLoading;
   readonly tableColumns = ['product', 'variant', 'unitPrice', 'quantity', 'lineTotal'];
@@ -61,6 +64,12 @@ export class OrderDetailComponent implements OnInit {
   });
 
   readonly hasValidTransitions = computed(() => this.validTransitions().length > 0);
+
+  readonly isCancellable = computed(() => {
+    const order = this._order();
+    if (!order) return false;
+    return ['Pending', 'Confirmed', 'Shipped'].includes(order.statusKey);
+  });
 
   readonly mapStatusToSpanish = mapOrderStatusToSpanish;
 
@@ -145,7 +154,37 @@ export class OrderDetailComponent implements OnInit {
     }
   }
 
+  async onCancelOrder(): Promise<void> {
+    const order = this._order();
+    if (!order || this.isLoading()) return;
+
+    const dialogRef = this.dialog.open(ConfirmCancelDialogComponent, {
+      width: '400px',
+      data: { orderId: order.id },
+    });
+
+    const confirmed = await firstValueFrom(dialogRef.afterClosed());
+    if (!confirmed) return;
+
+    try {
+      const result = await this.ordersService.cancelOrder(order.id);
+      this._order.update((o) =>
+        o
+          ? {
+              ...o,
+              status: result.status,
+              statusKey: 'Cancelled' as OrderStatus,
+              cancelledAt: result.changedAt,
+            }
+          : o
+      );
+      this.snackBar.open('Pedido cancelado correctamente', 'Cerrar', { duration: 3000 });
+    } catch {
+      // El ErrorInterceptor global muestra el mensaje de error al usuario
+    }
+  }
+
   goBack(): void {
-    this.router.navigate(['/orders/create']);
+    this.router.navigate(['/orders']);
   }
 }

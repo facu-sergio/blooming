@@ -3,7 +3,9 @@ using blooming_api.Modules.Orders.Commands.ChangeOrderStatus;
 using blooming_api.Modules.Orders.Commands.ConfirmOrder;
 using blooming_api.Modules.Orders.Commands.CreateOrder;
 using blooming_api.Modules.Orders.DTOs;
+using blooming_api.Modules.Orders.Entities;
 using blooming_api.Modules.Orders.Queries.GetOrderDetail;
+using blooming_api.Modules.Orders.Queries.GetOrders;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +22,19 @@ public class OrdersController : ControllerBase
     public OrdersController(IMediator mediator)
     {
         _mediator = mediator;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<PagedOrdersResult>> GetList(
+        [FromQuery] string? status,
+        [FromQuery] DateTime? fromDate,
+        [FromQuery] DateTime? toDate,
+        [FromQuery] int? customerId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = OrdersConstants.DefaultPageSize)
+    {
+        var result = await _mediator.Send(new GetOrdersQuery(status, fromDate, toDate, customerId, page, pageSize));
+        return Ok(result);
     }
 
     [HttpPost]
@@ -60,6 +75,14 @@ public class OrdersController : ControllerBase
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
         var result = await _mediator.Send(new ChangeOrderStatusCommand(id, request.NewStatus, userId));
+        return Ok(result);
+    }
+
+    [HttpPost("{id:int}/cancel")]
+    public async Task<ActionResult<ChangeOrderStatusResult>> Cancel(int id)
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+        var result = await _mediator.Send(new ChangeOrderStatusCommand(id, nameof(OrderStatus.Cancelled), userId));
         return Ok(result);
     }
 }

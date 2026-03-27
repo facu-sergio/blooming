@@ -280,6 +280,43 @@ describe('OrdersService', () => {
     });
   });
 
+  describe('cancelOrder()', () => {
+    it('should POST /api/orders/:id/cancel and return result', async () => {
+      const mockCancelResult: ChangeOrderStatusResult = {
+        orderId: 42,
+        status: 'Cancelado',
+        changedAt: '2026-03-24T15:00:00Z',
+      };
+      const cancelPromise = service.cancelOrder(42);
+
+      const req = httpMock.expectOne((r) =>
+        r.url.includes('/api/orders/42/cancel') && r.method === 'POST'
+      );
+      req.flush(mockCancelResult);
+
+      const result = await cancelPromise;
+      expect(result).toEqual(mockCancelResult);
+    });
+
+    it('should set isLoading to false after successful cancelOrder', async () => {
+      const cancelPromise = service.cancelOrder(42);
+      httpMock
+        .expectOne((r) => r.url.includes('/api/orders/42/cancel') && r.method === 'POST')
+        .flush({ orderId: 42, status: 'Cancelado', changedAt: '2026-03-24T15:00:00Z' });
+      await cancelPromise;
+      expect(service.isLoading()).toBe(false);
+    });
+
+    it('should set isLoading to false after failed cancelOrder', async () => {
+      const cancelPromise = service.cancelOrder(42).catch(() => null);
+      httpMock
+        .expectOne((r) => r.url.includes('/api/orders/42/cancel') && r.method === 'POST')
+        .flush('error', { status: 400, statusText: 'Bad Request' });
+      await cancelPromise;
+      expect(service.isLoading()).toBe(false);
+    });
+  });
+
   describe('getValidTransitionsForCurrentOrder()', () => {
     it('should return empty array when no order is loaded', () => {
       expect(service.getValidTransitionsForCurrentOrder()).toEqual([]);

@@ -2,6 +2,13 @@ import { Routes } from '@angular/router';
 
 export const ordersRoutes: Routes = [
   {
+    path: '',
+    loadComponent: () =>
+      import('./components/order-list/order-list.component').then(
+        (m) => m.OrderListComponent
+      ),
+  },
+  {
     path: 'create',
     loadComponent: () =>
       import('./components/create-order/create-order.component').then(
@@ -15,5 +22,4 @@ export const ordersRoutes: Routes = [
         (m) => m.OrderDetailComponent
       ),
   },
-  { path: '', redirectTo: 'create', pathMatch: 'full' },
 ];

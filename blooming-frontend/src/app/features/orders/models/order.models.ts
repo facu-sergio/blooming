@@ -93,3 +93,29 @@ export interface ConfirmOrderResult {
   status: string;
   confirmedAt: string;
 }
+
+export interface OrderListItemDto {
+  id: number;
+  customerId: number;
+  customerName: string;
+  status: string;
+  statusKey: OrderStatus;
+  total: number;
+  createdAt: string;
+}
+
+export interface PagedOrdersResult {
+  items: OrderListItemDto[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface OrderListFilters {
+  status?: OrderStatus;
+  fromDate?: string;
+  toDate?: string;
+  customerId?: number;
+  page: number;
+  pageSize: number;
+}

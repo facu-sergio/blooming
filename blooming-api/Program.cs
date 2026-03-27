@@ -6,6 +6,7 @@ using blooming_api.Infrastructure.Cloudinary;
 using blooming_api.Infrastructure.Data;
 using blooming_api.Infrastructure.Middleware;
 using blooming_api.Infrastructure.Pipeline;
+using blooming_api.Modules.Orders.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -52,6 +53,9 @@ builder.Services.AddAuthorization();
 // Cloudinary
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 builder.Services.AddSingleton<ICloudinaryService, CloudinaryService>();
+
+// Domain Services
+builder.Services.AddScoped<StockReversionService>();
 
 // 5. MediatR + ValidationBehavior
 builder.Services.AddMediatR(cfg =>

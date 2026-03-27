@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import {
   ChangeOrderStatusRequest,
@@ -8,7 +8,10 @@ import {
   CreateOrderDto,
   CreateOrderResult,
   OrderDetailDto,
+  OrderListFilters,
+  OrderListItemDto,
   OrderStatus,
+  PagedOrdersResult,
   getValidTransitions,
 } from '../models/order.models';
 import { firstValueFrom } from 'rxjs';
@@ -21,8 +24,37 @@ export class OrdersService {
   private readonly _isLoading = signal(false);
   readonly isLoading = this._isLoading.asReadonly();
 
+  private readonly _orders = signal<OrderListItemDto[]>([]);
+  readonly orders = this._orders.asReadonly();
+
+  private readonly _totalCount = signal(0);
+  readonly totalCount = this._totalCount.asReadonly();
+
   private readonly _selectedOrder = signal<OrderDetailDto | null>(null);
   readonly selectedOrder = this._selectedOrder.asReadonly();
+
+  async getOrders(filters: OrderListFilters): Promise<PagedOrdersResult> {
+    this._isLoading.set(true);
+    try {
+      let params = new HttpParams()
+        .set('page', filters.page.toString())
+        .set('pageSize', filters.pageSize.toString());
+
+      if (filters.status) params = params.set('status', filters.status);
+      if (filters.fromDate) params = params.set('fromDate', filters.fromDate);
+      if (filters.toDate) params = params.set('toDate', filters.toDate);
+      if (filters.customerId !== undefined) params = params.set('customerId', filters.customerId.toString());
+
+      const result = await firstValueFrom(
+        this.http.get<PagedOrdersResult>(this.baseUrl, { params })
+      );
+      this._orders.set(result.items);
+      this._totalCount.set(result.totalCount);
+      return result;
+    } finally {
+      this._isLoading.set(false);
+    }
+  }
 
   async createOrder(dto: CreateOrderDto): Promise<CreateOrderResult> {
     this._isLoading.set(true);
@@ -66,6 +98,17 @@ export class OrdersService {
         } satisfies ChangeOrderStatusRequest)
       );
       return result;
+    } finally {
+      this._isLoading.set(false);
+    }
+  }
+
+  async cancelOrder(orderId: number): Promise<ChangeOrderStatusResult> {
+    this._isLoading.set(true);
+    try {
+      return await firstValueFrom(
+        this.http.post<ChangeOrderStatusResult>(`${this.baseUrl}/${orderId}/cancel`, {})
+      );
     } finally {
       this._isLoading.set(false);
     }
