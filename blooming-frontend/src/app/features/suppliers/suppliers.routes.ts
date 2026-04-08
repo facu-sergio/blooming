@@ -15,11 +15,19 @@ export const suppliersRoutes: Routes = [
         (m) => m.SupplierFormComponent
       ),
   },
+  // IMPORTANTE: ':id/edit' debe ir ANTES de ':id' para evitar conflictos de ruta.
   {
     path: ':id/edit',
     loadComponent: () =>
       import('./components/supplier-form/supplier-form.component').then(
         (m) => m.SupplierFormComponent
+      ),
+  },
+  {
+    path: ':id',
+    loadComponent: () =>
+      import('./components/supplier-detail/supplier-detail.component').then(
+        (m) => m.SupplierDetailComponent
       ),
   },
 ];

@@ -39,6 +39,10 @@ export class SupplierListComponent implements OnInit {
   readonly isLoading = this.suppliersService.isLoading;
   readonly displayedColumns = ['name', 'contactInfo', 'notes', 'actions'];
 
+  viewSupplier(supplier: Supplier): void {
+    this.router.navigate(['/suppliers', supplier.id]);
+  }
+
   readonly searchControl = new FormControl<string>('');
 
   isMobile = false;

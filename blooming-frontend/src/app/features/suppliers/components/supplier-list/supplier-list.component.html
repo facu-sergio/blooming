@@ -47,6 +47,9 @@
                 <div class="supplier-card-header">
                   <span class="supplier-name">{{ supplier.name }}</span>
                   <div class="card-actions">
+                    <button mat-icon-button (click)="viewSupplier(supplier)" aria-label="Ver detalle">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
                     <button mat-icon-button (click)="editSupplier(supplier)" aria-label="Editar">
                       <mat-icon>edit</mat-icon>
                     </button>
@@ -86,6 +89,9 @@
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let supplier">
+              <button mat-icon-button (click)="viewSupplier(supplier)" aria-label="Ver detalle">
+                <mat-icon>visibility</mat-icon>
+              </button>
               <button mat-icon-button (click)="editSupplier(supplier)" aria-label="Editar">
                 <mat-icon>edit</mat-icon>
               </button>
