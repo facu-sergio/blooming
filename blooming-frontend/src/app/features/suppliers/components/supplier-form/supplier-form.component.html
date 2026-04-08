@@ -1,0 +1,61 @@
+<div class="supplier-form-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>{{ isEditMode ? 'Editar proveedor' : 'Nuevo proveedor' }}</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" id="supplierForm">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nombre *</mat-label>
+          <input matInput formControlName="name" [maxlength]="constants.nameMaxLength" />
+          @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+            <mat-error>El nombre es requerido</mat-error>
+          }
+          @if (form.get('name')?.hasError('maxlength')) {
+            <mat-error>Máximo {{ constants.nameMaxLength }} caracteres</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contacto (opcional)</mat-label>
+          <input matInput formControlName="contactInfo" [maxlength]="constants.contactInfoMaxLength" />
+          @if (form.get('contactInfo')?.hasError('maxlength')) {
+            <mat-error>Máximo {{ constants.contactInfoMaxLength }} caracteres</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Notas (opcional)</mat-label>
+          <textarea
+            matInput
+            formControlName="notes"
+            [maxlength]="constants.notesMaxLength"
+            rows="4"
+          ></textarea>
+          @if (form.get('notes')?.hasError('maxlength')) {
+            <mat-error>Máximo {{ constants.notesMaxLength }} caracteres</mat-error>
+          }
+        </mat-form-field>
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <button mat-button type="button" (click)="onCancel()">Cancelar</button>
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        form="supplierForm"
+        [disabled]="form.invalid || isLoading()"
+        (click)="onSubmit()"
+      >
+        @if (isLoading()) {
+          <mat-spinner diameter="20" />
+        } @else {
+          {{ isEditMode ? 'Guardar cambios' : 'Crear proveedor' }}
+        }
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

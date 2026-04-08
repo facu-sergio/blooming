@@ -1,0 +1,152 @@
+<mat-card class="form-card">
+  <mat-card-header>
+    <mat-card-title>Nueva Orden de Compra</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <!-- Proveedor -->
+    <section class="section">
+      <h3 class="section-title">Proveedor</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Buscar proveedor</mat-label>
+        <input
+          matInput
+          [formControl]="supplierSearchControl"
+          [matAutocomplete]="supplierAuto"
+          placeholder="Escribí el nombre del proveedor..."
+        />
+        <button
+          *ngIf="selectedSupplier()"
+          matSuffix
+          mat-icon-button
+          (click)="clearSupplier()"
+          type="button"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-autocomplete
+          #supplierAuto="matAutocomplete"
+          (optionSelected)="onSupplierSelected($event.option.value)"
+        >
+          <mat-option *ngFor="let s of filteredSuppliers()" [value]="s">
+            {{ s.name }}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <div *ngIf="selectedSupplier()" class="selected-badge">
+        <mat-icon>storefront</mat-icon>
+        <span>{{ selectedSupplier()!.name }}</span>
+      </div>
+    </section>
+
+    <mat-divider></mat-divider>
+
+    <!-- Búsqueda de variantes -->
+    <section class="section">
+      <h3 class="section-title">Agregar Productos</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Buscar variante (producto / talle / color)</mat-label>
+        <input
+          matInput
+          [formControl]="variantSearchControl"
+          [matAutocomplete]="variantAuto"
+          placeholder="Ej: Remera M Rojo..."
+        />
+        <mat-autocomplete
+          #variantAuto="matAutocomplete"
+          [displayWith]="variantDisplayFn"
+          (optionSelected)="addVariantToOrder($event.option.value)"
+        >
+          <mat-option *ngFor="let item of filteredVariants()" [value]="item">
+            {{ item.product.name }} — {{ item.variant.size }} {{ item.variant.color }}
+            <span class="variant-price">(Costo: ${{ item.variant.costPrice | number: '1.2-2' }})</span>
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+    </section>
+
+    <!-- Tabla de ítems -->
+    <section class="section" *ngIf="items().length > 0">
+      <h3 class="section-title">Ítems de la Orden</h3>
+      <mat-table [dataSource]="items()" class="items-table">
+        <ng-container matColumnDef="product">
+          <mat-header-cell *matHeaderCellDef>Producto</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.productName }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="variant">
+          <mat-header-cell *matHeaderCellDef>Variante</mat-header-cell>
+          <mat-cell *matCellDef="let item">{{ item.variantLabel }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="quantity">
+          <mat-header-cell *matHeaderCellDef>Cantidad</mat-header-cell>
+          <mat-cell *matCellDef="let item; let i = index">
+            <mat-form-field appearance="outline" class="qty-field">
+              <input
+                matInput
+                type="number"
+                [value]="item.quantity"
+                min="1"
+                (change)="updateQuantity(i, $any($event.target).value)"
+              />
+            </mat-form-field>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="unitCostPrice">
+          <mat-header-cell *matHeaderCellDef>Precio Unitario ($)</mat-header-cell>
+          <mat-cell *matCellDef="let item; let i = index">
+            <mat-form-field appearance="outline" class="price-field">
+              <input
+                matInput
+                type="number"
+                [value]="item.unitCostPrice"
+                min="0.01"
+                step="0.01"
+                (change)="updateUnitCostPrice(i, $any($event.target).value)"
+              />
+            </mat-form-field>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="lineTotal">
+          <mat-header-cell *matHeaderCellDef>Subtotal</mat-header-cell>
+          <mat-cell *matCellDef="let item">${{ item.lineTotal | number: '1.2-2' }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <mat-header-cell *matHeaderCellDef></mat-header-cell>
+          <mat-cell *matCellDef="let item; let i = index">
+            <button mat-icon-button color="warn" (click)="removeItem(i)" type="button">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="tableColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: tableColumns"></mat-row>
+      </mat-table>
+
+      <div class="total-row">
+        <span class="total-label">Total de la Orden:</span>
+        <span class="total-amount">${{ orderTotal() | number: '1.2-2' }}</span>
+      </div>
+    </section>
+  </mat-card-content>
+
+  <mat-card-actions align="end">
+    <button mat-button (click)="onCancel()" type="button">Cancelar</button>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onSubmit()"
+      [disabled]="isLoading()"
+      type="button"
+    >
+      <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+      <span *ngIf="!isLoading()">Registrar Orden</span>
+    </button>
+  </mat-card-actions>
+</mat-card>

@@ -1,0 +1,73 @@
+.form-card {
+  max-width: 900px;
+  margin: 24px auto;
+  padding: 16px;
+}
+
+.section {
+  margin: 20px 0;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.full-width {
+  width: 100%;
+}
+
+.selected-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #e8f5e9;
+  border-radius: 4px;
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.items-table {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.qty-field,
+.price-field {
+  width: 100px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  margin-top: 8px;
+}
+
+.total-label {
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.total-amount {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+.variant-price {
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+mat-card-actions {
+  padding: 16px;
+  gap: 8px;
+}

@@ -19,6 +19,7 @@ public class StockMovementConfiguration : IEntityTypeConfiguration<StockMovement
         builder.Property(m => m.Quantity).HasColumnName("quantity").IsRequired();
         builder.Property(m => m.OrderId).HasColumnName("order_id");
         builder.Property(m => m.PurchaseOrderId).HasColumnName("purchase_order_id");
+        builder.Property(m => m.UnitCostPrice).HasColumnName("unit_cost_price").HasColumnType("numeric(12,2)");
         builder.Property(m => m.CreatedAt).HasColumnName("created_at").IsRequired();
 
         builder.HasOne(m => m.ProductVariant)

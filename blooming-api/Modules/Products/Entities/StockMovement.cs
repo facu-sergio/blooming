@@ -22,6 +22,10 @@ public class StockMovement
     /// FK a la orden de compra (PurchaseOrder) que originó el movimiento. Null si no aplica.
     /// </summary>
     public int? PurchaseOrderId { get; set; }
+    /// <summary>
+    /// Precio unitario de costo al momento de la compra. Solo aplica a movimientos de tipo In por compra.
+    /// </summary>
+    public decimal? UnitCostPrice { get; set; }
     public DateTime CreatedAt { get; set; }
     public ProductVariant ProductVariant { get; set; } = null!;
 }

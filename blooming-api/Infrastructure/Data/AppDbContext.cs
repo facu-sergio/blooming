@@ -3,6 +3,7 @@ using blooming_api.Common;
 using blooming_api.Modules.Customers.Entities;
 using blooming_api.Modules.Orders.Entities;
 using blooming_api.Modules.Products.Entities;
+using blooming_api.Modules.Suppliers.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace blooming_api.Infrastructure.Data;
@@ -21,6 +22,9 @@ public class AppDbContext : DbContext
 
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<Supplier> Suppliers { get; set; }
+    public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
+    public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
