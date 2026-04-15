@@ -11,5 +11,11 @@ public record PurchaseOrderListItemDto(
     DateTime OrderDate,
     decimal TotalAmount,
     int ItemCount,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    List<PurchaseOrderItemSummaryDto> Items
+);
+
+public record PurchaseOrderItemSummaryDto(
+    string ProductName,
+    string? ImageUrl
 );

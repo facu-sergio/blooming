@@ -12,6 +12,7 @@ const mockListItem: PurchaseOrderListItem = {
   totalAmount: 5000,
   itemCount: 2,
   createdAt: '2026-03-27T00:00:00Z',
+  items: [{ productName: 'Remera', imageUrl: undefined }],
 };
 
 const mockDetail: PurchaseOrderDetail = {

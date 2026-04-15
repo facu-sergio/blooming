@@ -15,6 +15,10 @@ const mockOrders: PurchaseOrderListItem[] = [
     totalAmount: 5000,
     itemCount: 2,
     createdAt: '2026-03-01T00:00:00Z',
+    items: [
+      { productName: 'Remera', imageUrl: undefined },
+      { productName: 'Pantalón', imageUrl: undefined },
+    ],
   },
   {
     id: 2,
@@ -24,6 +28,7 @@ const mockOrders: PurchaseOrderListItem[] = [
     totalAmount: 3000,
     itemCount: 1,
     createdAt: '2026-02-15T00:00:00Z',
+    items: [{ productName: 'Campera', imageUrl: 'https://example.com/campera.jpg' }],
   },
 ];
 

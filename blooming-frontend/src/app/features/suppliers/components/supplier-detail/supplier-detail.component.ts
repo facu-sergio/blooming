@@ -75,6 +75,12 @@ export class SupplierDetailComponent implements OnInit, OnDestroy {
     this.router.navigate(['/suppliers', this.supplierId, 'edit']);
   }
 
+  newPurchaseOrder(): void {
+    this.router.navigate(['/purchase-orders', 'new'], {
+      queryParams: { supplierId: this.supplierId },
+    });
+  }
+
   async viewOrderDetail(order: PurchaseOrderListItem): Promise<void> {
     const detail = await this.purchaseHistoryService.getOrderDetail(order.id);
     const data: PurchaseOrderDetailsDialogData = { orderId: order.id, orderDetail: detail };

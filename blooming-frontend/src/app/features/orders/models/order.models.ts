@@ -2,7 +2,7 @@ export type OrderStatus = 'Pending' | 'Confirmed' | 'Shipped' | 'Delivered' | 'C
 
 export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   Pending: ['Confirmed', 'Cancelled'],
-  Confirmed: ['Shipped', 'Cancelled'],
+  Confirmed: ['Shipped', 'Delivered', 'Cancelled'],
   Shipped: ['Delivered', 'Cancelled'],
   Delivered: [],
   Cancelled: [],

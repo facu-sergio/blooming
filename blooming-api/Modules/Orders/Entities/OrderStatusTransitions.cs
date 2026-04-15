@@ -9,7 +9,7 @@ public static class OrderStatusTransitions
     private static readonly Dictionary<OrderStatus, OrderStatus[]> ValidTransitions = new()
     {
         { OrderStatus.Pending,   new[] { OrderStatus.Confirmed, OrderStatus.Cancelled } },
-        { OrderStatus.Confirmed, new[] { OrderStatus.Shipped,   OrderStatus.Cancelled } },
+        { OrderStatus.Confirmed, new[] { OrderStatus.Shipped, OrderStatus.Delivered, OrderStatus.Cancelled } },
         { OrderStatus.Shipped,   new[] { OrderStatus.Delivered, OrderStatus.Cancelled } },
         { OrderStatus.Delivered, Array.Empty<OrderStatus>() },
         { OrderStatus.Cancelled, Array.Empty<OrderStatus>() },

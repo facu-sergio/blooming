@@ -1,0 +1,10 @@
+<mat-card class="metric-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar>today</mat-icon>
+    <mat-card-title>Ventas del Día</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <p class="metric-value">{{ dailySales().totalAmount | currency: 'ARS' : 'symbol' : '1.0-0' }}</p>
+    <p class="metric-subtitle">{{ dailySales().orderCount }} pedido(s) entregado(s)</p>
+  </mat-card-content>
+</mat-card>

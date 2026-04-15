@@ -1,0 +1,17 @@
+<mat-card class="metric-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar>trending_up</mat-icon>
+    <mat-card-title>Margen del Mes</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <p class="metric-value" [class.negative]="monthlyMargin().margin < 0">
+      {{ monthlyMargin().margin | currency: 'ARS' : 'symbol' : '1.0-0' }}
+    </p>
+    <p class="metric-subtitle">
+      Ingresos: {{ monthlyMargin().revenue | currency: 'ARS' : 'symbol' : '1.0-0' }}
+    </p>
+    <p class="metric-subtitle">
+      Costos: {{ monthlyMargin().cost | currency: 'ARS' : 'symbol' : '1.0-0' }}
+    </p>
+  </mat-card-content>
+</mat-card>

@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormControl } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -42,6 +42,7 @@ import { ProductResponse, VariantResponse } from '../../../products/models/produ
 export class PurchaseOrderFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
   private readonly suppliersService = inject(SuppliersService);
   private readonly productsService = inject(ProductsService);
@@ -76,13 +77,19 @@ export class PurchaseOrderFormComponent implements OnInit {
     this._items().reduce((sum, item) => sum + item.lineTotal, 0)
   );
 
-  ngOnInit(): void {
-    this.suppliersService.loadAll();
+  async ngOnInit(): Promise<void> {
+    await this.suppliersService.loadAll();
     this.productsService.loadAll();
 
     this.variantSearchControl.valueChanges
       .pipe(debounceTime(200), distinctUntilChanged())
       .subscribe((term) => this.filterVariants(term ?? ''));
+
+    const supplierId = this.route.snapshot.queryParamMap.get('supplierId');
+    if (supplierId) {
+      const supplier = this.suppliersService.suppliers().find((s) => s.id === supplierId);
+      if (supplier) this.onSupplierSelected(supplier);
+    }
   }
 
   private filterVariants(term: string): void {

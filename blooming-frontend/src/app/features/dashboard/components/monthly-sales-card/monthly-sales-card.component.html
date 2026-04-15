@@ -1,0 +1,10 @@
+<mat-card class="metric-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar>calendar_month</mat-icon>
+    <mat-card-title>Ventas del Mes</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <p class="metric-value">{{ monthlySales().totalAmount | currency: 'ARS' : 'symbol' : '1.0-0' }}</p>
+    <p class="metric-subtitle">{{ monthlySales().orderCount }} pedido(s) entregado(s)</p>
+  </mat-card-content>
+</mat-card>

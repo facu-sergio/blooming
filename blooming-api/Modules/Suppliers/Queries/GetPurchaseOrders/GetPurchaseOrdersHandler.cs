@@ -15,15 +15,12 @@ public class GetPurchaseOrdersHandler : IRequestHandler<GetPurchaseOrdersQuery, 
 
     public async Task<List<PurchaseOrderListItemDto>> Handle(GetPurchaseOrdersQuery request, CancellationToken cancellationToken)
     {
-        var query = _db.PurchaseOrders
+        var orders = await _db.PurchaseOrders
             .Include(p => p.Supplier)
             .Include(p => p.Items)
-            .AsQueryable();
-
-        if (request.SupplierId.HasValue)
-            query = query.Where(p => p.SupplierId == request.SupplierId.Value);
-
-        var orders = await query
+                .ThenInclude(i => i.ProductVariant)
+                    .ThenInclude(v => v.Product)
+            .Where(p => !request.SupplierId.HasValue || p.SupplierId == request.SupplierId.Value)
             .OrderByDescending(p => p.OrderDate)
             .ToListAsync(cancellationToken);
 
@@ -34,7 +31,11 @@ public class GetPurchaseOrdersHandler : IRequestHandler<GetPurchaseOrdersQuery, 
             p.OrderDate,
             p.TotalAmount,
             p.Items.Count,
-            p.CreatedAt
+            p.CreatedAt,
+            p.Items.Select(i => new PurchaseOrderItemSummaryDto(
+                i.ProductVariant.Product.Name,
+                i.ProductVariant.Product.ImageUrl
+            )).ToList()
         )).ToList();
     }
 }

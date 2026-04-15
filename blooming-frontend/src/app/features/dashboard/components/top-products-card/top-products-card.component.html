@@ -1,0 +1,20 @@
+<mat-card class="metric-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar>star</mat-icon>
+    <mat-card-title>Top 5 Productos del Mes</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    @if (topProducts().length === 0) {
+      <p class="empty-message">Sin ventas registradas este mes</p>
+    } @else {
+      <mat-list>
+        @for (product of topProducts(); track product.productName; let i = $index) {
+          <mat-list-item>
+            <span matListItemTitle>{{ i + 1 }}. {{ product.productName }}</span>
+            <span matListItemLine>{{ product.unitsSold }} unidades vendidas</span>
+          </mat-list-item>
+        }
+      </mat-list>
+    }
+  </mat-card-content>
+</mat-card>

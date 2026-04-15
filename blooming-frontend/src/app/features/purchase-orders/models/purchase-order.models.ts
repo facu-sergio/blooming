@@ -19,6 +19,11 @@ export interface PurchaseOrderDetail {
   items: PurchaseOrderItemDetail[];
 }
 
+export interface PurchaseOrderItemSummary {
+  productName: string;
+  imageUrl?: string;
+}
+
 export interface PurchaseOrderListItem {
   id: number;
   supplierId: string;
@@ -27,6 +32,7 @@ export interface PurchaseOrderListItem {
   totalAmount: number;
   itemCount: number;
   createdAt: string;
+  items: PurchaseOrderItemSummary[];
 }
 
 export interface CreatePurchaseOrderItemDto {

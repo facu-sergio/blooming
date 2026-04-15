@@ -1,0 +1,26 @@
+<mat-card class="metric-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar class="alert-icon">warning</mat-icon>
+    <mat-card-title>Alertas de Stock Bajo</mat-card-title>
+    @if (stockAlerts().length > 0) {
+      <mat-card-subtitle>{{ stockAlerts().length }} alerta(s) activa(s)</mat-card-subtitle>
+    }
+  </mat-card-header>
+  <mat-card-content>
+    @if (stockAlerts().length === 0) {
+      <p class="empty-message">Sin alertas de stock activas</p>
+    } @else {
+      <mat-list>
+        @for (alert of stockAlerts(); track alert.productName + alert.size + alert.color) {
+          <mat-list-item>
+            <mat-icon matListItemIcon class="alert-icon">inventory_2</mat-icon>
+            <span matListItemTitle>{{ alert.productName }}</span>
+            <span matListItemLine>
+              {{ alert.size }} / {{ alert.color }} — Stock: {{ alert.currentStock }} (umbral: {{ alert.threshold }})
+            </span>
+          </mat-list-item>
+        }
+      </mat-list>
+    }
+  </mat-card-content>
+</mat-card>
