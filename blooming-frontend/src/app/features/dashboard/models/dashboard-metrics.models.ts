@@ -8,6 +8,11 @@ export interface MonthlySalesMetrics {
   totalAmount: number;
 }
 
+export interface MonthlyProfitsMetrics {
+  orderCount: number;
+  totalProfit: number;
+}
+
 export interface TopProduct {
   productName: string;
   imageUrl: string | null;
@@ -26,4 +31,10 @@ export interface MonthlyMargin {
   revenue: number;
   cost: number;
   margin: number;
+}
+
+export interface MonthlyNetProfit {
+  revenue: number;
+  cost: number;
+  netProfit: number;
 }

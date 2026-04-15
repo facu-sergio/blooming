@@ -1,6 +1,7 @@
 using blooming_api.Modules.Dashboard.Queries.GetActiveStockAlerts;
 using blooming_api.Modules.Dashboard.Queries.GetDailySalesMetrics;
 using blooming_api.Modules.Dashboard.Queries.GetMonthlyMargin;
+using blooming_api.Modules.Dashboard.Queries.GetMonthlyProfits;
 using blooming_api.Modules.Dashboard.Queries.GetMonthlySalesMetrics;
 using blooming_api.Modules.Dashboard.Queries.GetTopProducts;
 using MediatR;
@@ -53,6 +54,13 @@ public class DashboardController : ControllerBase
     public async Task<ActionResult<MonthlyMarginDto>> GetMonthlyMargin()
     {
         var result = await _mediator.Send(new GetMonthlyMarginQuery());
+        return Ok(result);
+    }
+
+    [HttpGet("monthly-profits")]
+    public async Task<ActionResult<MonthlyProfitsDto>> GetMonthlyProfits()
+    {
+        var result = await _mediator.Send(new GetMonthlyProfitsQuery());
         return Ok(result);
     }
 }

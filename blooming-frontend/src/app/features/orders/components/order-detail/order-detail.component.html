@@ -90,7 +90,7 @@
           </ng-container>
           <ng-container matColumnDef="unitPrice">
             <th mat-header-cell *matHeaderCellDef>Precio unit.</th>
-            <td mat-cell *matCellDef="let item">{{ item.unitPrice | currency: 'ARS' : 'symbol' : '1.0-0' }}</td>
+            <td mat-cell *matCellDef="let item">{{ item.unitPrice | currency: 'ARS' : '$' : '1.0-0' }}</td>
           </ng-container>
           <ng-container matColumnDef="quantity">
             <th mat-header-cell *matHeaderCellDef>Cantidad</th>
@@ -98,7 +98,7 @@
           </ng-container>
           <ng-container matColumnDef="lineTotal">
             <th mat-header-cell *matHeaderCellDef>Subtotal</th>
-            <td mat-cell *matCellDef="let item">{{ item.lineTotal | currency: 'ARS' : 'symbol' : '1.0-0' }}</td>
+            <td mat-cell *matCellDef="let item">{{ item.lineTotal | currency: 'ARS' : '$' : '1.0-0' }}</td>
           </ng-container>
           <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: tableColumns"></tr>
@@ -106,7 +106,7 @@
 
         <div class="total-row">
           <span class="total-label">Total</span>
-          <span class="total-value">{{ order()!.total | currency: 'ARS' : 'symbol' : '1.0-0' }}</span>
+          <span class="total-value">{{ order()!.total | currency: 'ARS' : '$' : '1.0-0' }}</span>
         </div>
 
         @if (hasValidTransitions()) {

@@ -69,7 +69,7 @@
         <mat-card class="metric-card">
           <mat-card-content>
             <div class="metric-value">
-              {{ customerMetrics()!.totalSpent | currency: 'ARS' : 'symbol' : '1.0-0' }}
+              {{ customerMetrics()!.totalSpent | currency: 'ARS' : '$' : '1.0-0' }}
             </div>
             <div class="metric-label">
               <mat-icon>payments</mat-icon>
@@ -115,7 +115,7 @@
             <ng-container matColumnDef="total">
               <th mat-header-cell *matHeaderCellDef>Total</th>
               <td mat-cell *matCellDef="let order">
-                {{ order.total | currency: 'ARS' : 'symbol' : '1.0-0' }}
+                {{ order.total | currency: 'ARS' : '$' : '1.0-0' }}
               </td>
             </ng-container>
 

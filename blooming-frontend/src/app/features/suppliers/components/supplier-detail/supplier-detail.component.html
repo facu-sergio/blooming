@@ -100,7 +100,7 @@
               <ng-container matColumnDef="totalAmount">
                 <th mat-header-cell *matHeaderCellDef>Total invertido</th>
                 <td mat-cell *matCellDef="let order">
-                  {{ order.totalAmount | currency: 'ARS' : 'symbol' : '1.0-0' }}
+                  {{ order.totalAmount | currency: 'ARS' : '$' : '1.0-0' }}
                 </td>
               </ng-container>
 

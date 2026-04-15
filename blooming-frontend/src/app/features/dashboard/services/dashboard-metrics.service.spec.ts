@@ -5,6 +5,7 @@ import { DashboardMetricsService } from './dashboard-metrics.service';
 import {
   DailySalesMetrics,
   MonthlySalesMetrics,
+  MonthlyProfitsMetrics,
   TopProduct,
   StockAlert,
   MonthlyMargin,
@@ -12,6 +13,7 @@ import {
 
 const mockDailySales: DailySalesMetrics = { orderCount: 3, totalAmount: 45000 };
 const mockMonthlySales: MonthlySalesMetrics = { orderCount: 25, totalAmount: 380000 };
+const mockMonthlyProfits: MonthlyProfitsMetrics = { orderCount: 25, totalProfit: 95000 };
 const mockTopProducts: TopProduct[] = [
   { productName: 'Remera Básica', imageUrl: null, unitsSold: 42 },
   { productName: 'Jeans Slim', imageUrl: 'https://example.com/img.jpg', unitsSold: 30 },
@@ -50,6 +52,14 @@ describe('DashboardMetricsService', () => {
     expect(service.monthlySales()).toEqual({ orderCount: 0, totalAmount: 0 });
   });
 
+  it('should start with zeroed monthlyProfits signal', () => {
+    expect(service.monthlyProfits()).toEqual({ orderCount: 0, totalProfit: 0 });
+  });
+
+  it('should start with zeroed monthlyNetProfit signal', () => {
+    expect(service.monthlyNetProfit()).toEqual({ revenue: 0, cost: 0, netProfit: 0 });
+  });
+
   it('should start with empty topProducts signal', () => {
     expect(service.topProducts()).toEqual([]);
   });
@@ -73,6 +83,9 @@ describe('DashboardMetricsService', () => {
         .expectOne((r) => r.url.includes('/api/dashboard/monthly-sales'))
         .flush(mockMonthlySales);
       httpMock
+        .expectOne((r) => r.url.includes('/api/dashboard/monthly-profits'))
+        .flush(mockMonthlyProfits);
+      httpMock
         .expectOne((r) => r.url.includes('/api/dashboard/top-products'))
         .flush(mockTopProducts);
       httpMock
@@ -83,7 +96,7 @@ describe('DashboardMetricsService', () => {
         .flush(mockMonthlyMargin);
     }
 
-    it('should call all 5 dashboard endpoints', async () => {
+    it('should call all 6 dashboard endpoints', async () => {
       const loadPromise = service.loadAll();
       flushAllRequests();
       await loadPromise;
@@ -124,6 +137,24 @@ describe('DashboardMetricsService', () => {
       expect(service.monthlyMargin()).toEqual(mockMonthlyMargin);
     });
 
+    it('should update monthlyProfits signal after loadAll', async () => {
+      const loadPromise = service.loadAll();
+      flushAllRequests();
+      await loadPromise;
+      expect(service.monthlyProfits()).toEqual(mockMonthlyProfits);
+    });
+
+    it('should update monthlyNetProfit signal with netProfit = margin after loadAll', async () => {
+      const loadPromise = service.loadAll();
+      flushAllRequests();
+      await loadPromise;
+      expect(service.monthlyNetProfit()).toEqual({
+        revenue: mockMonthlyMargin.revenue,
+        cost: mockMonthlyMargin.cost,
+        netProfit: mockMonthlyMargin.margin,
+      });
+    });
+
     it('should set isLoading to false after successful loadAll', async () => {
       const loadPromise = service.loadAll();
       flushAllRequests();
@@ -139,6 +170,9 @@ describe('DashboardMetricsService', () => {
       httpMock
         .expectOne((r) => r.url.includes('/api/dashboard/monthly-sales'))
         .flush(mockMonthlySales);
+      httpMock
+        .expectOne((r) => r.url.includes('/api/dashboard/monthly-profits'))
+        .flush(mockMonthlyProfits);
       httpMock.expectOne((r) => r.url.includes('/api/dashboard/top-products')).flush([]);
       httpMock.expectOne((r) => r.url.includes('/api/dashboard/stock-alerts')).flush([]);
       httpMock

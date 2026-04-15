@@ -45,11 +45,11 @@
             <div class="variant-info">
               <div class="info-row">
                 <span class="label">Precio de costo:</span>
-                <span>{{ variant.costPrice | currency:'ARS':'symbol':'1.0-2' }}</span>
+                <span>{{ variant.costPrice | currency:'ARS':'$':'1.0-2' }}</span>
               </div>
               <div class="info-row">
                 <span class="label">Precio de venta:</span>
-                <span>{{ variant.sellingPrice | currency:'ARS':'symbol':'1.0-2' }}</span>
+                <span>{{ variant.sellingPrice | currency:'ARS':'$':'1.0-2' }}</span>
               </div>
               @if (variant.lowStockThreshold != null) {
                 <div class="info-row">

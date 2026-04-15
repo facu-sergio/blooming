@@ -1,17 +1,20 @@
 <mat-card class="metric-card">
   <mat-card-header>
     <mat-icon mat-card-avatar>trending_up</mat-icon>
-    <mat-card-title>Margen del Mes</mat-card-title>
+    <mat-card-title
+      matTooltip="Ingresos totales menos costos totales del mes"
+      matTooltipPosition="above"
+    >Ganancia Neta del Mes</mat-card-title>
   </mat-card-header>
   <mat-card-content>
-    <p class="metric-value" [class.negative]="monthlyMargin().margin < 0">
-      {{ monthlyMargin().margin | currency: 'ARS' : 'symbol' : '1.0-0' }}
+    <p class="metric-value" [class.negative]="monthlyNetProfit().netProfit < 0">
+      {{ monthlyNetProfit().netProfit | currency: 'ARS' : '$' : '1.0-0' }}
     </p>
     <p class="metric-subtitle">
-      Ingresos: {{ monthlyMargin().revenue | currency: 'ARS' : 'symbol' : '1.0-0' }}
+      Ingresos: {{ monthlyNetProfit().revenue | currency: 'ARS' : '$' : '1.0-0' }}
     </p>
     <p class="metric-subtitle">
-      Costos: {{ monthlyMargin().cost | currency: 'ARS' : 'symbol' : '1.0-0' }}
+      Costos: {{ monthlyNetProfit().cost | currency: 'ARS' : '$' : '1.0-0' }}
     </p>
   </mat-card-content>
 </mat-card>
