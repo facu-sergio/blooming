@@ -58,44 +58,66 @@
       }
 
       .status-chip {
-        display: inline-block;
-        padding: 4px 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
         border-radius: 16px;
         font-size: 12px;
         font-weight: 500;
         text-transform: uppercase;
 
+        .status-chip-icon {
+          font-size: 14px;
+          width: 14px;
+          height: 14px;
+        }
+
         &.status-pending {
-          background-color: #fff3cd;
-          color: #856404;
+          background-color: var(--color-status-pending-bg);
+          color: var(--color-status-pending-text);
         }
 
         &.status-confirmed {
-          background-color: #d1ecf1;
-          color: #0c5460;
+          background-color: var(--color-status-confirmed-bg);
+          color: var(--color-status-confirmed-text);
         }
 
         &.status-shipped {
-          background-color: #d4edda;
-          color: #155724;
+          background-color: var(--color-status-shipped-bg);
+          color: var(--color-status-shipped-text);
         }
 
         &.status-delivered {
-          background-color: #c3e6cb;
-          color: #155724;
+          background-color: var(--color-status-delivered-bg);
+          color: var(--color-status-delivered-text);
         }
 
         &.status-cancelled {
-          background-color: #f8d7da;
-          color: #721c24;
+          background-color: var(--color-status-cancelled-bg);
+          color: var(--color-status-cancelled-text);
         }
       }
     }
 
     .empty-state {
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
       padding: 48px;
       color: rgba(0, 0, 0, 0.6);
+
+      .empty-state-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        opacity: 0.4;
+      }
+
+      p {
+        margin: 0;
+      }
     }
   }
 
@@ -107,7 +129,11 @@
 
     .order-card {
       cursor: pointer;
-      transition: box-shadow 0.2s;
+      transition: box-shadow var(--motion-duration-standard) var(--motion-easing);
+
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
+      }
 
       &:hover {
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -146,9 +172,23 @@
     }
 
     .empty-state {
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
       padding: 48px;
       color: rgba(0, 0, 0, 0.6);
+
+      .empty-state-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        opacity: 0.4;
+      }
+
+      p {
+        margin: 0;
+      }
     }
   }
 

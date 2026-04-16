@@ -124,6 +124,12 @@
       </button>
       <mat-menu #userMenu="matMenu">
         <button mat-menu-item disabled class="menu-email">{{ currentUser()?.email }}</button>
+        <mat-divider />
+        <button mat-menu-item (click)="toggleTheme()">
+          <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+          {{ isDarkMode() ? 'Modo claro' : 'Modo oscuro' }}
+        </button>
+        <mat-divider />
         <button mat-menu-item (click)="logout()" data-testid="logout-menu-btn">
           <mat-icon>logout</mat-icon>
           Cerrar sesión

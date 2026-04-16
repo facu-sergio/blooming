@@ -1,7 +1,7 @@
 <div class="product-list-container">
   <div class="product-list-header">
     <h1>Productos</h1>
-    <button mat-raised-button color="primary" (click)="navigateToNew()">
+    <button mat-flat-button color="primary" (click)="navigateToNew()">
       <mat-icon>add</mat-icon>
       Nuevo producto
     </button>
@@ -71,13 +71,27 @@
   } @else if (noResults()) {
     <mat-card>
       <mat-card-content>
-        <p class="empty-state">No se encontraron productos</p>
+        <div class="empty-state">
+          <mat-icon class="empty-state-icon">search_off</mat-icon>
+          <p>No se encontraron productos con los filtros aplicados.</p>
+          <button mat-stroked-button (click)="clearFilters()">
+            <mat-icon>clear</mat-icon>
+            Limpiar filtros
+          </button>
+        </div>
       </mat-card-content>
     </mat-card>
   } @else if (products().length === 0) {
     <mat-card>
       <mat-card-content>
-        <p class="empty-state">No hay productos cargados aún.</p>
+        <div class="empty-state">
+          <mat-icon class="empty-state-icon">inventory_2</mat-icon>
+          <p>No hay productos cargados aún.</p>
+          <button mat-flat-button color="primary" (click)="navigateToNew()">
+            <mat-icon>add</mat-icon>
+            Agregar producto
+          </button>
+        </div>
       </mat-card-content>
     </mat-card>
   } @else {

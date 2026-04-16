@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
 import { DashboardMetricsService } from '../../services/dashboard-metrics.service';
 import { DailySalesCardComponent } from '../daily-sales-card/daily-sales-card.component';
 import { MonthlySalesCardComponent } from '../monthly-sales-card/monthly-sales-card.component';
@@ -14,7 +14,7 @@ import { StockAlertsCardComponent } from '../stock-alerts-card/stock-alerts-card
   standalone: true,
   imports: [
     CommonModule,
-    MatProgressSpinnerModule,
+    MatCardModule,
     DailySalesCardComponent,
     MonthlySalesCardComponent,
     MarginCardComponent,
@@ -30,6 +30,7 @@ export class DashboardComponent implements OnInit {
 
   readonly isLoading = this.dashboardService.isLoading;
   readonly columns = signal(3);
+  readonly skeletonItems = [1, 2, 3, 4, 5];
 
   ngOnInit(): void {
     this.breakpointObserver

@@ -5,7 +5,7 @@
     font-size: 40px;
     width: 40px;
     height: 40px;
-    color: #388e3c;
+    color: var(--color-metric-monthly);
   }
 }
 
@@ -13,11 +13,11 @@
   font-size: 2rem;
   font-weight: 700;
   margin: 8px 0 4px;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
 }
 
 .metric-subtitle {
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
   font-size: 0.875rem;
 }

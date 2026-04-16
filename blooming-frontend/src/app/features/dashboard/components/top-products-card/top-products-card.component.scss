@@ -5,12 +5,12 @@
     font-size: 40px;
     width: 40px;
     height: 40px;
-    color: #7b1fa2;
+    color: var(--color-metric-products);
   }
 }
 
 .empty-message {
-  color: #999;
+  color: var(--color-text-muted);
   font-style: italic;
   margin: 8px 0;
 }

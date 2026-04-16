@@ -7,6 +7,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
@@ -26,6 +27,7 @@ import { AuthService } from '../../features/auth/services/auth.service';
     MatListModule,
     MatMenuModule,
     MatTooltipModule,
+    MatDividerModule,
   ],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss',
@@ -35,6 +37,24 @@ export class LayoutComponent {
   private readonly breakpointObserver = inject(BreakpointObserver);
 
   readonly currentUser = this.authService.currentUser;
+
+  private readonly _isDarkMode = signal(
+    localStorage.getItem('theme') === 'dark'
+  );
+  readonly isDarkMode = this._isDarkMode.asReadonly();
+
+  constructor() {
+    if (this._isDarkMode()) {
+      document.body.classList.add('dark-mode');
+    }
+  }
+
+  toggleTheme(): void {
+    const next = !this._isDarkMode();
+    this._isDarkMode.set(next);
+    document.body.classList.toggle('dark-mode', next);
+    localStorage.setItem('theme', next ? 'dark' : 'light');
+  }
 
   readonly isMobile = toSignal(
     this.breakpointObserver.observe(Breakpoints.Handset).pipe(map((r) => r.matches)),

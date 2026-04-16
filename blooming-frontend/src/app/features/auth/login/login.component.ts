@@ -6,6 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../services/auth.service';
 
@@ -19,6 +20,7 @@ import { AuthService } from '../services/auth.service';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatIconModule,
     MatProgressSpinnerModule,
   ],
   templateUrl: './login.component.html',
@@ -30,10 +32,11 @@ export class LoginComponent {
   private readonly router = inject(Router);
 
   readonly isSubmitting = signal(false);
+  readonly showPassword = signal(false);
 
   readonly form = this.fb.group({
-    email: ['', { validators: [Validators.required, Validators.email], updateOn: 'change' }],
-    password: ['', { validators: [Validators.required], updateOn: 'change' }],
+    email: ['', { validators: [Validators.required, Validators.email], updateOn: 'blur' }],
+    password: ['', { validators: [Validators.required], updateOn: 'blur' }],
   });
 
   async onSubmit(): Promise<void> {

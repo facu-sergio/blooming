@@ -172,4 +172,15 @@ export class OrderListComponent implements OnInit {
   getStatusClass(statusKey: string): string {
     return 'status-' + statusKey.toLowerCase();
   }
+
+  getStatusIcon(statusKey: string): string {
+    const icons: Record<string, string> = {
+      pending: 'schedule',
+      confirmed: 'check_circle',
+      shipped: 'local_shipping',
+      delivered: 'done_all',
+      cancelled: 'cancel',
+    };
+    return icons[statusKey.toLowerCase()] ?? 'help_outline';
+  }
 }

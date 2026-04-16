@@ -2,8 +2,19 @@
   <h1 class="dashboard-title">Dashboard</h1>
 
   @if (isLoading()) {
-    <div class="loading-wrapper">
-      <mat-progress-spinner mode="indeterminate" diameter="48" />
+    <div class="metrics-grid" [style.--grid-columns]="columns()">
+      @for (i of skeletonItems; track i) {
+        <mat-card class="skeleton-card">
+          <mat-card-header>
+            <div class="skeleton-avatar shimmer"></div>
+            <div class="skeleton-title shimmer"></div>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="skeleton-value shimmer"></div>
+            <div class="skeleton-subtitle shimmer"></div>
+          </mat-card-content>
+        </mat-card>
+      }
     </div>
   } @else {
     <div class="metrics-grid" [style.--grid-columns]="columns()">
