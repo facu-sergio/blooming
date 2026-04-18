@@ -11,6 +11,7 @@ import { ProductsService } from '../../services/products.service';
 import { StockMovementsService } from '../../services/stock-movements.service';
 import { StockMovementsListComponent } from '../stock-movements-list/stock-movements-list.component';
 import { FormatMeasurementsPipe } from '../../pipes/format-measurements.pipe';
+import { PriceHistoryItem, ProductResponse, VariantResponse } from '../../models/product.models';
 
 @Component({
   selector: 'app-product-detail',
@@ -39,6 +40,8 @@ export class ProductDetailComponent implements OnInit {
   readonly isLoading = this.productsService.isLoading;
 
   readonly selectedVariantId = signal<number | null>(null);
+  readonly priceHistory = signal<PriceHistoryItem[]>([]);
+  readonly isLoadingHistory = signal(false);
 
   async ngOnInit(): Promise<void> {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -51,6 +54,21 @@ export class ProductDetailComponent implements OnInit {
 
   selectVariant(variantId: number): void {
     this.selectedVariantId.set(variantId);
+    this.loadPriceHistory(variantId);
+  }
+
+  async loadPriceHistory(variantId: number): Promise<void> {
+    this.isLoadingHistory.set(true);
+    try {
+      const history = await this.productsService.getPriceHistory(variantId);
+      this.priceHistory.set(history);
+    } finally {
+      this.isLoadingHistory.set(false);
+    }
+  }
+
+  getVariantImageUrl(variant: VariantResponse, product: ProductResponse): string | undefined {
+    return variant.imageUrl ?? product.imageUrl;
   }
 
   navigateToEdit(): void {

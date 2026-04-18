@@ -34,6 +34,12 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
             .IsRequired()
             .HasColumnType("numeric(12,2)");
 
+        builder.Property(oi => oi.CostPriceAtSale)
+            .HasColumnName("cost_price_at_sale")
+            .IsRequired()
+            .HasColumnType("numeric(12,2)")
+            .HasDefaultValue(0m);
+
         builder.HasOne(oi => oi.Order)
             .WithMany(o => o.Items)
             .HasForeignKey(oi => oi.OrderId)

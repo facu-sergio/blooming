@@ -9,5 +9,6 @@ public record UpdateProductCommand(
     int CategoryId,
     IFormFile? Image,
     bool RemoveImage,
-    List<UpdateVariantDto> Variants
+    List<UpdateVariantDto> Variants,
+    List<IFormFile?>? VariantImages = null
 ) : IRequest<ProductResponse>;

@@ -18,6 +18,7 @@ public class CreatePurchaseOrderHandlerTests : IDisposable
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.InMemoryEventId.TransactionIgnoredWarning))
             .Options;
         _db = new AppDbContext(options);
         _handler = new CreatePurchaseOrderHandler(_db);
@@ -229,6 +230,50 @@ public class CreatePurchaseOrderHandlerTests : IDisposable
 
         var variantActualizada = await _db.ProductVariants.FindAsync(variant.Id);
         Assert.Equal(nuevoPrecio, variantActualizada!.CostPrice);
+    }
+
+    [Fact]
+    public async Task Handle_ActualizaSellingPrice_CuandoCambiaCosto()
+    {
+        var (supplier, variant) = await SeedDataAsync();
+        // variant.MarkupPercentage = 50m, CostPrice = 1000m => SellingPrice = 1500m
+        var nuevoCosto = 2000m;
+        var expectedSellingPrice = nuevoCosto * (1 + variant.MarkupPercentage / 100);
+
+        var command = new CreatePurchaseOrderCommand(
+            supplier.Id,
+            new List<CreatePurchaseOrderItemDto> { new(variant.Id, 1, nuevoCosto) },
+            null
+        );
+
+        await _handler.Handle(command, CancellationToken.None);
+
+        var variantActualizada = await _db.ProductVariants.FindAsync(variant.Id);
+        Assert.Equal(nuevoCosto, variantActualizada!.CostPrice);
+        Assert.Equal(expectedSellingPrice, variantActualizada.SellingPrice);
+    }
+
+    [Fact]
+    public async Task Handle_CreaRegistroHistorialPrecios_AlActualizarCosto()
+    {
+        var (supplier, variant) = await SeedDataAsync();
+        var nuevoCosto = 1200m;
+
+        var command = new CreatePurchaseOrderCommand(
+            supplier.Id,
+            new List<CreatePurchaseOrderItemDto> { new(variant.Id, 5, nuevoCosto) },
+            null
+        );
+
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        var history = await _db.ProductVariantPriceHistories
+            .FirstOrDefaultAsync(h => h.ProductVariantId == variant.Id);
+
+        Assert.NotNull(history);
+        Assert.Equal(nuevoCosto, history.CostPrice);
+        Assert.Equal(result.PurchaseOrderId, history.PurchaseOrderId);
+        Assert.Equal(nuevoCosto * (1 + variant.MarkupPercentage / 100), history.SellingPrice);
     }
 
     public void Dispose() => _db.Dispose();

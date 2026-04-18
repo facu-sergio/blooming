@@ -7,3 +7,7 @@ opencode
 .vs/
 blooming-api/.sonarqube/
 bmad-help.md
+blooming-frontend/skills-lock.json
+blooming-frontend/.agents/skills/ui-ux-pro-max/data
+blooming-frontend/.agents/skills/ui-ux-pro-max/scripts
+blooming-frontend/.agents/skills/ui-ux-pro-max/SKILL.md

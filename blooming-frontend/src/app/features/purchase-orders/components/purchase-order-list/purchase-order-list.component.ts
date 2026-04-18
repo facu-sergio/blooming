@@ -6,8 +6,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog } from '@angular/material/dialog';
 import { PurchaseOrdersService } from '../../services/purchase-orders.service';
 import { PurchaseOrderListItem } from '../../models/purchase-order.models';
+import {
+  PurchaseOrderDetailsDialogComponent,
+  PurchaseOrderDetailsDialogData,
+} from '../../../suppliers/components/purchase-order-details-dialog/purchase-order-details-dialog.component';
 
 @Component({
   selector: 'app-purchase-order-list',
@@ -26,6 +31,7 @@ import { PurchaseOrderListItem } from '../../models/purchase-order.models';
 export class PurchaseOrderListComponent implements OnInit {
   private readonly purchaseOrdersService = inject(PurchaseOrdersService);
   private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
 
   readonly purchaseOrders = this.purchaseOrdersService.purchaseOrders;
   readonly isLoading = this.purchaseOrdersService.isLoading;
@@ -39,7 +45,13 @@ export class PurchaseOrderListComponent implements OnInit {
     this.router.navigate(['/purchase-orders/new']);
   }
 
-  viewDetail(order: PurchaseOrderListItem): void {
-    this.router.navigate(['/purchase-orders', order.id]);
+  async viewDetail(order: PurchaseOrderListItem): Promise<void> {
+    const detail = await this.purchaseOrdersService.getById(order.id);
+    const data: PurchaseOrderDetailsDialogData = { orderId: order.id, orderDetail: detail };
+    this.dialog.open(PurchaseOrderDetailsDialogComponent, {
+      data,
+      width: '640px',
+      maxWidth: '95vw',
+    });
   }
 }

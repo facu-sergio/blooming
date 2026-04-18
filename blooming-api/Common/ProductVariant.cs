@@ -11,6 +11,7 @@ public class ProductVariant
     public decimal SellingPrice { get; set; }
     public int Stock { get; set; }
     public int? LowStockThreshold { get; set; }
+    public string? ImageUrl { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public Product Product { get; set; } = null!;

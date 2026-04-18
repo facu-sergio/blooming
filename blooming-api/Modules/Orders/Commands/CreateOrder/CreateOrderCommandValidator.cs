@@ -36,8 +36,8 @@ public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
             .When(x => x.Notes != null);
 
         RuleFor(x => x.EstimatedDeliveryDate)
-            .GreaterThan(DateTime.UtcNow)
-            .WithMessage("La fecha de entrega estimada debe ser una fecha futura")
+            .GreaterThanOrEqualTo(DateTime.UtcNow.Date)
+            .WithMessage("La fecha de entrega estimada no puede ser anterior a hoy")
             .When(x => x.EstimatedDeliveryDate.HasValue);
     }
 }

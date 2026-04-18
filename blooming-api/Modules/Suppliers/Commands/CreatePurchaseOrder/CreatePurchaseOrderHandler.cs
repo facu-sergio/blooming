@@ -65,9 +65,20 @@ public class CreatePurchaseOrderHandler : IRequestHandler<CreatePurchaseOrderCom
             {
                 var variant = variants.First(v => v.Id == requestItem.ProductVariantId);
 
-                variant.Stock += requestItem.Quantity;
                 variant.CostPrice = requestItem.UnitCostPrice;
+                variant.SellingPrice = requestItem.UnitCostPrice * (1 + variant.MarkupPercentage / 100);
+                variant.Stock += requestItem.Quantity;
                 variant.UpdatedAt = now;
+
+                _db.ProductVariantPriceHistories.Add(new ProductVariantPriceHistory
+                {
+                    ProductVariantId = variant.Id,
+                    CostPrice = variant.CostPrice,
+                    SellingPrice = variant.SellingPrice,
+                    MarkupPercentage = variant.MarkupPercentage,
+                    PurchaseOrderId = purchaseOrder.Id,
+                    CreatedAt = now
+                });
 
                 _db.StockMovements.Add(new StockMovement
                 {

@@ -6,6 +6,7 @@ public class CreateProductRequest
     public int CategoryId { get; set; }
     public IFormFile? Image { get; set; }
     public string Variants { get; set; } = string.Empty; // JSON string de List<CreateVariantDto>
+    public List<IFormFile>? VariantImages { get; set; }
 }
 
 public class CreateVariantDto

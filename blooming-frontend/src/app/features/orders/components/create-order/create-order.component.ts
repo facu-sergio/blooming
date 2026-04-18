@@ -54,7 +54,7 @@ export class CreateOrderComponent implements OnInit {
 
   readonly constants = ordersConstants;
   readonly isLoading = this.ordersService.isLoading;
-  readonly today = new Date();
+  readonly today = new Date(new Date().setHours(0, 0, 0, 0));
 
   // Estado de búsqueda y selección de cliente
   readonly customerSearchControl = new FormControl('', { updateOn: 'change' });

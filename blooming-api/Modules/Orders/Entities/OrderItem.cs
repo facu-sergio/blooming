@@ -19,4 +19,7 @@ public class OrderItem
 
     /// <summary>UnitPrice × Quantity.</summary>
     public decimal LineTotal { get; set; }
+
+    /// <summary>Costo de la variante al momento de crear el pedido. Inmutable tras su creación.</summary>
+    public decimal CostPriceAtSale { get; set; }
 }

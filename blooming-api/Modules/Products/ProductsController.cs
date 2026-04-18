@@ -1,7 +1,9 @@
 using System.Text.Json;
 using blooming_api.Modules.Products.Commands.CreateProduct;
+using blooming_api.Modules.Products.Commands.CreateProductInline;
 using blooming_api.Modules.Products.Commands.UpdateProduct;
 using blooming_api.Modules.Products.DTOs;
+using blooming_api.Modules.Products.Queries.GetPriceHistory;
 using blooming_api.Modules.Products.Queries.GetProductDetail;
 using blooming_api.Modules.Products.Queries.GetProducts;
 using blooming_api.Modules.Products.Queries.GetStockMovements;
@@ -62,7 +64,8 @@ public class ProductsController : ControllerBase
         var variants = JsonSerializer.Deserialize<List<CreateVariantDto>>(request.Variants,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
 
-        var command = new CreateProductCommand(request.Name, request.CategoryId, request.Image, variants);
+        var variantImages = BuildVariantImagesList(variants.Count);
+        var command = new CreateProductCommand(request.Name, request.CategoryId, request.Image, variants, variantImages);
         var result = await _mediator.Send(command);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
@@ -83,8 +86,37 @@ public class ProductsController : ControllerBase
         var variants = JsonSerializer.Deserialize<List<UpdateVariantDto>>(request.Variants,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
 
-        var command = new UpdateProductCommand(id, request.Name, request.CategoryId, request.Image, request.RemoveImage, variants);
+        var variantImages = BuildVariantImagesList(variants.Count);
+        var command = new UpdateProductCommand(id, request.Name, request.CategoryId, request.Image, request.RemoveImage, variants, variantImages);
         var result = await _mediator.Send(command);
+        return Ok(result);
+    }
+
+    private List<IFormFile?> BuildVariantImagesList(int variantCount)
+    {
+        var images = new List<IFormFile?>(variantCount);
+        for (var i = 0; i < variantCount; i++)
+        {
+            var key = $"variantImage_{i}";
+            images.Add(Request.Form.Files.GetFile(key));
+        }
+        return images;
+    }
+
+    [HttpPost("inline")]
+    public async Task<ActionResult<ProductResponse>> CreateInline([FromBody] CreateProductInlineRequest request)
+    {
+        var command = new CreateProductInlineCommand(
+            request.Name, request.CategoryId, request.Size, request.Color,
+            request.MarkupPercentage, request.LowStockThreshold);
+        var result = await _mediator.Send(command);
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+    }
+
+    [HttpGet("variants/{variantId}/price-history")]
+    public async Task<ActionResult<List<PriceHistoryItemDto>>> GetPriceHistory(int variantId)
+    {
+        var result = await _mediator.Send(new GetPriceHistoryQuery(variantId));
         return Ok(result);
     }
 }

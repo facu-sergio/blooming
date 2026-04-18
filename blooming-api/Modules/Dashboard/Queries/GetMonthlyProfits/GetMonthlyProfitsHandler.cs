@@ -25,13 +25,12 @@ public class GetMonthlyProfitsHandler : IRequestHandler<GetMonthlyProfitsQuery, 
                 && o.DeliveredAt >= startOfMonth
                 && o.DeliveredAt < startOfNextMonth)
             .Include(o => o.Items)
-                .ThenInclude(i => i.ProductVariant)
             .ToListAsync(cancellationToken);
 
         var orderCount = deliveredOrders.Count;
         var totalProfit = deliveredOrders
             .SelectMany(o => o.Items)
-            .Sum(i => (i.UnitPrice - i.ProductVariant.CostPrice) * i.Quantity);
+            .Sum(i => (i.UnitPrice - i.CostPriceAtSale) * i.Quantity);
 
         return new MonthlyProfitsDto(orderCount, totalProfit);
     }

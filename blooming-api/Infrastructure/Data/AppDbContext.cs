@@ -25,6 +25,7 @@ public class AppDbContext : DbContext
     public DbSet<Supplier> Suppliers { get; set; }
     public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
     public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
+    public DbSet<ProductVariantPriceHistory> ProductVariantPriceHistories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

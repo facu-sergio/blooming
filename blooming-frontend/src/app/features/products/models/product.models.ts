@@ -20,6 +20,7 @@ export interface UpdateVariantDto {
   costPrice: number;
   markupPercentage: number;
   lowStockThreshold?: number;
+  removeVariantImage?: boolean;
   measurements?: ProductVariantMeasurement[];
 }
 
@@ -42,6 +43,7 @@ export interface VariantResponse {
   sellingPrice: number;
   stock: number;
   lowStockThreshold?: number;
+  imageUrl?: string;
   measurements: ProductVariantMeasurement[];
 }
 
@@ -51,4 +53,22 @@ export interface SearchFilters {
   category?: string;
   size?: string;
   color?: string;
+}
+
+export interface CreateProductInlineDto {
+  name: string;
+  categoryId: number;
+  size: string;
+  color: string;
+  markupPercentage: number;
+  lowStockThreshold?: number;
+}
+
+export interface PriceHistoryItem {
+  id: number;
+  costPrice: number;
+  sellingPrice: number;
+  markupPercentage: number;
+  purchaseOrderId?: number;
+  createdAt: string;
 }

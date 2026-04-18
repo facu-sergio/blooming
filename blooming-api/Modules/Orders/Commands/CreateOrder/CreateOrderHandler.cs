@@ -49,7 +49,8 @@ public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, CreateOrde
                 ProductVariantId = item.ProductVariantId,
                 Quantity = item.Quantity,
                 UnitPrice = variant.SellingPrice,
-                LineTotal = variant.SellingPrice * item.Quantity
+                LineTotal = variant.SellingPrice * item.Quantity,
+                CostPriceAtSale = variant.CostPrice
             };
         }).ToList();
 

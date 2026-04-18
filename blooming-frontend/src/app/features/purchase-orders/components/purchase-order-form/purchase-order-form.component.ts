@@ -12,6 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDialog } from '@angular/material/dialog';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { SuppliersService } from '../../../suppliers/services/suppliers.service';
 import { ProductsService } from '../../../products/services/products.service';
@@ -19,6 +20,7 @@ import { PurchaseOrdersService } from '../../services/purchase-orders.service';
 import { PurchaseOrderItemFormEntry } from '../../models/purchase-order.models';
 import { Supplier } from '../../../suppliers/models/supplier.models';
 import { ProductResponse, VariantResponse } from '../../../products/models/product.models';
+import { ProductFormComponent } from '../../../products/components/product-form/product-form.component';
 
 @Component({
   selector: 'app-purchase-order-form',
@@ -44,6 +46,7 @@ export class PurchaseOrderFormComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
   private readonly suppliersService = inject(SuppliersService);
   private readonly productsService = inject(ProductsService);
   private readonly purchaseOrdersService = inject(PurchaseOrdersService);
@@ -201,6 +204,24 @@ export class PurchaseOrderFormComponent implements OnInit {
     await this.purchaseOrdersService.create(dto);
     this.snackBar.open('Orden de compra registrada correctamente', 'Cerrar', { duration: 3000 });
     this.router.navigate(['/purchase-orders']);
+  }
+
+  openCreateProductDialog(): void {
+    const dialogRef = this.dialog.open(ProductFormComponent, {
+      width: '1000px',
+      maxWidth: '95vw',
+      maxHeight: '95vh',
+      panelClass: 'product-form-dialog',
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((product: ProductResponse | null) => {
+      if (product && product.variants.length > 0) {
+        const variant = product.variants[0];
+        this.addVariantToOrder({ product, variant });
+        this.snackBar.open(`Producto "${product.name}" creado y agregado a la orden`, 'Cerrar', { duration: 3000 });
+      }
+    });
   }
 
   onCancel(): void {

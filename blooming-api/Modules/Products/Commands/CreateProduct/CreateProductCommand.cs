@@ -7,5 +7,6 @@ public record CreateProductCommand(
     string Name,
     int CategoryId,
     IFormFile? Image,
-    List<CreateVariantDto> Variants
+    List<CreateVariantDto> Variants,
+    List<IFormFile?>? VariantImages = null
 ) : IRequest<ProductResponse>;

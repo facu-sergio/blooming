@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
-import { ProductResponse, CreateVariantDto, UpdateVariantDto, SearchFilters, VariantResponse } from '../models/product.models';
+import { ProductResponse, CreateVariantDto, UpdateVariantDto, SearchFilters, VariantResponse, CreateProductInlineDto, PriceHistoryItem } from '../models/product.models';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -85,6 +85,25 @@ export class ProductsService {
     } finally {
       this._isLoading.set(false);
     }
+  }
+
+  async createInline(dto: CreateProductInlineDto): Promise<ProductResponse> {
+    this._isLoading.set(true);
+    try {
+      const result = await firstValueFrom(
+        this.http.post<ProductResponse>(`${this.baseUrl}/inline`, dto)
+      );
+      await this.loadAll();
+      return result;
+    } finally {
+      this._isLoading.set(false);
+    }
+  }
+
+  async getPriceHistory(variantId: number): Promise<PriceHistoryItem[]> {
+    return firstValueFrom(
+      this.http.get<PriceHistoryItem[]>(`${this.baseUrl}/variants/${variantId}/price-history`)
+    );
   }
 
   isLowStock(variant: VariantResponse): boolean {

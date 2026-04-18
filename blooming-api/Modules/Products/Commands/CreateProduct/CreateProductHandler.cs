@@ -31,13 +31,19 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
             imageUrl = await _cloudinary.UploadImageAsync(stream, request.Image.FileName);
         }
 
-        var product = new Product
+        var variants = new List<ProductVariant>();
+        for (var i = 0; i < request.Variants.Count; i++)
         {
-            Name = request.Name,
-            CategoryId = request.CategoryId,
-            ImageUrl = imageUrl,
-            CreatedAt = DateTime.UtcNow,
-            Variants = request.Variants.Select(v => new ProductVariant
+            var v = request.Variants[i];
+            string? variantImageUrl = null;
+            var variantImageFile = request.VariantImages?.ElementAtOrDefault(i);
+            if (variantImageFile != null)
+            {
+                using var variantStream = variantImageFile.OpenReadStream();
+                variantImageUrl = await _cloudinary.UploadImageAsync(variantStream, variantImageFile.FileName);
+            }
+
+            variants.Add(new ProductVariant
             {
                 Size = v.Size,
                 Color = v.Color,
@@ -46,6 +52,7 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
                 SellingPrice = v.CostPrice * (1 + v.MarkupPercentage / 100),
                 Stock = 0,
                 LowStockThreshold = v.LowStockThreshold,
+                ImageUrl = variantImageUrl,
                 CreatedAt = DateTime.UtcNow,
                 Measurements = (v.Measurements ?? []).Select(m => new ProductVariantMeasurement
                 {
@@ -53,7 +60,16 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
                     ValueInCm = m.ValueInCm,
                     CreatedAt = DateTime.UtcNow
                 }).ToList()
-            }).ToList()
+            });
+        }
+
+        var product = new Product
+        {
+            Name = request.Name,
+            CategoryId = request.CategoryId,
+            ImageUrl = imageUrl,
+            CreatedAt = DateTime.UtcNow,
+            Variants = variants
         };
 
         _db.Products.Add(product);
@@ -80,6 +96,7 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
             SellingPrice = v.SellingPrice,
             Stock = v.Stock,
             LowStockThreshold = v.LowStockThreshold,
+            ImageUrl = v.ImageUrl,
             Measurements = v.Measurements.Select(m => new MeasurementResponse
             {
                 Name = m.MeasurementName,

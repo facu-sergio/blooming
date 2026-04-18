@@ -68,6 +68,37 @@ body {
   height: 100%;
 }
 
+// Dialog de producto: full-screen en mobile, flotante en desktop
+.product-form-dialog {
+  @media (max-width: 599px) {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+
+    .mat-mdc-dialog-container {
+      border-radius: 0 !important;
+      height: 100vh !important;
+      max-height: 100vh !important;
+    }
+
+    .mdc-dialog__surface {
+      border-radius: 0 !important;
+      height: 100vh !important;
+      max-height: 100vh !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    // Permite que mat-dialog-content crezca para llenar el espacio entre título y acciones
+    .mat-mdc-dialog-content {
+      max-height: none !important;
+      flex: 1 1 auto !important;
+      overflow-y: auto !important;
+    }
+  }
+}
+
 body.dark-mode {
   color-scheme: dark;
 

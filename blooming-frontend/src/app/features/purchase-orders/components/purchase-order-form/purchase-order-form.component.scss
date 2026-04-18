@@ -19,6 +19,17 @@
   width: 100%;
 }
 
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+
+  .section-title {
+    margin-bottom: 0;
+  }
+}
+
 .selected-badge {
   display: flex;
   align-items: center;

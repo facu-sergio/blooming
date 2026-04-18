@@ -10,6 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { ProductsService } from '../../services/products.service';
 import { CategoriesService } from '../../services/categories.service';
 import { productsConstants } from '../../constants/products.constants';
@@ -28,6 +29,7 @@ import { UpdateVariantDto, CreateVariantDto, ProductVariantMeasurement } from '.
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatDialogModule,
   ],
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.scss',
@@ -39,11 +41,13 @@ export class ProductFormComponent implements OnInit {
   readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly dialogRef = inject(MatDialogRef<ProductFormComponent>, { optional: true });
 
   readonly constants = productsConstants;
-  private readonly cdr = inject(ChangeDetectorRef);
   readonly isLoading = this.productsService.isLoading;
   readonly categories = this.categoriesService.categories;
+  readonly isDialog = !!this.dialogRef;
 
   readonly isEditMode = signal(false);
   readonly productId = signal<number | null>(null);
@@ -52,6 +56,8 @@ export class ProductFormComponent implements OnInit {
   readonly imagePreviewUrl = signal<string | null>(null);
   readonly imageError = signal<string | null>(null);
   readonly removeImage = signal(false);
+
+  readonly variantImages = signal<{ file: File | null; preview: string | null; existingUrl: string | null; remove: boolean }[]>([]);
 
   readonly form = this.fb.group({
     name: ['', { validators: [Validators.required, Validators.maxLength(productsConstants.nameMaxLength)], updateOn: 'blur' }],
@@ -76,7 +82,7 @@ export class ProductFormComponent implements OnInit {
       id: [data?.id ?? null],
       size: [data?.size ?? '', [Validators.required, Validators.maxLength(productsConstants.sizeMaxLength)]],
       color: [data?.color ?? '', [Validators.required, Validators.maxLength(productsConstants.colorMaxLength)]],
-      costPrice: [data?.costPrice ?? null, [Validators.required, Validators.min(0.01)]],
+      costPrice: [{ value: data?.costPrice ?? 0, disabled: false }],
       markupPercentage: [data?.markupPercentage ?? 0, [Validators.required, Validators.min(0)]],
       lowStockThreshold: [data?.lowStockThreshold ?? null, [Validators.min(0)]],
       measurements: this.fb.array(
@@ -114,12 +120,41 @@ export class ProductFormComponent implements OnInit {
 
   addVariant(): void {
     this.variantsArray.push(this.createVariantGroup());
+    this.variantImages.update((imgs) => [...imgs, { file: null, preview: null, existingUrl: null, remove: false }]);
   }
 
   removeVariant(index: number): void {
     if (this.variantsArray.length > 1) {
       this.variantsArray.removeAt(index);
+      this.variantImages.update((imgs) => imgs.filter((_, i) => i !== index));
     }
+  }
+
+  onVariantImageSelected(variantIndex: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (!(productsConstants.allowedImageTypes as readonly string[]).includes(file.type)) return;
+    if (file.size > productsConstants.imageMaxSizeBytes) return;
+
+    this.variantImages.update((imgs) => {
+      const updated = [...imgs];
+      updated[variantIndex] = { ...updated[variantIndex], file, preview: URL.createObjectURL(file), remove: false };
+      return updated;
+    });
+  }
+
+  onRemoveVariantImage(variantIndex: number): void {
+    this.variantImages.update((imgs) => {
+      const updated = [...imgs];
+      updated[variantIndex] = { file: null, preview: null, existingUrl: null, remove: true };
+      return updated;
+    });
+  }
+
+  getVariantImage(index: number) {
+    return this.variantImages()[index] ?? { file: null, preview: null, existingUrl: null, remove: false };
   }
 
   onImageSelected(event: Event): void {
@@ -149,6 +184,14 @@ export class ProductFormComponent implements OnInit {
     this.removeImage.set(true);
   }
 
+  onCancel(): void {
+    if (this.isDialog) {
+      this.dialogRef!.close(null);
+    } else {
+      this.router.navigate(['/products']);
+    }
+  }
+
   async ngOnInit(): Promise<void> {
     await this.categoriesService.loadAll();
 
@@ -165,6 +208,7 @@ export class ProductFormComponent implements OnInit {
         while (this.variantsArray.length > 0) {
           this.variantsArray.removeAt(0);
         }
+        const imgs: { file: File | null; preview: string | null; existingUrl: string | null; remove: boolean }[] = [];
         for (const v of product.variants) {
           this.variantsArray.push(this.createVariantGroup({
             id: v.id,
@@ -175,9 +219,13 @@ export class ProductFormComponent implements OnInit {
             lowStockThreshold: v.lowStockThreshold,
             measurements: v.measurements ?? [],
           }));
+          imgs.push({ file: null, preview: v.imageUrl ?? null, existingUrl: v.imageUrl ?? null, remove: false });
         }
+        this.variantImages.set(imgs);
         this.cdr.detectChanges();
       }
+    } else {
+      this.variantImages.set([{ file: null, preview: null, existingUrl: null, remove: false }]);
     }
   }
 
@@ -186,24 +234,46 @@ export class ProductFormComponent implements OnInit {
 
     const { name, categoryId } = this.form.value;
     const variants = this.variantsArray.value;
+    const variantImgs = this.variantImages();
+
+    const variantDtos = this.isEditMode()
+      ? (variants as UpdateVariantDto[]).map((v, i) => ({
+          ...v,
+          removeVariantImage: variantImgs[i]?.remove ?? false,
+        }))
+      : (variants as CreateVariantDto[]);
 
     const formData = this.productsService.buildFormData(
       name!,
       categoryId!,
-      this.isEditMode() ? (variants as UpdateVariantDto[]) : (variants as CreateVariantDto[]),
+      variantDtos,
       this.selectedImage() ?? undefined,
       this.isEditMode() ? this.removeImage() : undefined,
     );
 
-    if (this.isEditMode() && this.productId()) {
-      await this.productsService.update(this.productId()!, formData);
-      this.snackBar.open('Producto actualizado', 'Cerrar', { duration: 3000 });
-    } else {
-      await this.productsService.create(formData);
-      this.snackBar.open('Producto creado', 'Cerrar', { duration: 3000 });
-    }
+    variantImgs.forEach((vi, i) => {
+      if (vi.file) {
+        formData.append(`variantImage_${i}`, vi.file);
+      }
+    });
 
-    this.router.navigate(['/products']);
+    if (this.isEditMode() && this.productId()) {
+      const result = await this.productsService.update(this.productId()!, formData);
+      this.snackBar.open('Producto actualizado', 'Cerrar', { duration: 3000 });
+      if (this.isDialog) {
+        this.dialogRef!.close(result);
+      } else {
+        this.router.navigate(['/products']);
+      }
+    } else {
+      const result = await this.productsService.create(formData);
+      if (this.isDialog) {
+        this.dialogRef!.close(result);
+      } else {
+        this.snackBar.open('Producto creado', 'Cerrar', { duration: 3000 });
+        this.router.navigate(['/products']);
+      }
+    }
   }
 
   getVariantControls() {

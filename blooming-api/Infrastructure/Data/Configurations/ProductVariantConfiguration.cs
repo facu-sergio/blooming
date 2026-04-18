@@ -20,6 +20,7 @@ public class ProductVariantConfiguration : IEntityTypeConfiguration<ProductVaria
         builder.Property(v => v.SellingPrice).HasColumnName("selling_price").HasColumnType("decimal(18,2)").IsRequired();
         builder.Property(v => v.Stock).HasColumnName("stock").HasDefaultValue(0).IsRequired();
         builder.Property(v => v.LowStockThreshold).HasColumnName("low_stock_threshold");
+        builder.Property(v => v.ImageUrl).HasColumnName("image_url").HasMaxLength(500);
         builder.Property(v => v.CreatedAt).HasColumnName("created_at").IsRequired();
         builder.Property(v => v.UpdatedAt).HasColumnName("updated_at");
 

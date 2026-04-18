@@ -44,7 +44,13 @@
 
     <!-- Búsqueda de variantes -->
     <section class="section">
-      <h3 class="section-title">Agregar Productos</h3>
+      <div class="section-header">
+        <h3 class="section-title">Agregar Productos</h3>
+        <button mat-stroked-button type="button" (click)="openCreateProductDialog()">
+          <mat-icon>add_circle</mat-icon>
+          Crear producto rápido
+        </button>
+      </div>
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Buscar variante (producto / talle / color)</mat-label>
         <input

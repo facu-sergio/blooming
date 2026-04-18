@@ -51,8 +51,11 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
         product.UpdatedAt = DateTime.UtcNow;
 
         // Actualizar variantes
-        foreach (var variantDto in request.Variants)
+        for (var idx = 0; idx < request.Variants.Count; idx++)
         {
+            var variantDto = request.Variants[idx];
+            var variantImageFile = request.VariantImages?.ElementAtOrDefault(idx);
+
             if (variantDto.Id.HasValue && variantDto.Id > 0)
             {
                 var existing = product.Variants.FirstOrDefault(v => v.Id == variantDto.Id.Value);
@@ -65,6 +68,20 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
                     existing.SellingPrice = variantDto.CostPrice * (1 + variantDto.MarkupPercentage / 100);
                     existing.LowStockThreshold = variantDto.LowStockThreshold;
                     existing.UpdatedAt = DateTime.UtcNow;
+
+                    if (variantImageFile != null)
+                    {
+                        if (existing.ImageUrl != null)
+                            await DeleteCloudinaryImage(existing.ImageUrl);
+                        using var vs = variantImageFile.OpenReadStream();
+                        existing.ImageUrl = await _cloudinary.UploadImageAsync(vs, variantImageFile.FileName);
+                    }
+                    else if (variantDto.RemoveVariantImage && existing.ImageUrl != null)
+                    {
+                        await DeleteCloudinaryImage(existing.ImageUrl);
+                        existing.ImageUrl = null;
+                    }
+
                     existing.Measurements.Clear();
                     foreach (var m in variantDto.Measurements ?? [])
                     {
@@ -79,6 +96,13 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
             }
             else
             {
+                string? variantImageUrl = null;
+                if (variantImageFile != null)
+                {
+                    using var vs = variantImageFile.OpenReadStream();
+                    variantImageUrl = await _cloudinary.UploadImageAsync(vs, variantImageFile.FileName);
+                }
+
                 product.Variants.Add(new ProductVariant
                 {
                     Size = variantDto.Size,
@@ -88,6 +112,7 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
                     SellingPrice = variantDto.CostPrice * (1 + variantDto.MarkupPercentage / 100),
                     Stock = 0,
                     LowStockThreshold = variantDto.LowStockThreshold,
+                    ImageUrl = variantImageUrl,
                     CreatedAt = DateTime.UtcNow,
                     Measurements = (variantDto.Measurements ?? []).Select(m => new ProductVariantMeasurement
                     {
