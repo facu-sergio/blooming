@@ -21,7 +21,9 @@ public class UpdateSupplierHandler : IRequestHandler<UpdateSupplierCommand, Supp
             ?? throw new NotFoundException($"Proveedor {request.SupplierId} no encontrado");
 
         supplier.Name = request.Name;
-        supplier.ContactInfo = request.ContactInfo;
+        supplier.Phone = request.Phone;
+        supplier.Website = request.Website;
+        supplier.Address = request.Address;
         supplier.Notes = request.Notes;
         supplier.UpdatedAt = DateTime.UtcNow;
 

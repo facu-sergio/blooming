@@ -32,7 +32,9 @@ public class UpdateSupplierHandlerTests : IDisposable
         {
             Id = Guid.NewGuid(),
             Name = "Proveedor Original",
-            ContactInfo = "original@test.com",
+            Phone = "011-1111-2222",
+            Website = "www.original.com",
+            Address = "Calle Original 100",
             Notes = "Notas originales",
             CreatedAt = DateTime.UtcNow.AddDays(-1),
             UpdatedAt = DateTime.UtcNow.AddDays(-1),
@@ -45,13 +47,15 @@ public class UpdateSupplierHandlerTests : IDisposable
     [Fact]
     public async Task Handle_DatosValidos_ActualizaProveedor()
     {
-        var command = new UpdateSupplierCommand(_existingSupplierId, "Proveedor Actualizado", "nuevo@test.com", "Nuevas notas");
+        var command = new UpdateSupplierCommand(_existingSupplierId, "Proveedor Actualizado", "011-9999-0000", "www.nuevo.com", "Av. Nueva 200", "Nuevas notas");
 
         var result = await _handler.Handle(command, CancellationToken.None);
 
         Assert.Equal(_existingSupplierId, result.Id);
         Assert.Equal("Proveedor Actualizado", result.Name);
-        Assert.Equal("nuevo@test.com", result.ContactInfo);
+        Assert.Equal("011-9999-0000", result.Phone);
+        Assert.Equal("www.nuevo.com", result.Website);
+        Assert.Equal("Av. Nueva 200", result.Address);
         Assert.Equal("Nuevas notas", result.Notes);
     }
 
@@ -59,7 +63,7 @@ public class UpdateSupplierHandlerTests : IDisposable
     public async Task Handle_ActualizaUpdatedAt()
     {
         var antesDeActualizar = DateTime.UtcNow.AddSeconds(-1);
-        var command = new UpdateSupplierCommand(_existingSupplierId, "Proveedor Nuevo", null, null);
+        var command = new UpdateSupplierCommand(_existingSupplierId, "Proveedor Nuevo", null, null, null, null);
 
         var result = await _handler.Handle(command, CancellationToken.None);
 
@@ -69,7 +73,7 @@ public class UpdateSupplierHandlerTests : IDisposable
     [Fact]
     public async Task Handle_PersisteCambiosEnDB()
     {
-        var command = new UpdateSupplierCommand(_existingSupplierId, "Nombre Persistido", null, null);
+        var command = new UpdateSupplierCommand(_existingSupplierId, "Nombre Persistido", null, null, null, null);
 
         await _handler.Handle(command, CancellationToken.None);
 
@@ -82,7 +86,7 @@ public class UpdateSupplierHandlerTests : IDisposable
     public async Task Handle_ProveedorInexistente_LanzaNotFoundException()
     {
         var idInexistente = Guid.NewGuid();
-        var command = new UpdateSupplierCommand(idInexistente, "Nombre", null, null);
+        var command = new UpdateSupplierCommand(idInexistente, "Nombre", null, null, null, null);
 
         await Assert.ThrowsAsync<NotFoundException>(() => _handler.Handle(command, CancellationToken.None));
     }
@@ -90,7 +94,7 @@ public class UpdateSupplierHandlerTests : IDisposable
     [Fact]
     public void Validate_IdVacio_FallaValidacion()
     {
-        var command = new UpdateSupplierCommand(Guid.Empty, "Nombre", null, null);
+        var command = new UpdateSupplierCommand(Guid.Empty, "Nombre", null, null, null, null);
 
         var result = _validator.Validate(command);
 
@@ -101,7 +105,7 @@ public class UpdateSupplierHandlerTests : IDisposable
     [Fact]
     public void Validate_NombreVacio_FallaValidacion()
     {
-        var command = new UpdateSupplierCommand(_existingSupplierId, "", null, null);
+        var command = new UpdateSupplierCommand(_existingSupplierId, "", null, null, null, null);
 
         var result = _validator.Validate(command);
 
@@ -113,7 +117,7 @@ public class UpdateSupplierHandlerTests : IDisposable
     public void Validate_NombreDemasiadoLargo_FallaValidacion()
     {
         var nombreLargo = new string('A', SuppliersConstants.NameMaxLength + 1);
-        var command = new UpdateSupplierCommand(_existingSupplierId, nombreLargo, null, null);
+        var command = new UpdateSupplierCommand(_existingSupplierId, nombreLargo, null, null, null, null);
 
         var result = _validator.Validate(command);
 
@@ -124,7 +128,7 @@ public class UpdateSupplierHandlerTests : IDisposable
     [Fact]
     public void Validate_DatosValidos_PasaValidacion()
     {
-        var command = new UpdateSupplierCommand(_existingSupplierId, "Nombre Válido", "contacto@ok.com", null);
+        var command = new UpdateSupplierCommand(_existingSupplierId, "Nombre Válido", "011-5555-6666", null, null, null);
 
         var result = _validator.Validate(command);
 

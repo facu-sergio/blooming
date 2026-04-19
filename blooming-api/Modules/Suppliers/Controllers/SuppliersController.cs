@@ -38,7 +38,7 @@ public class SuppliersController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<SupplierResponse>> Create([FromBody] CreateSupplierRequest request)
     {
-        var command = new CreateSupplierCommand(request.Name, request.ContactInfo, request.Notes);
+        var command = new CreateSupplierCommand(request.Name, request.Phone, request.Website, request.Address, request.Notes);
         var result = await _mediator.Send(command);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
@@ -46,7 +46,7 @@ public class SuppliersController : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<SupplierResponse>> Update(Guid id, [FromBody] UpdateSupplierRequest request)
     {
-        var command = new UpdateSupplierCommand(id, request.Name, request.ContactInfo, request.Notes);
+        var command = new UpdateSupplierCommand(id, request.Name, request.Phone, request.Website, request.Address, request.Notes);
         var result = await _mediator.Send(command);
         return Ok(result);
     }

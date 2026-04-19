@@ -38,10 +38,22 @@
       </mat-card-header>
       <mat-card-content>
         <div class="info-grid">
-          @if (supplier()!.contactInfo) {
+          @if (supplier()!.phone) {
             <div class="info-item">
-              <mat-icon class="info-icon">contact_phone</mat-icon>
-              <span>{{ supplier()!.contactInfo }}</span>
+              <mat-icon class="info-icon">phone</mat-icon>
+              <span>{{ supplier()!.phone }}</span>
+            </div>
+          }
+          @if (supplier()!.website) {
+            <div class="info-item">
+              <mat-icon class="info-icon">language</mat-icon>
+              <a [href]="supplier()!.website" target="_blank" rel="noopener">{{ supplier()!.website }}</a>
+            </div>
+          }
+          @if (supplier()!.address) {
+            <div class="info-item">
+              <mat-icon class="info-icon">location_on</mat-icon>
+              <span>{{ supplier()!.address }}</span>
             </div>
           }
           @if (supplier()!.notes) {

@@ -16,9 +16,15 @@ public class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
             .HasColumnName("name")
             .IsRequired()
             .HasMaxLength(SuppliersConstants.NameMaxLength);
-        builder.Property(s => s.ContactInfo)
-            .HasColumnName("contact_info")
-            .HasMaxLength(SuppliersConstants.ContactInfoMaxLength);
+        builder.Property(s => s.Phone)
+            .HasColumnName("phone")
+            .HasMaxLength(SuppliersConstants.PhoneMaxLength);
+        builder.Property(s => s.Website)
+            .HasColumnName("website")
+            .HasMaxLength(SuppliersConstants.WebsiteMaxLength);
+        builder.Property(s => s.Address)
+            .HasColumnName("address")
+            .HasMaxLength(SuppliersConstants.AddressMaxLength);
         builder.Property(s => s.Notes)
             .HasColumnName("notes")
             .HasMaxLength(SuppliersConstants.NotesMaxLength);

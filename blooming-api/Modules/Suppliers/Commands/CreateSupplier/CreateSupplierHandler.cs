@@ -20,7 +20,9 @@ public class CreateSupplierHandler : IRequestHandler<CreateSupplierCommand, Supp
         {
             Id = Guid.NewGuid(),
             Name = request.Name,
-            ContactInfo = request.ContactInfo,
+            Phone = request.Phone,
+            Website = request.Website,
+            Address = request.Address,
             Notes = request.Notes,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
@@ -36,7 +38,9 @@ public class CreateSupplierHandler : IRequestHandler<CreateSupplierCommand, Supp
     {
         Id = supplier.Id,
         Name = supplier.Name,
-        ContactInfo = supplier.ContactInfo,
+        Phone = supplier.Phone,
+        Website = supplier.Website,
+        Address = supplier.Address,
         Notes = supplier.Notes,
         CreatedAt = supplier.CreatedAt,
         UpdatedAt = supplier.UpdatedAt,

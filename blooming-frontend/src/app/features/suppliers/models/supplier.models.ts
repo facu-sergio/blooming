@@ -1,7 +1,9 @@
 export interface Supplier {
   id: string;
   name: string;
-  contactInfo?: string;
+  phone?: string;
+  website?: string;
+  address?: string;
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -9,12 +11,16 @@ export interface Supplier {
 
 export interface CreateSupplierDto {
   name: string;
-  contactInfo?: string;
+  phone?: string;
+  website?: string;
+  address?: string;
   notes?: string;
 }
 
 export interface UpdateSupplierDto {
   name: string;
-  contactInfo?: string;
+  phone?: string;
+  website?: string;
+  address?: string;
   notes?: string;
 }

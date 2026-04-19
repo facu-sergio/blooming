@@ -3,4 +3,4 @@ using MediatR;
 
 namespace blooming_api.Modules.Suppliers.Commands.CreateSupplier;
 
-public record CreateSupplierCommand(string Name, string? ContactInfo, string? Notes) : IRequest<SupplierResponse>;
+public record CreateSupplierCommand(string Name, string? Phone, string? Website, string? Address, string? Notes) : IRequest<SupplierResponse>;

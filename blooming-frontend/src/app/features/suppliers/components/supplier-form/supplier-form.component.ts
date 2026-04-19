@@ -47,7 +47,9 @@ export class SupplierFormComponent implements OnInit {
         updateOn: 'change',
       },
     ],
-    contactInfo: ['', [Validators.maxLength(suppliersConstants.contactInfoMaxLength)]],
+    phone: ['', [Validators.maxLength(suppliersConstants.phoneMaxLength)]],
+    website: ['', [Validators.maxLength(suppliersConstants.websiteMaxLength)]],
+    address: ['', [Validators.maxLength(suppliersConstants.addressMaxLength)]],
     notes: ['', [Validators.maxLength(suppliersConstants.notesMaxLength)]],
   });
 
@@ -61,7 +63,9 @@ export class SupplierFormComponent implements OnInit {
       if (supplier) {
         this.form.patchValue({
           name: supplier.name,
-          contactInfo: supplier.contactInfo ?? '',
+          phone: supplier.phone ?? '',
+          website: supplier.website ?? '',
+          address: supplier.address ?? '',
           notes: supplier.notes ?? '',
         });
       }
@@ -71,10 +75,12 @@ export class SupplierFormComponent implements OnInit {
   async onSubmit(): Promise<void> {
     if (this.form.invalid || this.isLoading()) return;
 
-    const { name, contactInfo, notes } = this.form.value;
+    const { name, phone, website, address, notes } = this.form.value;
     const dto = {
       name: name!,
-      contactInfo: contactInfo || undefined,
+      phone: phone || undefined,
+      website: website || undefined,
+      address: address || undefined,
       notes: notes || undefined,
     };
 

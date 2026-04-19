@@ -24,7 +24,9 @@ public class GetSuppliersHandler : IRequestHandler<GetSuppliersQuery, List<Suppl
             var term = request.SearchTerm.ToLower();
             query = query.Where(s =>
                 s.Name.ToLower().Contains(term) ||
-                (s.ContactInfo != null && s.ContactInfo.ToLower().Contains(term)));
+                (s.Phone != null && s.Phone.ToLower().Contains(term)) ||
+                (s.Website != null && s.Website.ToLower().Contains(term)) ||
+                (s.Address != null && s.Address.ToLower().Contains(term)));
         }
 
         var suppliers = await query

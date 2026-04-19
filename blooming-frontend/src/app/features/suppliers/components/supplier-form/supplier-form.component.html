@@ -18,10 +18,26 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Contacto (opcional)</mat-label>
-          <input matInput formControlName="contactInfo" [maxlength]="constants.contactInfoMaxLength" />
-          @if (form.get('contactInfo')?.hasError('maxlength')) {
-            <mat-error>Máximo {{ constants.contactInfoMaxLength }} caracteres</mat-error>
+          <mat-label>Teléfono (opcional)</mat-label>
+          <input matInput formControlName="phone" [maxlength]="constants.phoneMaxLength" />
+          @if (form.get('phone')?.hasError('maxlength')) {
+            <mat-error>Máximo {{ constants.phoneMaxLength }} caracteres</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Sitio web (opcional)</mat-label>
+          <input matInput formControlName="website" [maxlength]="constants.websiteMaxLength" />
+          @if (form.get('website')?.hasError('maxlength')) {
+            <mat-error>Máximo {{ constants.websiteMaxLength }} caracteres</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Dirección (opcional)</mat-label>
+          <input matInput formControlName="address" [maxlength]="constants.addressMaxLength" />
+          @if (form.get('address')?.hasError('maxlength')) {
+            <mat-error>Máximo {{ constants.addressMaxLength }} caracteres</mat-error>
           }
         </mat-form-field>
 

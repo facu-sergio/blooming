@@ -13,7 +13,7 @@
     <mat-card-content>
       <div class="search-section">
         <mat-form-field appearance="outline" class="search-field">
-          <mat-label>Buscar por nombre o contacto</mat-label>
+          <mat-label>Buscar por nombre, teléfono, web o dirección</mat-label>
           <input
             matInput
             [formControl]="searchControl"
@@ -55,13 +55,16 @@
                     </button>
                   </div>
                 </div>
-                @if (supplier.contactInfo || supplier.notes) {
+                @if (supplier.phone || supplier.website || supplier.address) {
                   <div class="supplier-card-details">
-                    @if (supplier.contactInfo) {
-                      <span><mat-icon class="inline-icon">contact_phone</mat-icon> {{ truncate(supplier.contactInfo) }}</span>
+                    @if (supplier.phone) {
+                      <span><mat-icon class="inline-icon">phone</mat-icon> {{ supplier.phone }}</span>
                     }
-                    @if (supplier.notes) {
-                      <span><mat-icon class="inline-icon">notes</mat-icon> {{ truncate(supplier.notes) }}</span>
+                    @if (supplier.website) {
+                      <span><mat-icon class="inline-icon">language</mat-icon> {{ truncate(supplier.website) }}</span>
+                    }
+                    @if (supplier.address) {
+                      <span><mat-icon class="inline-icon">location_on</mat-icon> {{ truncate(supplier.address) }}</span>
                     }
                   </div>
                 }
@@ -76,14 +79,19 @@
             <td mat-cell *matCellDef="let supplier">{{ supplier.name }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="contactInfo">
-            <th mat-header-cell *matHeaderCellDef>Contacto</th>
-            <td mat-cell *matCellDef="let supplier">{{ truncate(supplier.contactInfo) }}</td>
+          <ng-container matColumnDef="phone">
+            <th mat-header-cell *matHeaderCellDef>Teléfono</th>
+            <td mat-cell *matCellDef="let supplier">{{ supplier.phone || '—' }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="notes">
-            <th mat-header-cell *matHeaderCellDef>Notas</th>
-            <td mat-cell *matCellDef="let supplier">{{ truncate(supplier.notes) }}</td>
+          <ng-container matColumnDef="website">
+            <th mat-header-cell *matHeaderCellDef>Sitio web</th>
+            <td mat-cell *matCellDef="let supplier">{{ truncate(supplier.website) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="address">
+            <th mat-header-cell *matHeaderCellDef>Dirección</th>
+            <td mat-cell *matCellDef="let supplier">{{ truncate(supplier.address) }}</td>
           </ng-container>
 
           <ng-container matColumnDef="actions">
