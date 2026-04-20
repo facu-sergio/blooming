@@ -1,0 +1,133 @@
+.customer-detail-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .detail-title {
+    flex: 1;
+    margin: 0;
+    font-size: 1.25rem;
+  }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.empty-card mat-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px;
+  color: #888;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* Información básica */
+.info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+
+  .info-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: #888;
+    margin-top: 2px;
+  }
+}
+
+/* Métricas */
+.metrics-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.metric-card mat-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  text-align: center;
+}
+
+.metric-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1976d2;
+  line-height: 1.2;
+}
+
+.metric-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 0.875rem;
+  color: #666;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Historial de pedidos */
+.orders-table {
+  width: 100%;
+}
+
+.empty-orders {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px;
+  color: #888;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+/* Colores de estado de pedido */
+::ng-deep {
+  .status-pendiente { background-color: #fff3e0 !important; color: #e65100 !important; }
+  .status-confirmado { background-color: #e3f2fd !important; color: #1565c0 !important; }
+  .status-enviado { background-color: #f3e5f5 !important; color: #6a1b9a !important; }
+  .status-entregado { background-color: #e8f5e9 !important; color: #2e7d32 !important; }
+  .status-cancelado { background-color: #fce4ec !important; color: #c62828 !important; }
+}

@@ -1,0 +1,132 @@
+<div class="customer-detail-container">
+
+  <!-- Header con navegación -->
+  <div class="detail-header">
+    <button mat-icon-button (click)="goBack()" aria-label="Volver a clientes">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h2 class="detail-title">Perfil del cliente</h2>
+    <button mat-icon-button (click)="editCustomer()" aria-label="Editar cliente">
+      <mat-icon>edit</mat-icon>
+    </button>
+  </div>
+
+  @if (isLoadingDetail()) {
+    <div class="loading-container">
+      <mat-spinner diameter="48" />
+    </div>
+  } @else if (!customer()) {
+    <mat-card class="empty-card">
+      <mat-card-content>
+        <mat-icon>person_off</mat-icon>
+        <p>No se encontró el cliente.</p>
+        <button mat-button (click)="goBack()">Volver a la lista</button>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+
+    <!-- Información básica del cliente -->
+    <mat-card class="info-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>person</mat-icon>
+        <mat-card-title>{{ customer()!.name }}</mat-card-title>
+        <mat-card-subtitle>Cliente desde {{ customer()!.createdAt | date: 'dd/MM/yyyy' }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <mat-icon class="info-icon">phone</mat-icon>
+            <span>{{ customer()!.phone }}</span>
+          </div>
+          @if (customer()!.address) {
+            <div class="info-item">
+              <mat-icon class="info-icon">location_on</mat-icon>
+              <span>{{ customer()!.address }}</span>
+            </div>
+          }
+          @if (customer()!.notes) {
+            <div class="info-item">
+              <mat-icon class="info-icon">notes</mat-icon>
+              <span>{{ customer()!.notes }}</span>
+            </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Métricas del cliente -->
+    @if (customerMetrics()) {
+      <div class="metrics-row">
+        <mat-card class="metric-card">
+          <mat-card-content>
+            <div class="metric-value">{{ customerMetrics()!.totalOrders }}</div>
+            <div class="metric-label">
+              <mat-icon>shopping_bag</mat-icon>
+              Pedidos totales
+            </div>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="metric-card">
+          <mat-card-content>
+            <div class="metric-value">
+              {{ customerMetrics()!.totalSpent | currency: 'ARS' : '$' : '1.0-0' }}
+            </div>
+            <div class="metric-label">
+              <mat-icon>payments</mat-icon>
+              Total gastado
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    }
+
+    <!-- Historial de pedidos -->
+    <mat-card class="orders-card">
+      <mat-card-header>
+        <mat-card-title>Historial de pedidos</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+
+        @if (customerOrders().length === 0) {
+          <!-- Tarea 6: Caso sin pedidos (AC #2) -->
+          <div class="empty-orders">
+            <mat-icon>receipt_long</mat-icon>
+            <p>Este cliente aún no tiene pedidos.</p>
+          </div>
+        } @else {
+          <table mat-table [dataSource]="customerOrders()" class="orders-table">
+
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef>Fecha</th>
+              <td mat-cell *matCellDef="let order">
+                {{ order.createdAt | date: 'dd/MM/yyyy' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let order">
+                <mat-chip [class]="'status-' + order.status.toLowerCase()">
+                  {{ order.status }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="total">
+              <th mat-header-cell *matHeaderCellDef>Total</th>
+              <td mat-cell *matCellDef="let order">
+                {{ order.total | currency: 'ARS' : '$' : '1.0-0' }}
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="ordersTableColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: ordersTableColumns"></tr>
+          </table>
+        }
+
+      </mat-card-content>
+    </mat-card>
+
+  }
+
+</div>

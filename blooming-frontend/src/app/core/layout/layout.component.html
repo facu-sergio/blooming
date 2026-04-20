@@ -1,0 +1,144 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav
+    [mode]="isMobile() ? 'over' : 'side'"
+    [opened]="!isMobile() || sidenavOpened()"
+    (openedChange)="onSidenavOpenedChange($event)"
+    class="sidenav"
+    aria-label="Navegación principal"
+  >
+    <mat-nav-list>
+      <div class="nav-section-label">PRINCIPAL</div>
+      <a
+        mat-list-item
+        routerLink="/dashboard"
+        routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="onNavItemClick()"
+      >
+        <mat-icon matListItemIcon>dashboard</mat-icon>
+        <span matListItemTitle>Dashboard</span>
+      </a>
+      <a
+        mat-list-item
+        routerLink="/products"
+        routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: true }"
+        data-testid="products-nav"
+        (click)="onNavItemClick()"
+      >
+        <mat-icon matListItemIcon>inventory_2</mat-icon>
+        <span matListItemTitle>Productos</span>
+      </a>
+      <a
+        mat-list-item
+        routerLink="/products/categories"
+        routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="onNavItemClick()"
+      >
+        <mat-icon matListItemIcon>category</mat-icon>
+        <span matListItemTitle>Categorías</span>
+      </a>
+      <a
+        mat-list-item
+        routerLink="/customers"
+        routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: false }"
+        (click)="onNavItemClick()"
+      >
+        <mat-icon matListItemIcon>people</mat-icon>
+        <span matListItemTitle>Clientes</span>
+      </a>
+      <a
+        mat-list-item
+        routerLink="/orders"
+        routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: false }"
+        (click)="onNavItemClick()"
+      >
+        <mat-icon matListItemIcon>shopping_cart</mat-icon>
+        <span matListItemTitle>Pedidos</span>
+      </a>
+
+      <div class="nav-section-label">OPERACIONES</div>
+      <a
+        mat-list-item
+        routerLink="/suppliers"
+        routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: false }"
+        (click)="onNavItemClick()"
+      >
+        <mat-icon matListItemIcon>local_shipping</mat-icon>
+        <span matListItemTitle>Proveedores</span>
+      </a>
+      <a
+        mat-list-item
+        routerLink="/purchase-orders"
+        routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: false }"
+        (click)="onNavItemClick()"
+      >
+        <mat-icon matListItemIcon>receipt_long</mat-icon>
+        <span matListItemTitle>Historial de compras</span>
+      </a>
+
+      <div class="nav-section-label">ADMINISTRACIÓN</div>
+      <a
+        mat-list-item
+        routerLink="/users/register"
+        routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: false }"
+        data-testid="register-user-nav"
+        (click)="onNavItemClick()"
+      >
+        <mat-icon matListItemIcon>manage_accounts</mat-icon>
+        <span matListItemTitle>Usuarios</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar color="primary" class="app-toolbar">
+      @if (isMobile()) {
+        <button
+          mat-icon-button
+          (click)="toggleSidenav()"
+          aria-label="Abrir menú"
+          matTooltip="Abrir menú"
+          data-testid="hamburger-btn"
+        >
+          <mat-icon>menu</mat-icon>
+        </button>
+      }
+      <span class="toolbar-title">Blooming</span>
+      <span class="toolbar-spacer"></span>
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="userMenu"
+        class="avatar-btn"
+        aria-label="Menú de usuario"
+        matTooltip="Menú de usuario"
+        data-testid="avatar-btn"
+      >
+        {{ avatarLetter() }}
+      </button>
+      <mat-menu #userMenu="matMenu">
+        <button mat-menu-item disabled class="menu-email">{{ currentUser()?.email }}</button>
+        <mat-divider />
+        <button mat-menu-item (click)="toggleTheme()">
+          <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+          {{ isDarkMode() ? 'Modo claro' : 'Modo oscuro' }}
+        </button>
+        <mat-divider />
+        <button mat-menu-item (click)="logout()" data-testid="logout-menu-btn">
+          <mat-icon>logout</mat-icon>
+          Cerrar sesión
+        </button>
+      </mat-menu>
+    </mat-toolbar>
+
+    <div class="page-content">
+      <router-outlet />
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,0 +1,20 @@
+.metric-card {
+  height: 100%;
+
+  mat-icon[mat-card-avatar] {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: var(--color-metric-products);
+  }
+}
+
+.empty-message {
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin: 8px 0;
+}
+
+mat-list-item {
+  min-height: 44px;
+}

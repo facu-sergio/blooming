@@ -1,0 +1,144 @@
+<div class="supplier-detail-container">
+
+  <!-- Header con navegación -->
+  <div class="detail-header">
+    <button mat-icon-button (click)="goBack()" aria-label="Volver a proveedores">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h2 class="detail-title">Detalle del proveedor</h2>
+    <button mat-icon-button (click)="editSupplier()" aria-label="Editar proveedor">
+      <mat-icon>edit</mat-icon>
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="48" />
+    </div>
+  } @else if (!supplier()) {
+    <mat-card class="empty-card">
+      <mat-card-content>
+        <mat-icon>storefront_off</mat-icon>
+        <p>No se encontró el proveedor.</p>
+        <button mat-button (click)="goBack()">Volver a la lista</button>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+
+    <!-- Información básica del proveedor -->
+    <mat-card class="info-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>storefront</mat-icon>
+        <mat-card-title>{{ supplier()!.name }}</mat-card-title>
+        <mat-card-subtitle>Proveedor desde {{ supplier()!.createdAt | date: 'dd/MM/yyyy' }}</mat-card-subtitle>
+        <button mat-raised-button color="primary" (click)="newPurchaseOrder()" class="card-action-btn">
+          <mat-icon>add_shopping_cart</mat-icon>
+          Nueva orden de compra
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          @if (supplier()!.phone) {
+            <div class="info-item">
+              <mat-icon class="info-icon">phone</mat-icon>
+              <span>{{ supplier()!.phone }}</span>
+            </div>
+          }
+          @if (supplier()!.website) {
+            <div class="info-item">
+              <mat-icon class="info-icon">language</mat-icon>
+              <a [href]="supplier()!.website" target="_blank" rel="noopener">{{ supplier()!.website }}</a>
+            </div>
+          }
+          @if (supplier()!.address) {
+            <div class="info-item">
+              <mat-icon class="info-icon">location_on</mat-icon>
+              <span>{{ supplier()!.address }}</span>
+            </div>
+          }
+          @if (supplier()!.notes) {
+            <div class="info-item">
+              <mat-icon class="info-icon">notes</mat-icon>
+              <span>{{ supplier()!.notes }}</span>
+            </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Tabs: Historial de Compras -->
+    <mat-tab-group>
+      <mat-tab label="Historial de Compras">
+        <div class="tab-content">
+
+          @if (isLoadingHistory()) {
+            <div class="loading-container">
+              <mat-spinner diameter="40" />
+            </div>
+          } @else if (purchaseOrders().length === 0) {
+            <!-- AC #3: Sin compras registradas -->
+            <div class="empty-orders">
+              <mat-icon>shopping_cart_off</mat-icon>
+              <p>No hay compras registradas para este proveedor.</p>
+            </div>
+          } @else {
+            <table mat-table [dataSource]="purchaseOrders()" class="history-table">
+
+              <ng-container matColumnDef="orderDate">
+                <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                <td mat-cell *matCellDef="let order">
+                  {{ order.orderDate | date: 'dd/MM/yyyy' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="itemCount">
+                <th mat-header-cell *matHeaderCellDef>Productos</th>
+                <td mat-cell *matCellDef="let order">
+                  <div class="products-cell">
+                    @for (item of order.items; track item.productName) {
+                      <div class="product-chip">
+                        @if (item.imageUrl) {
+                          <img [src]="item.imageUrl" [alt]="item.productName" class="product-thumb" />
+                        } @else {
+                          <mat-icon class="product-thumb-icon">checkroom</mat-icon>
+                        }
+                        <span>{{ item.productName }}</span>
+                      </div>
+                    }
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="totalAmount">
+                <th mat-header-cell *matHeaderCellDef>Total invertido</th>
+                <td mat-cell *matCellDef="let order">
+                  {{ order.totalAmount | currency: 'ARS' : '$' : '1.0-0' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let order">
+                  <button
+                    mat-icon-button
+                    (click)="viewOrderDetail(order)"
+                    [disabled]="isLoadingDetail()"
+                    aria-label="Ver detalle"
+                  >
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="historyTableColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: historyTableColumns"></tr>
+            </table>
+          }
+
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+
+  }
+
+</div>

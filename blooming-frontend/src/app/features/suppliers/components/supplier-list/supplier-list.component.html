@@ -1,0 +1,126 @@
+<div class="supplier-list-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Proveedores</mat-card-title>
+      <div class="header-actions">
+        <button mat-flat-button color="primary" (click)="navigateToNew()">
+          <mat-icon>add</mat-icon>
+          Nuevo proveedor
+        </button>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="search-section">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Buscar por nombre, teléfono, web o dirección</mat-label>
+          <input
+            matInput
+            [formControl]="searchControl"
+            (input)="onSearchChange()"
+            placeholder="Buscar proveedores..."
+            aria-label="Buscar proveedores"
+          />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        @if (searchControl.value) {
+          <button mat-icon-button (click)="clearSearch()" aria-label="Limpiar búsqueda">
+            <mat-icon>clear</mat-icon>
+          </button>
+        }
+      </div>
+
+      @if (isLoading()) {
+        <div class="loading-container">
+          <mat-spinner diameter="40" />
+        </div>
+      } @else if (suppliers().length === 0) {
+        <div class="empty-state">
+          <mat-icon>local_shipping</mat-icon>
+          <p>No hay proveedores registrados. Crea el primero.</p>
+        </div>
+      } @else if (isMobile) {
+        <div class="cards-mobile">
+          @for (supplier of suppliers(); track supplier.id) {
+            <mat-card class="supplier-card">
+              <mat-card-content>
+                <div class="supplier-card-header">
+                  <span class="supplier-name">{{ supplier.name }}</span>
+                  <div class="card-actions">
+                    <button mat-icon-button (click)="viewSupplier(supplier)" aria-label="Ver detalle">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="editSupplier(supplier)" aria-label="Editar">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                  </div>
+                </div>
+                @if (supplier.phone || supplier.website || supplier.address) {
+                  <div class="supplier-card-details">
+                    @if (supplier.phone) {
+                      <span><mat-icon class="inline-icon">phone</mat-icon> {{ supplier.phone }}</span>
+                    }
+                    @if (supplier.website) {
+                      <span><mat-icon class="inline-icon">language</mat-icon> {{ truncate(supplier.website) }}</span>
+                    }
+                    @if (supplier.address) {
+                      <span><mat-icon class="inline-icon">location_on</mat-icon> {{ truncate(supplier.address) }}</span>
+                    }
+                  </div>
+                }
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      } @else {
+        <table mat-table [dataSource]="suppliers()" class="full-width">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Nombre</th>
+            <td mat-cell *matCellDef="let supplier">{{ supplier.name }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="phone">
+            <th mat-header-cell *matHeaderCellDef>Teléfono</th>
+            <td mat-cell *matCellDef="let supplier">{{ supplier.phone || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="website">
+            <th mat-header-cell *matHeaderCellDef>Sitio web</th>
+            <td mat-cell *matCellDef="let supplier">{{ truncate(supplier.website) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="address">
+            <th mat-header-cell *matHeaderCellDef>Dirección</th>
+            <td mat-cell *matCellDef="let supplier">{{ truncate(supplier.address) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let supplier">
+              <button mat-icon-button (click)="viewSupplier(supplier)" aria-label="Ver detalle">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-icon-button (click)="editSupplier(supplier)" aria-label="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  @if (totalCount() > 0) {
+    <mat-paginator
+      [length]="totalCount()"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[10, 20, 50]"
+      [pageIndex]="page - 1"
+      (page)="onPageChange($event)"
+      aria-label="Seleccionar página de proveedores"
+    ></mat-paginator>
+  }
+</div>

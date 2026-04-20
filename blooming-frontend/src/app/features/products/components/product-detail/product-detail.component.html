@@ -1,0 +1,75 @@
+<div class="product-detail-container">
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="48" />
+    </div>
+  } @else {
+    @let p = product();
+    @if (!p) {
+      <p class="not-found">Producto no encontrado.</p>
+    } @else {
+      <div class="detail-header">
+        <button mat-icon-button (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <h1>{{ p.name }}</h1>
+        <button mat-stroked-button (click)="navigateToEdit()">
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+      </div>
+
+      <div class="detail-meta">
+        <span class="category">{{ p.categoryName }}</span>
+        @if (p.imageUrl) {
+          <img class="product-image" [src]="p.imageUrl" [alt]="p.name" />
+        }
+      </div>
+
+      <h2 class="section-title">Variantes y Historial de Stock</h2>
+
+      <mat-accordion>
+        @for (variant of p.variants; track variant.id) {
+          <mat-expansion-panel
+            [expanded]="selectedVariantId() === variant.id"
+            (opened)="selectVariant(variant.id)">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <span class="variant-title">{{ variant.size }} — {{ variant.color }}</span>
+              </mat-panel-title>
+              <mat-panel-description>
+                Stock: {{ variant.stock }}
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <div class="variant-info">
+              <div class="info-row">
+                <span class="label">Precio de costo:</span>
+                <span>{{ variant.costPrice | currency:'ARS':'$':'1.0-2' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Precio de venta:</span>
+                <span>{{ variant.sellingPrice | currency:'ARS':'$':'1.0-2' }}</span>
+              </div>
+              @if (variant.lowStockThreshold != null) {
+                <div class="info-row">
+                  <span class="label">Umbral de stock bajo:</span>
+                  <span>{{ variant.lowStockThreshold }}</span>
+                </div>
+              }
+              @if (variant.measurements && variant.measurements.length > 0) {
+                <div class="info-row">
+                  <span class="label">Medidas:</span>
+                  <span>{{ variant.measurements | formatMeasurements }}</span>
+                </div>
+              }
+            </div>
+
+            <h3 class="history-title">Historial de movimientos</h3>
+            <app-stock-movements-list [variantId]="variant.id" />
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
+    }
+  }
+</div>

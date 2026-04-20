@@ -1,0 +1,76 @@
+<div class="stock-movements">
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="32" />
+    </div>
+  } @else {
+    @let data = stockMovements();
+    @if (!data || data.items.length === 0) {
+      <div class="empty-state">
+        <mat-icon>inventory_2</mat-icon>
+        <p>No hay movimientos registrados</p>
+      </div>
+    } @else {
+      <!-- Desktop table -->
+      <div class="table-wrapper desktop-only">
+        <table mat-table [dataSource]="data.items">
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef>Fecha</th>
+            <td mat-cell *matCellDef="let m">{{ formatDate(m.createdAt) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="movementType">
+            <th mat-header-cell *matHeaderCellDef>Tipo</th>
+            <td mat-cell *matCellDef="let m">
+              <span class="badge" [class.badge-in]="m.movementType === 'In'" [class.badge-out]="m.movementType === 'Out'">
+                {{ getMovementLabel(m.movementType) }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="quantity">
+            <th mat-header-cell *matHeaderCellDef>Cantidad</th>
+            <td mat-cell *matCellDef="let m">{{ m.quantity }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="reference">
+            <th mat-header-cell *matHeaderCellDef>Referencia</th>
+            <td mat-cell *matCellDef="let m">{{ getReferenceText(m.orderId, m.purchaseOrderId) }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+
+      <!-- Mobile cards -->
+      <div class="mobile-cards mobile-only">
+        @for (m of data.items; track m.id) {
+          <div class="movement-card">
+            <div class="card-header">
+              <span class="badge" [class.badge-in]="m.movementType === 'In'" [class.badge-out]="m.movementType === 'Out'">
+                {{ getMovementLabel(m.movementType) }}
+              </span>
+              <span class="quantity">{{ m.quantity }} unidades</span>
+            </div>
+            <div class="card-meta">
+              <span class="date">{{ formatDate(m.createdAt) }}</span>
+              <span class="reference">{{ getReferenceText(m.orderId, m.purchaseOrderId) }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      @if (data.totalPages > 1) {
+        <mat-paginator
+          [length]="data.totalCount"
+          [pageSize]="data.pageSize"
+          [pageIndex]="data.pageNumber - 1"
+          [pageSizeOptions]="[10, 20, 50]"
+          (page)="onPageChange($event)"
+          aria-label="Paginación de movimientos"
+        />
+      }
+    }
+  }
+</div>

@@ -1,0 +1,228 @@
+<div class="create-order-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Nuevo Pedido</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Selección de cliente -->
+      <section class="section">
+        <h3 class="section-title">Cliente</h3>
+
+        @if (selectedCustomer()) {
+          <div class="selected-customer">
+            <span class="customer-name">{{ selectedCustomer()!.name }}</span>
+            <span class="customer-phone">{{ selectedCustomer()!.phone }}</span>
+            <button mat-icon-button type="button" (click)="clearCustomer()" matTooltip="Cambiar cliente">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        } @else {
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Buscar cliente *</mat-label>
+            <input
+              matInput
+              [formControl]="customerSearchControl"
+              [matAutocomplete]="customerAuto"
+              placeholder="Nombre o teléfono"
+            />
+            <mat-autocomplete
+              #customerAuto="matAutocomplete"
+              (optionSelected)="onCustomerSelected($event.option.value)"
+            >
+              @for (customer of filteredCustomers(); track customer.id) {
+                <mat-option [value]="customer">
+                  <span class="autocomplete-name">{{ customer.name }}</span>
+                  <span class="autocomplete-sub">{{ customer.phone }}</span>
+                </mat-option>
+              }
+            </mat-autocomplete>
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+        }
+      </section>
+
+      <mat-divider />
+
+      <!-- Agregar ítems -->
+      <section class="section">
+        <h3 class="section-title">Ítems del pedido</h3>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Buscar producto / variante</mat-label>
+          <input
+            matInput
+            [formControl]="variantSearchControl"
+            [matAutocomplete]="variantAuto"
+            placeholder="Nombre, talle o color"
+          />
+          <mat-autocomplete
+            #variantAuto="matAutocomplete"
+            [displayWith]="variantDisplayFn"
+            (optionSelected)="addVariantToOrder($event.option.value)"
+          >
+            @for (item of filteredVariants(); track item.variant.id) {
+              <mat-option [value]="item">
+                <span class="autocomplete-name">{{ item.product.name }}</span>
+                <span class="autocomplete-sub">
+                  {{ item.variant.size }} · {{ item.variant.color }} ·
+                  ${{ item.variant.sellingPrice | number: '1.0-2' }} ·
+                  Stock: {{ item.variant.stock }}
+                </span>
+              </mat-option>
+            }
+          </mat-autocomplete>
+          <mat-icon matSuffix>add_shopping_cart</mat-icon>
+        </mat-form-field>
+
+        @if (items().length > 0) {
+          @if (isMobile()) {
+            <!-- Vista móvil: filas compactas -->
+            <div class="items-list-mobile">
+              @for (item of items(); track item.productVariantId; let i = $index) {
+                <div class="item-row-mobile">
+                  <div class="item-row-top">
+                    <span class="item-name">{{ item.productName }}</span>
+                    <span class="item-variant">{{ item.variantLabel }}</span>
+                  </div>
+                  <div class="item-row-bottom">
+                    <span class="item-price">${{ item.unitPrice | number: '1.0-2' }}</span>
+                    <span class="item-times">×</span>
+                    <input
+                      type="number"
+                      class="quantity-input"
+                      [value]="item.quantity"
+                      min="1"
+                      (change)="updateQuantity(i, $any($event.target).value)"
+                    />
+                    <span class="item-equals">=</span>
+                    <strong class="item-total">${{ item.lineTotal | number: '1.0-2' }}</strong>
+                    <button mat-icon-button type="button" (click)="removeItem(i)" matTooltip="Eliminar">
+                      <mat-icon>delete_outline</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <!-- Vista desktop: tabla -->
+            <table mat-table [dataSource]="items()" class="items-table full-width">
+              <ng-container matColumnDef="product">
+                <th mat-header-cell *matHeaderCellDef>Producto</th>
+                <td mat-cell *matCellDef="let item">{{ item.productName }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="variant">
+                <th mat-header-cell *matHeaderCellDef>Variante</th>
+                <td mat-cell *matCellDef="let item">{{ item.variantLabel }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="unitPrice">
+                <th mat-header-cell *matHeaderCellDef>Precio unit.</th>
+                <td mat-cell *matCellDef="let item">${{ item.unitPrice | number: '1.0-2' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="quantity">
+                <th mat-header-cell *matHeaderCellDef>Cant.</th>
+                <td mat-cell *matCellDef="let item; let i = index">
+                  <input
+                    type="number"
+                    class="quantity-input"
+                    [value]="item.quantity"
+                    min="1"
+                    (change)="updateQuantity(i, $any($event.target).value)"
+                  />
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="lineTotal">
+                <th mat-header-cell *matHeaderCellDef>Subtotal</th>
+                <td mat-cell *matCellDef="let item">${{ item.lineTotal | number: '1.0-2' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let item; let i = index">
+                  <button mat-icon-button type="button" (click)="removeItem(i)" matTooltip="Eliminar">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: tableColumns"></tr>
+            </table>
+          }
+
+          <div class="order-total">
+            <span>Total del pedido:</span>
+            <strong>${{ orderTotal() | number: '1.0-2' }}</strong>
+          </div>
+        }
+      </section>
+
+      <mat-divider />
+
+      <!-- Campos adicionales -->
+      <section class="section">
+        <h3 class="section-title">Información adicional (opcional)</h3>
+
+        <form [formGroup]="form" id="orderForm">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Dirección de entrega</mat-label>
+            <input
+              matInput
+              formControlName="shippingAddress"
+              [maxlength]="constants.shippingAddressMaxLength"
+            />
+            @if (form.get('shippingAddress')?.hasError('maxlength')) {
+              <mat-error>Máximo {{ constants.shippingAddressMaxLength }} caracteres</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Fecha estimada de entrega</mat-label>
+            <input
+              matInput
+              [matDatepicker]="datePicker"
+              formControlName="estimatedDeliveryDate"
+              [min]="today"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="datePicker" />
+            <mat-datepicker #datePicker />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Notas del pedido</mat-label>
+            <textarea
+              matInput
+              formControlName="notes"
+              [maxlength]="constants.notesMaxLength"
+              rows="3"
+            ></textarea>
+            @if (form.get('notes')?.hasError('maxlength')) {
+              <mat-error>Máximo {{ constants.notesMaxLength }} caracteres</mat-error>
+            }
+          </mat-form-field>
+        </form>
+      </section>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <button mat-button type="button" (click)="onCancel()">Cancelar</button>
+      <button
+        mat-raised-button
+        color="primary"
+        type="button"
+        [disabled]="form.invalid || isLoading()"
+        (click)="onSubmit()"
+      >
+        @if (isLoading()) {
+          <mat-spinner diameter="20" />
+        } @else {
+          Crear pedido
+        }
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

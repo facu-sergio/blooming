@@ -1,0 +1,17 @@
+.metric-card {
+  height: 100%;
+}
+
+.alert-icon {
+  color: var(--color-metric-alerts);
+}
+
+.empty-message {
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin: 8px 0;
+}
+
+mat-list-item {
+  min-height: 44px;
+}
