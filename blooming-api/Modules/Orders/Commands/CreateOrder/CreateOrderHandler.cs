@@ -1,6 +1,7 @@
 using blooming_api.Common.Exceptions;
 using blooming_api.Infrastructure.Data;
 using blooming_api.Modules.Orders.Entities;
+using blooming_api.Modules.Products.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,7 +32,7 @@ public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, CreateOrde
         if (variants.Count != variantIds.Count)
             throw new NotFoundException("Una o más variantes de producto no fueron encontradas");
 
-        // Solo verificar disponibilidad de stock — el descuento ocurre en Historia 4.2 (ConfirmOrderHandler)
+        // Verificar stock suficiente ANTES de cualquier modificación (atomicidad)
         foreach (var item in request.Items)
         {
             var variant = variants.First(v => v.Id == item.ProductVariantId);
@@ -55,24 +56,43 @@ public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, CreateOrde
         }).ToList();
 
         var total = orderItems.Sum(i => i.LineTotal);
+        var confirmedAt = DateTime.UtcNow;
 
         var order = new Order
         {
             CustomerId = request.CustomerId,
-            Status = OrderStatus.Pending,
+            Status = OrderStatus.Confirmed,
+            ConfirmedAt = confirmedAt,
             Total = total,
             ShippingAddress = request.ShippingAddress,
             Notes = request.Notes,
             EstimatedDeliveryDate = request.EstimatedDeliveryDate,
             CreatedByUserId = request.CreatedByUserId,
             Items = orderItems,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = confirmedAt
         };
 
         using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
         try
         {
             _db.Orders.Add(order);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            foreach (var item in request.Items)
+            {
+                var variant = variants.First(v => v.Id == item.ProductVariantId);
+                variant.Stock -= item.Quantity;
+
+                _db.StockMovements.Add(new StockMovement
+                {
+                    ProductVariantId = item.ProductVariantId,
+                    MovementType = MovementType.Out,
+                    Quantity = item.Quantity,
+                    OrderId = order.Id,
+                    CreatedAt = confirmedAt
+                });
+            }
+
             await _db.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
         }
