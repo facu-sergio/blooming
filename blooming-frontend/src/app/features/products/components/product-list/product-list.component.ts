@@ -12,7 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { BreakpointObserver } from '@angular/cdk/layout';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { ProductsService } from '../../services/products.service';
@@ -53,6 +53,11 @@ export class ProductListComponent implements OnInit {
 
   readonly isDesktop = toSignal(
     this.breakpointObserver.observe('(min-width: 1280px)').pipe(map((r) => r.matches)),
+    { initialValue: false }
+  );
+
+  readonly isMobile = toSignal(
+    this.breakpointObserver.observe([Breakpoints.XSmall, Breakpoints.Small]).pipe(map((r) => r.matches)),
     { initialValue: false }
   );
 

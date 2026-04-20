@@ -94,7 +94,81 @@
         </div>
       </mat-card-content>
     </mat-card>
+  } @else if (isMobile()) {
+    <!-- Vista móvil: cards separadas -->
+    <div class="cards-list">
+      @for (product of products(); track product.id) {
+        <mat-card class="product-card">
+          <mat-card-header>
+            @if (product.imageUrl) {
+              <img mat-card-avatar [src]="product.imageUrl" [alt]="product.name" class="product-card-avatar" />
+            } @else {
+              <div mat-card-avatar class="product-card-avatar-placeholder">
+                <mat-icon>image_not_supported</mat-icon>
+              </div>
+            }
+            <mat-card-title>{{ product.name }}</mat-card-title>
+            <mat-card-subtitle>
+              {{ product.categoryName }} · {{ product.variants.length }} variante(s) ·
+              <span [class]="getStockClass(getTotalStock(product.variants))">
+                Stock: {{ getTotalStock(product.variants) }}
+              </span>
+            </mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="variants-mobile">
+              @for (variant of product.variants; track variant.id) {
+                <div class="variant-mobile-row">
+                  <div class="variant-mobile-info">
+                    <div class="variant-mobile-main">
+                      <span class="variant-label">{{ variant.size }} / {{ variant.color }}</span>
+                      <span class="variant-price">${{ variant.sellingPrice | number: '1.2-2' }}</span>
+                      <span class="stock-badge" [class]="getStockClass(variant.stock)">
+                        {{ variant.stock }} u.
+                      </span>
+                      @if (isLowStock(variant)) {
+                        <mat-icon
+                          class="low-stock-icon-sm"
+                          [matTooltip]="getLowStockTooltip(variant)"
+                        >warning</mat-icon>
+                      }
+                    </div>
+                    @if (variant.measurements && variant.measurements.length > 0) {
+                      <div class="variant-measurements-mobile">
+                        <mat-icon class="measurements-icon-sm">straighten</mat-icon>
+                        <span>{{ variant.measurements | formatMeasurements }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <button
+              mat-icon-button
+              color="primary"
+              (click)="navigateToDetail(product.id)"
+              aria-label="Ver detalle"
+              matTooltip="Ver detalle"
+            >
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              color="primary"
+              (click)="navigateToEdit(product.id)"
+              aria-label="Editar producto"
+              matTooltip="Editar"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
   } @else {
+    <!-- Vista desktop/tablet: accordion -->
     <mat-accordion>
       @for (product of products(); track product.id) {
         <mat-expansion-panel>
@@ -187,7 +261,7 @@
               }
             </div>
           } @else {
-            <!-- Vista mobile: lista compacta -->
+            <!-- Vista tablet: lista compacta -->
             <div class="variants-mobile">
               @for (variant of product.variants; track variant.id) {
                 <div class="variant-mobile-row">

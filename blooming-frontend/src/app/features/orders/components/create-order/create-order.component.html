@@ -76,52 +76,83 @@
         </mat-form-field>
 
         @if (items().length > 0) {
-          <table mat-table [dataSource]="items()" class="items-table full-width">
-            <ng-container matColumnDef="product">
-              <th mat-header-cell *matHeaderCellDef>Producto</th>
-              <td mat-cell *matCellDef="let item">{{ item.productName }}</td>
-            </ng-container>
+          @if (isMobile()) {
+            <!-- Vista móvil: filas compactas -->
+            <div class="items-list-mobile">
+              @for (item of items(); track item.productVariantId; let i = $index) {
+                <div class="item-row-mobile">
+                  <div class="item-row-top">
+                    <span class="item-name">{{ item.productName }}</span>
+                    <span class="item-variant">{{ item.variantLabel }}</span>
+                  </div>
+                  <div class="item-row-bottom">
+                    <span class="item-price">${{ item.unitPrice | number: '1.0-2' }}</span>
+                    <span class="item-times">×</span>
+                    <input
+                      type="number"
+                      class="quantity-input"
+                      [value]="item.quantity"
+                      min="1"
+                      (change)="updateQuantity(i, $any($event.target).value)"
+                    />
+                    <span class="item-equals">=</span>
+                    <strong class="item-total">${{ item.lineTotal | number: '1.0-2' }}</strong>
+                    <button mat-icon-button type="button" (click)="removeItem(i)" matTooltip="Eliminar">
+                      <mat-icon>delete_outline</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <!-- Vista desktop: tabla -->
+            <table mat-table [dataSource]="items()" class="items-table full-width">
+              <ng-container matColumnDef="product">
+                <th mat-header-cell *matHeaderCellDef>Producto</th>
+                <td mat-cell *matCellDef="let item">{{ item.productName }}</td>
+              </ng-container>
 
-            <ng-container matColumnDef="variant">
-              <th mat-header-cell *matHeaderCellDef>Variante</th>
-              <td mat-cell *matCellDef="let item">{{ item.variantLabel }}</td>
-            </ng-container>
+              <ng-container matColumnDef="variant">
+                <th mat-header-cell *matHeaderCellDef>Variante</th>
+                <td mat-cell *matCellDef="let item">{{ item.variantLabel }}</td>
+              </ng-container>
 
-            <ng-container matColumnDef="unitPrice">
-              <th mat-header-cell *matHeaderCellDef>Precio unit.</th>
-              <td mat-cell *matCellDef="let item">${{ item.unitPrice | number: '1.0-2' }}</td>
-            </ng-container>
+              <ng-container matColumnDef="unitPrice">
+                <th mat-header-cell *matHeaderCellDef>Precio unit.</th>
+                <td mat-cell *matCellDef="let item">${{ item.unitPrice | number: '1.0-2' }}</td>
+              </ng-container>
 
-            <ng-container matColumnDef="quantity">
-              <th mat-header-cell *matHeaderCellDef>Cant.</th>
-              <td mat-cell *matCellDef="let item; let i = index">
-                <input
-                  type="number"
-                  class="quantity-input"
-                  [value]="item.quantity"
-                  min="1"
-                  (change)="updateQuantity(i, $any($event.target).value)"
-                />
-              </td>
-            </ng-container>
+              <ng-container matColumnDef="quantity">
+                <th mat-header-cell *matHeaderCellDef>Cant.</th>
+                <td mat-cell *matCellDef="let item; let i = index">
+                  <input
+                    type="number"
+                    class="quantity-input"
+                    [value]="item.quantity"
+                    min="1"
+                    (change)="updateQuantity(i, $any($event.target).value)"
+                  />
+                </td>
+              </ng-container>
 
-            <ng-container matColumnDef="lineTotal">
-              <th mat-header-cell *matHeaderCellDef>Subtotal</th>
-              <td mat-cell *matCellDef="let item">${{ item.lineTotal | number: '1.0-2' }}</td>
-            </ng-container>
+              <ng-container matColumnDef="lineTotal">
+                <th mat-header-cell *matHeaderCellDef>Subtotal</th>
+                <td mat-cell *matCellDef="let item">${{ item.lineTotal | number: '1.0-2' }}</td>
+              </ng-container>
 
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef></th>
-              <td mat-cell *matCellDef="let item; let i = index">
-                <button mat-icon-button type="button" (click)="removeItem(i)" matTooltip="Eliminar">
-                  <mat-icon>delete_outline</mat-icon>
-                </button>
-              </td>
-            </ng-container>
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let item; let i = index">
+                  <button mat-icon-button type="button" (click)="removeItem(i)" matTooltip="Eliminar">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: tableColumns"></tr>
-          </table>
+              <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: tableColumns"></tr>
+            </table>
+          }
 
           <div class="order-total">
             <span>Total del pedido:</span>

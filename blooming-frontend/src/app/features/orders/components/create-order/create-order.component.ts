@@ -14,7 +14,9 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatDividerModule } from '@angular/material/divider';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CustomersService } from '../../../customers/services/customers.service';
 import { ProductsService } from '../../../products/services/products.service';
 import { OrdersService } from '../../services/orders.service';
@@ -51,6 +53,12 @@ export class CreateOrderComponent implements OnInit {
   private readonly customersService = inject(CustomersService);
   private readonly productsService = inject(ProductsService);
   private readonly ordersService = inject(OrdersService);
+  private readonly breakpointObserver = inject(BreakpointObserver);
+
+  readonly isMobile = toSignal(
+    this.breakpointObserver.observe([Breakpoints.XSmall, Breakpoints.Small]).pipe(map((r) => r.matches)),
+    { initialValue: false }
+  );
 
   readonly constants = ordersConstants;
   readonly isLoading = this.ordersService.isLoading;

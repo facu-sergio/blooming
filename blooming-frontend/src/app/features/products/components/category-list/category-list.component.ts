@@ -8,6 +8,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs/operators';
 import { CategoriesService } from '../../services/categories.service';
 import { Category } from '../../models/category.models';
 import { CategoryFormComponent } from '../category-form/category-form.component';
@@ -30,7 +33,13 @@ export class CategoryListComponent implements OnInit {
   private readonly categoriesService = inject(CategoriesService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
+  private readonly breakpointObserver = inject(BreakpointObserver);
   readonly router = inject(Router);
+
+  readonly isMobile = toSignal(
+    this.breakpointObserver.observe([Breakpoints.XSmall, Breakpoints.Small]).pipe(map((r) => r.matches)),
+    { initialValue: false }
+  );
 
   readonly categories = this.categoriesService.categories;
   readonly isLoading = this.categoriesService.isLoading;

@@ -20,7 +20,30 @@
           <mat-icon>category</mat-icon>
           <p>No hay categorías creadas. Crea la primera para poder agregar productos.</p>
         </div>
+      } @else if (isMobile()) {
+        <!-- Vista móvil: cards separadas -->
+        <div class="cards-list">
+          @for (category of categories(); track category.id) {
+            <mat-card class="category-card">
+              <mat-card-header>
+                <mat-card-title>{{ category.name }}</mat-card-title>
+                @if (category.description) {
+                  <mat-card-subtitle>{{ category.description }}</mat-card-subtitle>
+                }
+              </mat-card-header>
+              <mat-card-actions align="end">
+                <button mat-icon-button (click)="openEditDialog(category)" aria-label="Editar">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteCategory(category)" aria-label="Eliminar">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          }
+        </div>
       } @else {
+        <!-- Vista desktop: tabla -->
         <table mat-table [dataSource]="categories()" class="full-width">
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Nombre</th>

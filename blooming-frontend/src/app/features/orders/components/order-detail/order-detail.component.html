@@ -171,38 +171,6 @@
           <mat-icon>arrow_back</mat-icon>
           Volver
         </button>
-        @if (isPending) {
-          <button
-            mat-flat-button
-            color="primary"
-            [disabled]="isLoading()"
-            (click)="onConfirm()"
-          >
-            @if (isLoading()) {
-              <mat-spinner diameter="20"></mat-spinner>
-            } @else {
-              <mat-icon>check_circle</mat-icon>
-              Confirmar Pedido
-            }
-          </button>
-        }
-        @if (isCancellable()) {
-          <button
-            mat-flat-button
-            color="warn"
-            [disabled]="isLoading()"
-            (click)="onCancelOrder()"
-          >
-            @if (isLoading()) {
-              <mat-spinner diameter="20"></mat-spinner>
-            } @else {
-              <ng-container>
-                <mat-icon>cancel</mat-icon>
-                Cancelar Pedido
-              </ng-container>
-            }
-          </button>
-        }
       </mat-card-actions>
     </mat-card>
   }
