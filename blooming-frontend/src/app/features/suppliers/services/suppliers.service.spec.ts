@@ -7,10 +7,12 @@ import { Supplier } from '../models/supplier.models';
 const mockSupplier: Supplier = {
   id: '550e8400-e29b-41d4-a716-446655440000',
   name: 'Mayorista ABC',
-  contactInfo: 'contacto@abc.com',
+  phone: 'contacto@abc.com',
   createdAt: '2026-03-27T00:00:00Z',
   updatedAt: '2026-03-27T00:00:00Z',
 };
+
+const pagedResponse = { items: [mockSupplier], totalCount: 1, page: 1, pageSize: 1000 };
 
 describe('SuppliersService', () => {
   let service: SuppliersService;
@@ -51,7 +53,7 @@ describe('SuppliersService', () => {
 
       const req = httpMock.expectOne((r) => r.url.includes('/api/suppliers'));
       expect(req.request.method).toBe('GET');
-      req.flush([mockSupplier]);
+      req.flush(pagedResponse);
 
       await loadPromise;
       expect(service.suppliers()).toEqual([mockSupplier]);
@@ -59,7 +61,7 @@ describe('SuppliersService', () => {
 
     it('should set isLoading to false after successful loadAll', async () => {
       const loadPromise = service.loadAll();
-      httpMock.expectOne((r) => r.url.includes('/api/suppliers')).flush([mockSupplier]);
+      httpMock.expectOne((r) => r.url.includes('/api/suppliers')).flush(pagedResponse);
       await loadPromise;
       expect(service.isLoading()).toBe(false);
     });
@@ -80,7 +82,7 @@ describe('SuppliersService', () => {
         r.url.includes('/api/suppliers') && r.params.get('searchTerm') === 'ABC'
       );
       expect(req.request.method).toBe('GET');
-      req.flush([mockSupplier]);
+      req.flush(pagedResponse);
 
       await loadPromise;
       expect(service.suppliers()).toEqual([mockSupplier]);
@@ -91,7 +93,7 @@ describe('SuppliersService', () => {
 
       const req = httpMock.expectOne((r) => r.url.includes('/api/suppliers'));
       expect(req.request.params.has('searchTerm')).toBe(false);
-      req.flush([]);
+      req.flush({ items: [], totalCount: 0, page: 1, pageSize: 1000 });
 
       await loadPromise;
     });
@@ -99,7 +101,7 @@ describe('SuppliersService', () => {
 
   describe('create()', () => {
     it('should POST /api/suppliers and refresh list', async () => {
-      const dto = { name: 'Mayorista ABC', contactInfo: 'contacto@abc.com' };
+      const dto = { name: 'Mayorista ABC', phone: 'contacto@abc.com' };
       const createPromise = service.create(dto);
 
       const postReq = httpMock.expectOne(
@@ -113,7 +115,7 @@ describe('SuppliersService', () => {
       const getReq = httpMock.expectOne(
         (r) => r.url.includes('/api/suppliers') && r.method === 'GET'
       );
-      getReq.flush([mockSupplier]);
+      getReq.flush(pagedResponse);
 
       const result = await createPromise;
       expect(result).toEqual(mockSupplier);
@@ -131,7 +133,7 @@ describe('SuppliersService', () => {
       req.flush({ ...mockSupplier, id: '550e8400-e29b-41d4-a716-000000000001', name: 'Proveedor XYZ' });
 
       await Promise.resolve();
-      httpMock.expectOne((r) => r.url.includes('/api/suppliers') && r.method === 'GET').flush([]);
+      httpMock.expectOne((r) => r.url.includes('/api/suppliers') && r.method === 'GET').flush({ items: [], totalCount: 0, page: 1, pageSize: 1000 });
       await createPromise;
     });
   });
@@ -152,7 +154,7 @@ describe('SuppliersService', () => {
 
       httpMock
         .expectOne((r) => r.url.includes('/api/suppliers') && r.method === 'GET')
-        .flush([updated]);
+        .flush({ items: [updated], totalCount: 1, page: 1, pageSize: 1000 });
 
       const result = await updatePromise;
       expect(result.name).toBe('Mayorista Actualizado');

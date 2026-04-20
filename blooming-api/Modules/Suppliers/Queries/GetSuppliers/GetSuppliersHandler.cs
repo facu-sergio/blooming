@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace blooming_api.Modules.Suppliers.Queries.GetSuppliers;
 
-public class GetSuppliersHandler : IRequestHandler<GetSuppliersQuery, List<SupplierResponse>>
+public class GetSuppliersHandler : IRequestHandler<GetSuppliersQuery, PagedSuppliersResult>
 {
     private readonly AppDbContext _db;
 
@@ -15,7 +15,7 @@ public class GetSuppliersHandler : IRequestHandler<GetSuppliersQuery, List<Suppl
         _db = db;
     }
 
-    public async Task<List<SupplierResponse>> Handle(GetSuppliersQuery request, CancellationToken cancellationToken)
+    public async Task<PagedSuppliersResult> Handle(GetSuppliersQuery request, CancellationToken cancellationToken)
     {
         var query = _db.Suppliers.AsQueryable();
 
@@ -29,10 +29,19 @@ public class GetSuppliersHandler : IRequestHandler<GetSuppliersQuery, List<Suppl
                 (s.Address != null && s.Address.ToLower().Contains(term)));
         }
 
+        var totalCount = await query.CountAsync(cancellationToken);
+
         var suppliers = await query
             .OrderBy(s => s.Name)
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
             .ToListAsync(cancellationToken);
 
-        return suppliers.Select(CreateSupplierHandler.MapToResponse).ToList();
+        return new PagedSuppliersResult(
+            suppliers.Select(CreateSupplierHandler.MapToResponse).ToList(),
+            totalCount,
+            request.Page,
+            request.PageSize
+        );
     }
 }

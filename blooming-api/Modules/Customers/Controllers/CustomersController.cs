@@ -23,9 +23,12 @@ public class CustomersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<CustomerResponse>>> GetAll([FromQuery] string? searchTerm)
+    public async Task<ActionResult<PagedCustomersResult>> GetAll(
+        [FromQuery] string? searchTerm,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 1000)
     {
-        var result = await _mediator.Send(new GetCustomersQuery(searchTerm));
+        var result = await _mediator.Send(new GetCustomersQuery(searchTerm, page, pageSize));
         return Ok(result);
     }
 

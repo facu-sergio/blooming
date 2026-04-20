@@ -6,6 +6,8 @@ import {
   CreatePurchaseOrderResult,
   PurchaseOrderDetail,
   PurchaseOrderListItem,
+  PurchaseOrderListFilters,
+  PagedPurchaseOrdersResult,
 } from '../models/purchase-order.models';
 import { firstValueFrom } from 'rxjs';
 
@@ -17,10 +19,12 @@ export class PurchaseOrdersService {
   private readonly _purchaseOrders = signal<PurchaseOrderListItem[]>([]);
   private readonly _isLoading = signal(false);
   private readonly _selectedOrder = signal<PurchaseOrderDetail | null>(null);
+  private readonly _totalCount = signal(0);
 
   readonly purchaseOrders = this._purchaseOrders.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
   readonly selectedOrder = this._selectedOrder.asReadonly();
+  readonly totalCount = this._totalCount.asReadonly();
 
   async loadAll(supplierId?: string): Promise<void> {
     this._isLoading.set(true);
@@ -28,9 +32,30 @@ export class PurchaseOrdersService {
       let params = new HttpParams();
       if (supplierId) params = params.set('supplierId', supplierId);
       const result = await firstValueFrom(
-        this.http.get<PurchaseOrderListItem[]>(this.baseUrl, { params })
+        this.http.get<PagedPurchaseOrdersResult>(this.baseUrl, { params })
       );
-      this._purchaseOrders.set(result);
+      this._purchaseOrders.set(result.items);
+      this._totalCount.set(result.totalCount);
+    } finally {
+      this._isLoading.set(false);
+    }
+  }
+
+  async getPurchaseOrdersPaged(filters: PurchaseOrderListFilters): Promise<void> {
+    this._isLoading.set(true);
+    try {
+      let params = new HttpParams()
+        .set('page', filters.page.toString())
+        .set('pageSize', filters.pageSize.toString());
+      if (filters.supplierId) params = params.set('supplierId', filters.supplierId);
+      if (filters.fromDate) params = params.set('fromDate', filters.fromDate);
+      if (filters.toDate) params = params.set('toDate', filters.toDate);
+
+      const result = await firstValueFrom(
+        this.http.get<PagedPurchaseOrdersResult>(this.baseUrl, { params })
+      );
+      this._purchaseOrders.set(result.items);
+      this._totalCount.set(result.totalCount);
     } finally {
       this._isLoading.set(false);
     }

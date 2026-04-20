@@ -55,6 +55,22 @@ export interface SearchFilters {
   color?: string;
 }
 
+export interface ProductListFilters {
+  searchTerm?: string;
+  category?: string;
+  size?: string;
+  color?: string;
+  page: number;
+  pageSize: number;
+}
+
+export interface PagedProductsResult {
+  items: ProductResponse[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}
+
 export interface CreateProductInlineDto {
   name: string;
   categoryId: number;

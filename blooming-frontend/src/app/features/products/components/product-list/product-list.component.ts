@@ -11,12 +11,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { ProductsService } from '../../services/products.service';
-import { SearchFilters, VariantResponse } from '../../models/product.models';
+import { ProductListFilters, VariantResponse } from '../../models/product.models';
 import { FormatMeasurementsPipe } from '../../pipes/format-measurements.pipe';
+import { CategoriesService } from '../../services/categories.service';
 
 @Component({
   selector: 'app-product-list',
@@ -33,6 +35,7 @@ import { FormatMeasurementsPipe } from '../../pipes/format-measurements.pipe';
     MatInputModule,
     MatAutocompleteModule,
     MatTooltipModule,
+    MatPaginatorModule,
     FormatMeasurementsPipe,
   ],
   templateUrl: './product-list.component.html',
@@ -40,12 +43,13 @@ import { FormatMeasurementsPipe } from '../../pipes/format-measurements.pipe';
 })
 export class ProductListComponent implements OnInit {
   private readonly productsService = inject(ProductsService);
+  private readonly categoriesService = inject(CategoriesService);
   private readonly router = inject(Router);
   private readonly breakpointObserver = inject(BreakpointObserver);
 
   readonly products = this.productsService.products;
   readonly isLoading = this.productsService.isLoading;
-  readonly searchFilters = this.productsService.searchFilters;
+  readonly totalCount = this.productsService.totalCount;
 
   readonly isDesktop = toSignal(
     this.breakpointObserver.observe('(min-width: 1280px)').pipe(map((r) => r.matches)),
@@ -57,41 +61,48 @@ export class ProductListComponent implements OnInit {
   readonly sizeControl = new FormControl<string>('');
   readonly colorControl = new FormControl<string>('');
 
-  readonly categories = computed(() => {
-    const all = this.productsService.products();
-    return [...new Set(all.map((p) => p.categoryName))].sort();
-  });
+  page = 1;
+  pageSize = 20;
 
-  readonly hasActiveFilters = computed(() => {
-    const f = this.searchFilters();
-    return !!(f.searchTerm || f.category || f.size || f.color);
-  });
+  readonly categories = computed(() =>
+    this.categoriesService.categories().map(c => c.name).sort()
+  );
 
-  readonly noResults = computed(() => {
-    return this.products().length === 0 && this.hasActiveFilters();
-  });
+  private readonly _hasActiveFilters = signal(false);
+
+  readonly hasActiveFilters = this._hasActiveFilters.asReadonly();
+
+  readonly noResults = computed(() => this.products().length === 0 && this._hasActiveFilters());
 
   private searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   async ngOnInit(): Promise<void> {
-    await this.productsService.loadAll();
+    await this.categoriesService.loadAll();
+    await this.loadProducts();
   }
 
-  onFilterChange(): void {
-    if (this.searchDebounceTimer) {
-      clearTimeout(this.searchDebounceTimer);
-    }
-    this.searchDebounceTimer = setTimeout(() => this.applyFilters(), 300);
-  }
-
-  private async applyFilters(): Promise<void> {
-    const filters: SearchFilters = {
+  private async loadProducts(): Promise<void> {
+    const filters: ProductListFilters = {
+      page: this.page,
+      pageSize: this.pageSize,
       searchTerm: this.searchTermControl.value || undefined,
       category: this.categoryControl.value || undefined,
       size: this.sizeControl.value || undefined,
       color: this.colorControl.value || undefined,
     };
-    await this.productsService.search(filters);
+    await this.productsService.getProductsPaged(filters);
+  }
+
+  onFilterChange(): void {
+    if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+    this.searchDebounceTimer = setTimeout(() => {
+      this._hasActiveFilters.set(
+        !!(this.searchTermControl.value || this.categoryControl.value ||
+           this.sizeControl.value || this.colorControl.value)
+      );
+      this.page = 1;
+      void this.loadProducts();
+    }, 300);
   }
 
   async clearFilters(): Promise<void> {
@@ -99,7 +110,15 @@ export class ProductListComponent implements OnInit {
     this.categoryControl.setValue('');
     this.sizeControl.setValue('');
     this.colorControl.setValue('');
-    await this.productsService.clearSearch();
+    this._hasActiveFilters.set(false);
+    this.page = 1;
+    await this.loadProducts();
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.page = event.pageIndex + 1;
+    this.pageSize = event.pageSize;
+    void this.loadProducts();
   }
 
   getStockClass(stock: number): string {
@@ -131,5 +150,4 @@ export class ProductListComponent implements OnInit {
   getLowStockTooltip(variant: VariantResponse): string {
     return `Stock bajo: ${variant.stock} unidades (umbral: ${variant.lowStockThreshold})`;
   }
-
 }

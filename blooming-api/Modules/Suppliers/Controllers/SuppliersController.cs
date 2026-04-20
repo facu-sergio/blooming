@@ -22,9 +22,12 @@ public class SuppliersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<SupplierResponse>>> GetAll([FromQuery] string? searchTerm)
+    public async Task<ActionResult<PagedSuppliersResult>> GetAll(
+        [FromQuery] string? searchTerm,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 1000)
     {
-        var result = await _mediator.Send(new GetSuppliersQuery(searchTerm));
+        var result = await _mediator.Send(new GetSuppliersQuery(searchTerm, page, pageSize));
         return Ok(result);
     }
 

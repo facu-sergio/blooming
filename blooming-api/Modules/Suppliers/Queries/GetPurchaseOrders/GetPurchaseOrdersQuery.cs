@@ -2,7 +2,20 @@ using MediatR;
 
 namespace blooming_api.Modules.Suppliers.Queries.GetPurchaseOrders;
 
-public record GetPurchaseOrdersQuery(Guid? SupplierId) : IRequest<List<PurchaseOrderListItemDto>>;
+public record GetPurchaseOrdersQuery(
+    Guid? SupplierId = null,
+    DateTime? FromDate = null,
+    DateTime? ToDate = null,
+    int Page = 1,
+    int PageSize = 1000
+) : IRequest<PagedPurchaseOrdersResult>;
+
+public record PagedPurchaseOrdersResult(
+    List<PurchaseOrderListItemDto> Items,
+    int TotalCount,
+    int Page,
+    int PageSize
+);
 
 public record PurchaseOrderListItemDto(
     int Id,

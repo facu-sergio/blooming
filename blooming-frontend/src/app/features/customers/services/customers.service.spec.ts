@@ -55,7 +55,7 @@ describe('CustomersService', () => {
 
       const req = httpMock.expectOne((r) => r.url.includes('/api/customers'));
       expect(req.request.method).toBe('GET');
-      req.flush([mockCustomer]);
+      req.flush({ items: [mockCustomer], totalCount: 1, page: 1, pageSize: 1000 });
 
       await loadPromise;
       expect(service.customers()).toEqual([mockCustomer]);
@@ -63,7 +63,7 @@ describe('CustomersService', () => {
 
     it('should set isLoading to false after successful loadAll', async () => {
       const loadPromise = service.loadAll();
-      httpMock.expectOne((r) => r.url.includes('/api/customers')).flush([mockCustomer]);
+      httpMock.expectOne((r) => r.url.includes('/api/customers')).flush({ items: [mockCustomer], totalCount: 1, page: 1, pageSize: 1000 });
       await loadPromise;
       expect(service.isLoading()).toBe(false);
     });
@@ -84,7 +84,7 @@ describe('CustomersService', () => {
         r.url.includes('/api/customers') && r.params.get('searchTerm') === 'Ana'
       );
       expect(req.request.method).toBe('GET');
-      req.flush([mockCustomer]);
+      req.flush({ items: [mockCustomer], totalCount: 1, page: 1, pageSize: 1000 });
 
       await loadPromise;
       expect(service.customers()).toEqual([mockCustomer]);
@@ -96,7 +96,7 @@ describe('CustomersService', () => {
 
       const req = httpMock.expectOne((r) => r.url.includes('/api/customers'));
       expect(req.request.params.has('searchTerm')).toBe(false);
-      req.flush([mockCustomer]);
+      req.flush({ items: [mockCustomer], totalCount: 1, page: 1, pageSize: 1000 });
 
       await loadPromise;
       expect(service.searchTerm()).toBe('');
@@ -106,19 +106,17 @@ describe('CustomersService', () => {
       const loadPromise = service.loadAll('García');
       httpMock
         .expectOne((r) => r.url.includes('/api/customers') && r.params.get('searchTerm') === 'García')
-        .flush([]);
+        .flush({ items: [], totalCount: 0, page: 1, pageSize: 1000 });
       await loadPromise;
       expect(service.searchTerm()).toBe('García');
     });
 
     it('should clear searchTerm signal when called without term', async () => {
-      // first search
       let p = service.loadAll('test');
-      httpMock.expectOne((r) => r.params.has('searchTerm')).flush([]);
+      httpMock.expectOne((r) => r.params.has('searchTerm')).flush({ items: [], totalCount: 0, page: 1, pageSize: 1000 });
       await p;
-      // then clear
       p = service.loadAll();
-      httpMock.expectOne((r) => r.url.includes('/api/customers')).flush([mockCustomer]);
+      httpMock.expectOne((r) => r.url.includes('/api/customers')).flush({ items: [mockCustomer], totalCount: 1, page: 1, pageSize: 1000 });
       await p;
       expect(service.searchTerm()).toBe('');
     });
@@ -140,7 +138,7 @@ describe('CustomersService', () => {
       const getReq = httpMock.expectOne(
         (r) => r.url.includes('/api/customers') && r.method === 'GET'
       );
-      getReq.flush([mockCustomer]);
+      getReq.flush({ items: [mockCustomer], totalCount: 1, page: 1, pageSize: 1000 });
 
       const result = await createPromise;
       expect(result).toEqual(mockCustomer);
@@ -159,7 +157,7 @@ describe('CustomersService', () => {
       req.flush({ ...mockCustomer, id: 2, name: 'Juan López' });
 
       await Promise.resolve();
-      httpMock.expectOne((r) => r.url.includes('/api/customers') && r.method === 'GET').flush([]);
+      httpMock.expectOne((r) => r.url.includes('/api/customers') && r.method === 'GET').flush({ items: [], totalCount: 0, page: 1, pageSize: 1000 });
       await createPromise;
     });
   });
@@ -180,7 +178,7 @@ describe('CustomersService', () => {
 
       httpMock
         .expectOne((r) => r.url.includes('/api/customers') && r.method === 'GET')
-        .flush([updated]);
+        .flush({ items: [updated], totalCount: 1, page: 1, pageSize: 1000 });
 
       const result = await updatePromise;
       expect(result.name).toBe('Ana García Actualizada');

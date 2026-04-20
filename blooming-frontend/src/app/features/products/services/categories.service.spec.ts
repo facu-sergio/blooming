@@ -46,7 +46,7 @@ describe('CategoriesService', () => {
 
       const req = httpMock.expectOne((r) => r.url.includes('/api/categories'));
       expect(req.request.method).toBe('GET');
-      req.flush([mockCategory]);
+      req.flush({ items: [mockCategory], totalCount: 1, page: 1, pageSize: 1000 });
 
       await loadPromise;
       expect(service.categories()).toEqual([mockCategory]);
@@ -54,7 +54,7 @@ describe('CategoriesService', () => {
 
     it('should set isLoading to false after successful loadAll', async () => {
       const loadPromise = service.loadAll();
-      httpMock.expectOne((r) => r.url.includes('/api/categories')).flush([mockCategory]);
+      httpMock.expectOne((r) => r.url.includes('/api/categories')).flush({ items: [mockCategory], totalCount: 1, page: 1, pageSize: 1000 });
       await loadPromise;
       expect(service.isLoading()).toBe(false);
     });
@@ -81,7 +81,7 @@ describe('CategoriesService', () => {
       await Promise.resolve();
 
       const getReq = httpMock.expectOne((r) => r.url.includes('/api/categories') && r.method === 'GET');
-      getReq.flush([mockCategory]);
+      getReq.flush({ items: [mockCategory], totalCount: 1, page: 1, pageSize: 1000 });
 
       const result = await createPromise;
       expect(result).toEqual(mockCategory);
@@ -97,7 +97,7 @@ describe('CategoriesService', () => {
       req.flush({ ...mockCategory, id: 2, name: 'Accesorios' });
 
       await Promise.resolve();
-      httpMock.expectOne((r) => r.url.includes('/api/categories') && r.method === 'GET').flush([]);
+      httpMock.expectOne((r) => r.url.includes('/api/categories') && r.method === 'GET').flush({ items: [], totalCount: 0, page: 1, pageSize: 1000 });
       await createPromise;
     });
   });
@@ -114,7 +114,7 @@ describe('CategoriesService', () => {
 
       await Promise.resolve();
 
-      httpMock.expectOne((r) => r.url.includes('/api/categories') && r.method === 'GET').flush([updated]);
+      httpMock.expectOne((r) => r.url.includes('/api/categories') && r.method === 'GET').flush({ items: [updated], totalCount: 1, page: 1, pageSize: 1000 });
 
       const result = await updatePromise;
       expect(result.name).toBe('Ropa Actualizada');
@@ -130,7 +130,7 @@ describe('CategoriesService', () => {
 
       await Promise.resolve();
 
-      httpMock.expectOne((r) => r.url.includes('/api/categories') && r.method === 'GET').flush([]);
+      httpMock.expectOne((r) => r.url.includes('/api/categories') && r.method === 'GET').flush({ items: [], totalCount: 0, page: 1, pageSize: 1000 });
 
       await deletePromise;
       expect(service.categories()).toEqual([]);

@@ -135,50 +135,52 @@ public class GetPurchaseOrdersBySupplierHandlerTests : IDisposable
     [Fact]
     public async Task Handle_SinFiltroSupplierId_RetornaTodosLosPedidos()
     {
-        var query = new GetPurchaseOrdersQuery(null);
+        var query = new GetPurchaseOrdersQuery();
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        Assert.Equal(3, result.Count);
+        Assert.Equal(3, result.TotalCount);
+        Assert.Equal(3, result.Items.Count);
     }
 
     [Fact]
     public async Task Handle_ConSupplierId_RetornaSoloPedidosDelProveedor()
     {
-        var query = new GetPurchaseOrdersQuery(_supplierId1);
+        var query = new GetPurchaseOrdersQuery(SupplierId: _supplierId1);
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        Assert.Equal(2, result.Count);
-        Assert.All(result, item => Assert.Equal(_supplierId1, item.SupplierId));
+        Assert.Equal(2, result.Items.Count);
+        Assert.All(result.Items, item => Assert.Equal(_supplierId1, item.SupplierId));
     }
 
     [Fact]
     public async Task Handle_ConSupplierId_RetornaListaVaciaSiNoTieneOrdenes()
     {
         var supplierSinOrdenes = Guid.NewGuid();
-        var query = new GetPurchaseOrdersQuery(supplierSinOrdenes);
+        var query = new GetPurchaseOrdersQuery(SupplierId: supplierSinOrdenes);
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        Assert.Empty(result);
+        Assert.Empty(result.Items);
+        Assert.Equal(0, result.TotalCount);
     }
 
     [Fact]
     public async Task Handle_ConSupplierId_RetornaOrdenadoPorFechaDescendente()
     {
-        var query = new GetPurchaseOrdersQuery(_supplierId1);
+        var query = new GetPurchaseOrdersQuery(SupplierId: _supplierId1);
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        Assert.Equal(2, result.Count);
-        Assert.True(result[0].OrderDate >= result[1].OrderDate);
+        Assert.Equal(2, result.Items.Count);
+        Assert.True(result.Items[0].OrderDate >= result.Items[1].OrderDate);
     }
 
     [Fact]
     public async Task Handle_RetornaDto_ConDatosCorrectos()
     {
-        var query = new GetPurchaseOrdersQuery(_supplierId2);
+        var query = new GetPurchaseOrdersQuery(SupplierId: _supplierId2);
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        Assert.Single(result);
-        var item = result[0];
+        Assert.Single(result.Items);
+        var item = result.Items[0];
         Assert.Equal(_supplierId2, item.SupplierId);
         Assert.Equal("Mayorista Dos", item.SupplierName);
         Assert.Equal(3000m, item.TotalAmount);

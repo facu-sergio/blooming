@@ -27,9 +27,15 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<ProductResponse>>> GetAll()
+    public async Task<ActionResult<PagedProductsResult>> GetAll(
+        [FromQuery] string? searchTerm,
+        [FromQuery] string? category,
+        [FromQuery] string? size,
+        [FromQuery] string? color,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 1000)
     {
-        var result = await _mediator.Send(new GetProductsQuery());
+        var result = await _mediator.Send(new GetProductsQuery(searchTerm, category, size, color, page, pageSize));
         return Ok(result);
     }
 

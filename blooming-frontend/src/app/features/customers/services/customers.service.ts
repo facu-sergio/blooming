@@ -7,6 +7,8 @@ import {
   UpdateCustomerDto,
   CustomerOrder,
   CustomerMetrics,
+  CustomerListFilters,
+  PagedCustomersResult,
 } from '../models/customer.models';
 import { firstValueFrom } from 'rxjs';
 
@@ -19,9 +21,8 @@ export class CustomersService {
   private readonly _isLoading = signal(false);
   private readonly _selectedCustomer = signal<Customer | null>(null);
   private readonly _searchTerm = signal<string>('');
+  private readonly _totalCount = signal(0);
 
-  // [Historia 3.3] Signals para historial y métricas del cliente en vista de detalle.
-  // TODO: Integrar con polling.service.ts cuando se implemente el servicio de polling global.
   private readonly _customerOrders = signal<CustomerOrder[]>([]);
   private readonly _customerMetrics = signal<CustomerMetrics | null>(null);
   private readonly _isLoadingDetail = signal(false);
@@ -30,6 +31,7 @@ export class CustomersService {
   readonly isLoading = this._isLoading.asReadonly();
   readonly selectedCustomer = this._selectedCustomer.asReadonly();
   readonly searchTerm = this._searchTerm.asReadonly();
+  readonly totalCount = this._totalCount.asReadonly();
   readonly customerOrders = this._customerOrders.asReadonly();
   readonly customerMetrics = this._customerMetrics.asReadonly();
   readonly isLoadingDetail = this._isLoadingDetail.asReadonly();
@@ -40,8 +42,25 @@ export class CustomersService {
     try {
       let params = new HttpParams();
       if (searchTerm) params = params.set('searchTerm', searchTerm);
-      const result = await firstValueFrom(this.http.get<Customer[]>(this.baseUrl, { params }));
-      this._customers.set(result);
+      const result = await firstValueFrom(this.http.get<PagedCustomersResult>(this.baseUrl, { params }));
+      this._customers.set(result.items);
+      this._totalCount.set(result.totalCount);
+    } finally {
+      this._isLoading.set(false);
+    }
+  }
+
+  async getCustomersPaged(filters: CustomerListFilters): Promise<void> {
+    this._isLoading.set(true);
+    try {
+      let params = new HttpParams()
+        .set('page', filters.page.toString())
+        .set('pageSize', filters.pageSize.toString());
+      if (filters.searchTerm) params = params.set('searchTerm', filters.searchTerm);
+
+      const result = await firstValueFrom(this.http.get<PagedCustomersResult>(this.baseUrl, { params }));
+      this._customers.set(result.items);
+      this._totalCount.set(result.totalCount);
     } finally {
       this._isLoading.set(false);
     }

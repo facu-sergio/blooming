@@ -21,9 +21,14 @@ public class PurchaseOrdersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<PurchaseOrderListItemDto>>> GetAll([FromQuery] Guid? supplierId)
+    public async Task<ActionResult<PagedPurchaseOrdersResult>> GetAll(
+        [FromQuery] Guid? supplierId,
+        [FromQuery] DateTime? fromDate,
+        [FromQuery] DateTime? toDate,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 1000)
     {
-        var result = await _mediator.Send(new GetPurchaseOrdersQuery(supplierId));
+        var result = await _mediator.Send(new GetPurchaseOrdersQuery(supplierId, fromDate, toDate, page, pageSize));
         return Ok(result);
     }
 

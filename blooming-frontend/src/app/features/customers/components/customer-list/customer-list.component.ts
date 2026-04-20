@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, computed } from '@angular/core';
+import { Component, inject, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
@@ -10,9 +10,10 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CustomersService } from '../../services/customers.service';
-import { Customer } from '../../models/customer.models';
+import { Customer, CustomerListFilters } from '../../models/customer.models';
 
 @Component({
   selector: 'app-customer-list',
@@ -27,6 +28,7 @@ import { Customer } from '../../models/customer.models';
     MatProgressSpinnerModule,
     MatFormFieldModule,
     MatInputModule,
+    MatPaginatorModule,
   ],
   templateUrl: './customer-list.component.html',
   styleUrl: './customer-list.component.scss',
@@ -39,35 +41,54 @@ export class CustomerListComponent implements OnInit {
 
   readonly customers = this.customersService.customers;
   readonly isLoading = this.customersService.isLoading;
-  readonly searchTerm = this.customersService.searchTerm;
+  readonly totalCount = this.customersService.totalCount;
   readonly displayedColumns = ['name', 'phone', 'address', 'actions'];
-
-  readonly noResults = computed(
-    () => this.customers().length === 0 && this.searchTerm().length > 0
-  );
 
   readonly searchControl = new FormControl<string>('');
 
+  page = 1;
+  pageSize = 20;
   isMobile = false;
   private searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+  readonly noResults = computed(
+    () => this.customers().length === 0 && !!this.searchControl.value
+  );
 
   async ngOnInit(): Promise<void> {
     this.breakpointObserver.observe([Breakpoints.Handset]).subscribe((result) => {
       this.isMobile = result.matches;
     });
-    await this.customersService.loadAll();
+    await this.loadCustomers();
+  }
+
+  private async loadCustomers(): Promise<void> {
+    const filters: CustomerListFilters = {
+      page: this.page,
+      pageSize: this.pageSize,
+      searchTerm: this.searchControl.value || undefined,
+    };
+    await this.customersService.getCustomersPaged(filters);
   }
 
   onSearchChange(): void {
     if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
     this.searchDebounceTimer = setTimeout(() => {
-      void this.customersService.loadAll(this.searchControl.value || undefined);
+      this.page = 1;
+      void this.loadCustomers();
     }, 300);
   }
 
   async clearSearch(): Promise<void> {
     this.searchControl.setValue('');
-    await this.customersService.loadAll();
+    this.page = 1;
+    await this.loadCustomers();
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.page = event.pageIndex + 1;
+    this.pageSize = event.pageSize;
+    void this.loadCustomers();
   }
 
   navigateToNew(): void {

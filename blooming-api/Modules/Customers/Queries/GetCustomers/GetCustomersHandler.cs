@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace blooming_api.Modules.Customers.Queries.GetCustomers;
 
-public class GetCustomersHandler : IRequestHandler<GetCustomersQuery, List<CustomerResponse>>
+public class GetCustomersHandler : IRequestHandler<GetCustomersQuery, PagedCustomersResult>
 {
     private readonly AppDbContext _db;
 
@@ -15,7 +15,7 @@ public class GetCustomersHandler : IRequestHandler<GetCustomersQuery, List<Custo
         _db = db;
     }
 
-    public async Task<List<CustomerResponse>> Handle(GetCustomersQuery request, CancellationToken cancellationToken)
+    public async Task<PagedCustomersResult> Handle(GetCustomersQuery request, CancellationToken cancellationToken)
     {
         var query = _db.Customers.AsQueryable();
 
@@ -27,10 +27,19 @@ public class GetCustomersHandler : IRequestHandler<GetCustomersQuery, List<Custo
                 c.Phone.ToLower().Contains(term));
         }
 
+        var totalCount = await query.CountAsync(cancellationToken);
+
         var customers = await query
             .OrderBy(c => c.Name)
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
             .ToListAsync(cancellationToken);
 
-        return customers.Select(CreateCustomerHandler.MapToResponse).ToList();
+        return new PagedCustomersResult(
+            customers.Select(CreateCustomerHandler.MapToResponse).ToList(),
+            totalCount,
+            request.Page,
+            request.PageSize
+        );
     }
 }

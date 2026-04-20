@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
-import { Category, CreateCategoryDto, UpdateCategoryDto } from '../models/category.models';
+import { Category, CreateCategoryDto, UpdateCategoryDto, PagedCategoriesResult } from '../models/category.models';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -18,8 +18,8 @@ export class CategoriesService {
   async loadAll(): Promise<void> {
     this._isLoading.set(true);
     try {
-      const result = await firstValueFrom(this.http.get<Category[]>(this.baseUrl));
-      this._categories.set(result);
+      const result = await firstValueFrom(this.http.get<PagedCategoriesResult>(this.baseUrl));
+      this._categories.set(result.items);
     } finally {
       this._isLoading.set(false);
     }

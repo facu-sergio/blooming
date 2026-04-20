@@ -20,7 +20,9 @@ function buildMockService(overrides: Partial<CustomersService> = {}): Partial<Cu
     isLoading: signal(false).asReadonly(),
     selectedCustomer: signal<Customer | null>(null).asReadonly(),
     searchTerm: signal<string>('').asReadonly(),
+    totalCount: signal(0).asReadonly(),
     loadAll: async () => {},
+    getCustomersPaged: async () => {},
     selectCustomer: () => {},
     ...overrides,
   };
@@ -59,10 +61,10 @@ describe('CustomerListComponent', () => {
     TestBed.overrideProvider(CustomersService, {
       useValue: buildMockService({
         customers: signal<Customer[]>([]).asReadonly(),
-        searchTerm: signal<string>('Ana').asReadonly(),
       }),
     });
     const fixture = TestBed.createComponent(CustomerListComponent);
+    fixture.componentInstance.searchControl.setValue('Ana');
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     const emptyMsg = compiled.querySelector('.empty-state p')?.textContent;
@@ -89,19 +91,15 @@ describe('CustomerListComponent', () => {
     expect(compiled.querySelector('input[aria-label="Buscar clientes"]')).toBeTruthy();
   });
 
-  it('should show clear button when searchTerm is active', () => {
-    TestBed.overrideProvider(CustomersService, {
-      useValue: buildMockService({
-        searchTerm: signal<string>('test').asReadonly(),
-      }),
-    });
+  it('should show clear button when searchControl has value', () => {
     const fixture = TestBed.createComponent(CustomerListComponent);
+    fixture.componentInstance.searchControl.setValue('test');
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('button[aria-label="Limpiar búsqueda"]')).toBeTruthy();
   });
 
-  it('should NOT show clear button when searchTerm is empty', () => {
+  it('should NOT show clear button when searchControl is empty', () => {
     const fixture = TestBed.createComponent(CustomerListComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;

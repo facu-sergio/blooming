@@ -112,4 +112,15 @@
       }
     </mat-card-content>
   </mat-card>
+
+  @if (totalCount() > 0) {
+    <mat-paginator
+      [length]="totalCount()"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[10, 20, 50]"
+      [pageIndex]="page - 1"
+      (page)="onPageChange($event)"
+      aria-label="Seleccionar página de proveedores"
+    ></mat-paginator>
+  }
 </div>

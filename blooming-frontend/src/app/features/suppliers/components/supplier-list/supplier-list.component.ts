@@ -10,8 +10,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { SuppliersService } from '../../services/suppliers.service';
-import { Supplier } from '../../models/supplier.models';
+import { Supplier, SupplierListFilters } from '../../models/supplier.models';
 
 @Component({
   selector: 'app-supplier-list',
@@ -26,6 +27,7 @@ import { Supplier } from '../../models/supplier.models';
     MatProgressSpinnerModule,
     MatFormFieldModule,
     MatInputModule,
+    MatPaginatorModule,
   ],
   templateUrl: './supplier-list.component.html',
   styleUrl: './supplier-list.component.scss',
@@ -37,14 +39,13 @@ export class SupplierListComponent implements OnInit {
 
   readonly suppliers = this.suppliersService.suppliers;
   readonly isLoading = this.suppliersService.isLoading;
+  readonly totalCount = this.suppliersService.totalCount;
   readonly displayedColumns = ['name', 'phone', 'website', 'address', 'actions'];
-
-  viewSupplier(supplier: Supplier): void {
-    this.router.navigate(['/suppliers', supplier.id]);
-  }
 
   readonly searchControl = new FormControl<string>('');
 
+  page = 1;
+  pageSize = 20;
   isMobile = false;
   private searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -52,19 +53,40 @@ export class SupplierListComponent implements OnInit {
     this.breakpointObserver.observe([Breakpoints.Handset]).subscribe((result) => {
       this.isMobile = result.matches;
     });
-    await this.suppliersService.loadAll();
+    await this.loadSuppliers();
+  }
+
+  private async loadSuppliers(): Promise<void> {
+    const filters: SupplierListFilters = {
+      page: this.page,
+      pageSize: this.pageSize,
+      searchTerm: this.searchControl.value || undefined,
+    };
+    await this.suppliersService.getSuppliersPaged(filters);
   }
 
   onSearchChange(): void {
     if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
     this.searchDebounceTimer = setTimeout(() => {
-      void this.suppliersService.loadAll(this.searchControl.value || undefined);
+      this.page = 1;
+      void this.loadSuppliers();
     }, 300);
   }
 
   async clearSearch(): Promise<void> {
     this.searchControl.setValue('');
-    await this.suppliersService.loadAll();
+    this.page = 1;
+    await this.loadSuppliers();
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.page = event.pageIndex + 1;
+    this.pageSize = event.pageSize;
+    void this.loadSuppliers();
+  }
+
+  viewSupplier(supplier: Supplier): void {
+    this.router.navigate(['/suppliers', supplier.id]);
   }
 
   navigateToNew(): void {

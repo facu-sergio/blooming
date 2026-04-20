@@ -23,9 +23,11 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<CategoryResponse>>> GetAll()
+    public async Task<ActionResult<PagedCategoriesResult>> GetAll(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 1000)
     {
-        var result = await _mediator.Send(new GetCategoriesQuery());
+        var result = await _mediator.Send(new GetCategoriesQuery(page, pageSize));
         return Ok(result);
     }
 

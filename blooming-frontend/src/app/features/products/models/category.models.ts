@@ -14,3 +14,10 @@ export interface UpdateCategoryDto {
   name: string;
   description?: string;
 }
+
+export interface PagedCategoriesResult {
+  items: Category[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}

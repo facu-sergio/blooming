@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
-import { ProductResponse, CreateVariantDto, UpdateVariantDto, SearchFilters, VariantResponse, CreateProductInlineDto, PriceHistoryItem } from '../models/product.models';
+import { ProductResponse, CreateVariantDto, UpdateVariantDto, SearchFilters, VariantResponse, CreateProductInlineDto, PriceHistoryItem, PagedProductsResult, ProductListFilters } from '../models/product.models';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -13,17 +13,41 @@ export class ProductsService {
   private readonly _isLoading = signal(false);
   private readonly _selectedProduct = signal<ProductResponse | null>(null);
   private readonly _searchFilters = signal<SearchFilters>({});
+  private readonly _totalCount = signal(0);
 
   readonly products = this._products.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
   readonly selectedProduct = this._selectedProduct.asReadonly();
   readonly searchFilters = this._searchFilters.asReadonly();
+  readonly totalCount = this._totalCount.asReadonly();
 
   async loadAll(): Promise<void> {
     this._isLoading.set(true);
     try {
-      const result = await firstValueFrom(this.http.get<ProductResponse[]>(this.baseUrl));
-      this._products.set(result);
+      const result = await firstValueFrom(this.http.get<PagedProductsResult>(this.baseUrl));
+      this._products.set(result.items);
+      this._totalCount.set(result.totalCount);
+    } finally {
+      this._isLoading.set(false);
+    }
+  }
+
+  async getProductsPaged(filters: ProductListFilters): Promise<void> {
+    this._isLoading.set(true);
+    try {
+      let params = new HttpParams()
+        .set('page', filters.page.toString())
+        .set('pageSize', filters.pageSize.toString());
+      if (filters.searchTerm) params = params.set('searchTerm', filters.searchTerm);
+      if (filters.category) params = params.set('category', filters.category);
+      if (filters.size) params = params.set('size', filters.size);
+      if (filters.color) params = params.set('color', filters.color);
+
+      const result = await firstValueFrom(
+        this.http.get<PagedProductsResult>(this.baseUrl, { params })
+      );
+      this._products.set(result.items);
+      this._totalCount.set(result.totalCount);
     } finally {
       this._isLoading.set(false);
     }

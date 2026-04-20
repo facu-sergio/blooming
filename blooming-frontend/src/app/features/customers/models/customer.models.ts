@@ -43,3 +43,16 @@ export interface CustomerMetrics {
   totalOrders: number;
   totalSpent: number;
 }
+
+export interface CustomerListFilters {
+  searchTerm?: string;
+  page: number;
+  pageSize: number;
+}
+
+export interface PagedCustomersResult {
+  items: Customer[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}

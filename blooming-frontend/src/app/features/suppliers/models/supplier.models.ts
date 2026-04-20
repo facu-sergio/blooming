@@ -24,3 +24,16 @@ export interface UpdateSupplierDto {
   address?: string;
   notes?: string;
 }
+
+export interface SupplierListFilters {
+  searchTerm?: string;
+  page: number;
+  pageSize: number;
+}
+
+export interface PagedSuppliersResult {
+  items: Supplier[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}

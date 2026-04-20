@@ -61,3 +61,18 @@ export interface PurchaseOrderItemFormEntry {
   unitCostPrice: number;
   lineTotal: number;
 }
+
+export interface PurchaseOrderListFilters {
+  supplierId?: string;
+  fromDate?: string;
+  toDate?: string;
+  page: number;
+  pageSize: number;
+}
+
+export interface PagedPurchaseOrdersResult {
+  items: PurchaseOrderListItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}

@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
-import { Supplier, CreateSupplierDto, UpdateSupplierDto } from '../models/supplier.models';
+import { Supplier, CreateSupplierDto, UpdateSupplierDto, SupplierListFilters, PagedSuppliersResult } from '../models/supplier.models';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -12,18 +12,37 @@ export class SuppliersService {
   private readonly _suppliers = signal<Supplier[]>([]);
   private readonly _isLoading = signal(false);
   private readonly _selectedSupplier = signal<Supplier | null>(null);
+  private readonly _totalCount = signal(0);
 
   readonly suppliers = this._suppliers.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
   readonly selectedSupplier = this._selectedSupplier.asReadonly();
+  readonly totalCount = this._totalCount.asReadonly();
 
   async loadAll(searchTerm?: string): Promise<void> {
     this._isLoading.set(true);
     try {
       let params = new HttpParams();
       if (searchTerm) params = params.set('searchTerm', searchTerm);
-      const result = await firstValueFrom(this.http.get<Supplier[]>(this.baseUrl, { params }));
-      this._suppliers.set(result);
+      const result = await firstValueFrom(this.http.get<PagedSuppliersResult>(this.baseUrl, { params }));
+      this._suppliers.set(result.items);
+      this._totalCount.set(result.totalCount);
+    } finally {
+      this._isLoading.set(false);
+    }
+  }
+
+  async getSuppliersPaged(filters: SupplierListFilters): Promise<void> {
+    this._isLoading.set(true);
+    try {
+      let params = new HttpParams()
+        .set('page', filters.page.toString())
+        .set('pageSize', filters.pageSize.toString());
+      if (filters.searchTerm) params = params.set('searchTerm', filters.searchTerm);
+
+      const result = await firstValueFrom(this.http.get<PagedSuppliersResult>(this.baseUrl, { params }));
+      this._suppliers.set(result.items);
+      this._totalCount.set(result.totalCount);
     } finally {
       this._isLoading.set(false);
     }

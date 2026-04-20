@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace blooming_api.Modules.Products.Queries.GetCategories;
 
-public class GetCategoriesHandler : IRequestHandler<GetCategoriesQuery, List<CategoryResponse>>
+public class GetCategoriesHandler : IRequestHandler<GetCategoriesQuery, PagedCategoriesResult>
 {
     private readonly AppDbContext _db;
 
@@ -15,12 +15,23 @@ public class GetCategoriesHandler : IRequestHandler<GetCategoriesQuery, List<Cat
         _db = db;
     }
 
-    public async Task<List<CategoryResponse>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
+    public async Task<PagedCategoriesResult> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
     {
-        var categories = await _db.Categories
+        var query = _db.Categories.AsQueryable();
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var categories = await query
             .OrderBy(c => c.Name)
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
             .ToListAsync(cancellationToken);
 
-        return categories.Select(CreateCategoryHandler.MapToResponse).ToList();
+        return new PagedCategoriesResult(
+            categories.Select(CreateCategoryHandler.MapToResponse).ToList(),
+            totalCount,
+            request.Page,
+            request.PageSize
+        );
     }
 }

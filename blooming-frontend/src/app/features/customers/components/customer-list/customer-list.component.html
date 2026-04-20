@@ -23,7 +23,7 @@
           />
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
-        @if (searchTerm()) {
+        @if (searchControl.value) {
           <button mat-icon-button (click)="clearSearch()" aria-label="Limpiar búsqueda">
             <mat-icon>clear</mat-icon>
           </button>
@@ -37,7 +37,7 @@
       } @else if (noResults()) {
         <div class="empty-state">
           <mat-icon>search_off</mat-icon>
-          <p>No se encontraron clientes para "{{ searchTerm() }}"</p>
+          <p>No se encontraron clientes para "{{ searchControl.value }}"</p>
         </div>
       } @else if (customers().length === 0) {
         <div class="empty-state">
@@ -105,4 +105,15 @@
       }
     </mat-card-content>
   </mat-card>
+
+  @if (totalCount() > 0) {
+    <mat-paginator
+      [length]="totalCount()"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[10, 20, 50]"
+      [pageIndex]="page - 1"
+      (page)="onPageChange($event)"
+      aria-label="Seleccionar página de clientes"
+    ></mat-paginator>
+  }
 </div>

@@ -64,7 +64,7 @@ describe('ProductsService', () => {
 
       const req = httpMock.expectOne((r) => r.url.includes('/api/products') && !r.url.includes('/api/products/'));
       expect(req.request.method).toBe('GET');
-      req.flush([mockProduct]);
+      req.flush({ items: [mockProduct], totalCount: 1, page: 1, pageSize: 1000 });
 
       await loadPromise;
       expect(service.products()).toEqual([mockProduct]);
@@ -74,7 +74,7 @@ describe('ProductsService', () => {
       const loadPromise = service.loadAll();
       httpMock
         .expectOne((r) => r.url.includes('/api/products') && !r.url.includes('/api/products/'))
-        .flush([mockProduct]);
+        .flush({ items: [mockProduct], totalCount: 1, page: 1, pageSize: 1000 });
       await loadPromise;
       expect(service.isLoading()).toBe(false);
     });
@@ -117,7 +117,7 @@ describe('ProductsService', () => {
       await Promise.resolve();
 
       const getReq = httpMock.expectOne((r) => r.url.includes('/api/products') && r.method === 'GET');
-      getReq.flush([mockProduct]);
+      getReq.flush({ items: [mockProduct], totalCount: 1, page: 1, pageSize: 1000 });
 
       const result = await createPromise;
       expect(result).toEqual(mockProduct);
@@ -141,7 +141,7 @@ describe('ProductsService', () => {
       await Promise.resolve();
 
       const getReq = httpMock.expectOne((r) => r.url.includes('/api/products') && r.method === 'GET');
-      getReq.flush([updatedProduct]);
+      getReq.flush({ items: [updatedProduct], totalCount: 1, page: 1, pageSize: 1000 });
 
       const result = await updatePromise;
       expect(result.name).toBe('Remera Actualizada');

@@ -75,7 +75,7 @@ describe('PurchaseOrdersService', () => {
 
       const req = httpMock.expectOne((r) => r.url.includes('/api/purchase-orders'));
       expect(req.request.method).toBe('GET');
-      req.flush([mockListItem]);
+      req.flush({ items: [mockListItem], totalCount: 1, page: 1, pageSize: 1000 });
 
       await loadPromise;
       expect(service.purchaseOrders()).toEqual([mockListItem]);
@@ -83,7 +83,7 @@ describe('PurchaseOrdersService', () => {
 
     it('should set isLoading to false after loadAll', async () => {
       const loadPromise = service.loadAll();
-      httpMock.expectOne((r) => r.url.includes('/api/purchase-orders')).flush([]);
+      httpMock.expectOne((r) => r.url.includes('/api/purchase-orders')).flush({ items: [], totalCount: 0, page: 1, pageSize: 1000 });
       await loadPromise;
       expect(service.isLoading()).toBe(false);
     });
@@ -95,7 +95,7 @@ describe('PurchaseOrdersService', () => {
       const req = httpMock.expectOne((r) =>
         r.url.includes('/api/purchase-orders') && r.params.get('supplierId') === supplierId
       );
-      req.flush([mockListItem]);
+      req.flush({ items: [mockListItem], totalCount: 1, page: 1, pageSize: 1000 });
 
       await loadPromise;
     });
