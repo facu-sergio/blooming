@@ -80,6 +80,10 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
+    // Migraciones automáticas
+    db.Database.Migrate();
+
+    //Sedding
     var adminEmail = config["Seed:AdminEmail"]!;
     if (!db.Users.Any(u => u.Email == adminEmail))
     {
