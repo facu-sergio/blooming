@@ -58,6 +58,7 @@ export class ProductFormComponent implements OnInit {
   readonly removeImage = signal(false);
 
   readonly variantImages = signal<{ file: File | null; preview: string | null; existingUrl: string | null; remove: boolean }[]>([]);
+  readonly expandedVariants = signal<Set<number>>(new Set([0]));
 
   readonly form = this.fb.group({
     name: ['', { validators: [Validators.required, Validators.maxLength(productsConstants.nameMaxLength)], updateOn: 'blur' }],
@@ -118,15 +119,34 @@ export class ProductFormComponent implements OnInit {
     return cost * (1 + markup / 100);
   }
 
+  toggleVariant(index: number): void {
+    this.expandedVariants.update(set => {
+      const next = new Set(set);
+      next.has(index) ? next.delete(index) : next.add(index);
+      return next;
+    });
+  }
+
+  isVariantExpanded(index: number): boolean {
+    return this.expandedVariants().has(index);
+  }
+
   addVariant(): void {
+    const newIndex = this.variantsArray.length;
     this.variantsArray.push(this.createVariantGroup());
     this.variantImages.update((imgs) => [...imgs, { file: null, preview: null, existingUrl: null, remove: false }]);
+    this.expandedVariants.update(set => new Set([...set, newIndex]));
   }
 
   removeVariant(index: number): void {
     if (this.variantsArray.length > 1) {
       this.variantsArray.removeAt(index);
       this.variantImages.update((imgs) => imgs.filter((_, i) => i !== index));
+      this.expandedVariants.update(set => {
+        const next = new Set<number>();
+        set.forEach(i => { if (i < index) next.add(i); else if (i > index) next.add(i - 1); });
+        return next;
+      });
     }
   }
 
@@ -222,6 +242,7 @@ export class ProductFormComponent implements OnInit {
           imgs.push({ file: null, preview: v.imageUrl ?? null, existingUrl: v.imageUrl ?? null, remove: false });
         }
         this.variantImages.set(imgs);
+        this.expandedVariants.set(new Set());
         this.cdr.detectChanges();
       }
     } else {

@@ -71,6 +71,8 @@ export class OrderListComponent implements OnInit {
 
   private readonly _isMobile = signal(false);
   readonly isMobile = this._isMobile.asReadonly();
+  readonly filtersVisible = signal(false);
+  readonly activeFilterCount = signal(0);
 
   readonly filterForm: FormGroup = this.fb.group({
     status: [''],
@@ -144,13 +146,21 @@ export class OrderListComponent implements OnInit {
     this.ordersService.getOrders(filters);
   }
 
+  toggleFilters(): void {
+    this.filtersVisible.update(v => !v);
+  }
+
   onApplyFilters(): void {
+    const { status, fromDate, toDate, customerId } = this.filterForm.value;
+    const count = [status, fromDate, toDate, customerId].filter(v => v !== null && v !== '' && v !== undefined).length;
+    this.activeFilterCount.set(count);
     this.page = 1;
     this.loadOrders();
   }
 
   onClearFilters(): void {
     this.filterForm.reset({ status: '', fromDate: null, toDate: null, customerId: null, customerName: '' });
+    this.activeFilterCount.set(0);
     this.page = 1;
     this.loadOrders();
   }
@@ -169,18 +179,18 @@ export class OrderListComponent implements OnInit {
     this.router.navigate(['/orders/create']);
   }
 
-  getStatusClass(statusKey: string): string {
-    return 'status-' + statusKey.toLowerCase();
+  private readonly statusMap: Record<string, string> = {
+    pending: 'status-pending', confirmed: 'status-confirmed',
+    shipped: 'status-shipped', delivered: 'status-delivered', cancelled: 'status-cancelled',
+    pendiente: 'status-pending', confirmado: 'status-confirmed',
+    enviado: 'status-shipped', entregado: 'status-delivered', cancelado: 'status-cancelled',
+  };
+
+  getStatusClass(status: string): string {
+    return this.statusMap[status.toLowerCase()] ?? 'status-pending';
   }
 
-  getStatusIcon(statusKey: string): string {
-    const icons: Record<string, string> = {
-      pending: 'schedule',
-      confirmed: 'check_circle',
-      shipped: 'local_shipping',
-      delivered: 'done_all',
-      cancelled: 'cancel',
-    };
-    return icons[statusKey.toLowerCase()] ?? 'help_outline';
+  getStatusIcon(status: string): string {
+    return '';
   }
 }

@@ -42,21 +42,51 @@ mat-card-header {
   width: 100%;
 }
 
-.cards-list {
+.mobile-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 8px 0;
+  gap: 8px;
+  padding: 4px 0;
 }
 
-.category-card {
-  transition: box-shadow 0.2s ease;
+.mobile-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 4px 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #fff;
+  min-height: 52px;
+}
 
-  @media (prefers-reduced-motion: reduce) {
-    transition: none;
-  }
+.mobile-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 
-  &:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
+.mobile-item-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-item-desc {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-item-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }

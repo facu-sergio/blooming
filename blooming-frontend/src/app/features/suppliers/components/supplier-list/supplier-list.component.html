@@ -13,12 +13,12 @@
     <mat-card-content>
       <div class="search-section">
         <mat-form-field appearance="outline" class="search-field">
-          <mat-label>Buscar por nombre, teléfono, web o dirección</mat-label>
+          <mat-label>Buscar proveedor</mat-label>
           <input
             matInput
             [formControl]="searchControl"
             (input)="onSearchChange()"
-            placeholder="Buscar proveedores..."
+            [placeholder]="isMobile ? 'Nombre, teléfono...' : 'Nombre, teléfono, web o dirección'"
             aria-label="Buscar proveedores"
           />
           <mat-icon matSuffix>search</mat-icon>
@@ -40,36 +40,30 @@
           <p>No hay proveedores registrados. Crea el primero.</p>
         </div>
       } @else if (isMobile) {
-        <div class="cards-mobile">
+        <div class="mobile-list">
           @for (supplier of suppliers(); track supplier.id) {
-            <mat-card class="supplier-card">
-              <mat-card-content>
-                <div class="supplier-card-header">
-                  <span class="supplier-name">{{ supplier.name }}</span>
-                  <div class="card-actions">
-                    <button mat-icon-button (click)="viewSupplier(supplier)" aria-label="Ver detalle">
-                      <mat-icon>visibility</mat-icon>
-                    </button>
-                    <button mat-icon-button (click)="editSupplier(supplier)" aria-label="Editar">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                  </div>
-                </div>
-                @if (supplier.phone || supplier.website || supplier.address) {
-                  <div class="supplier-card-details">
-                    @if (supplier.phone) {
-                      <span><mat-icon class="inline-icon">phone</mat-icon> {{ supplier.phone }}</span>
-                    }
-                    @if (supplier.website) {
-                      <span><mat-icon class="inline-icon">language</mat-icon> {{ truncate(supplier.website) }}</span>
-                    }
-                    @if (supplier.address) {
-                      <span><mat-icon class="inline-icon">location_on</mat-icon> {{ truncate(supplier.address) }}</span>
-                    }
-                  </div>
+            <div class="mobile-list-item">
+              <div class="mobile-item-info">
+                <span class="mobile-item-name">{{ supplier.name }}</span>
+                @if (supplier.phone) {
+                  <span class="mobile-item-meta">
+                    <mat-icon class="inline-icon">phone</mat-icon> {{ supplier.phone }}
+                  </span>
+                } @else if (supplier.address) {
+                  <span class="mobile-item-meta">
+                    <mat-icon class="inline-icon">location_on</mat-icon> {{ truncate(supplier.address, 35) }}
+                  </span>
                 }
-              </mat-card-content>
-            </mat-card>
+              </div>
+              <div class="mobile-item-actions">
+                <button mat-icon-button class="btn-view" (click)="viewSupplier(supplier)" aria-label="Ver detalle">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button mat-icon-button class="btn-edit" (click)="editSupplier(supplier)" aria-label="Editar">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
           }
         </div>
       } @else {
@@ -97,10 +91,10 @@
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let supplier">
-              <button mat-icon-button (click)="viewSupplier(supplier)" aria-label="Ver detalle">
+              <button mat-icon-button class="btn-view" (click)="viewSupplier(supplier)" aria-label="Ver detalle">
                 <mat-icon>visibility</mat-icon>
               </button>
-              <button mat-icon-button (click)="editSupplier(supplier)" aria-label="Editar">
+              <button mat-icon-button class="btn-edit" (click)="editSupplier(supplier)" aria-label="Editar">
                 <mat-icon>edit</mat-icon>
               </button>
             </td>
@@ -119,6 +113,7 @@
       [pageSize]="pageSize"
       [pageSizeOptions]="[10, 20, 50]"
       [pageIndex]="page - 1"
+      [hidePageSize]="isMobile"
       (page)="onPageChange($event)"
       aria-label="Seleccionar página de proveedores"
     ></mat-paginator>

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -65,6 +65,8 @@ export class PurchaseOrderListComponent implements OnInit {
   readonly filteredSuppliers: Observable<Supplier[]>;
 
   isMobile = false;
+  readonly filtersVisible = signal(false);
+  readonly activeFilterCount = signal(0);
   page = 1;
   pageSize = 20;
 
@@ -124,13 +126,21 @@ export class PurchaseOrderListComponent implements OnInit {
     await this.purchaseOrdersService.getPurchaseOrdersPaged(filters);
   }
 
+  toggleFilters(): void {
+    this.filtersVisible.update(v => !v);
+  }
+
   onApplyFilters(): void {
+    const { fromDate, toDate, supplierId } = this.filterForm.value;
+    const count = [supplierId, fromDate, toDate].filter(v => v !== null && v !== '' && v !== undefined).length;
+    this.activeFilterCount.set(count);
     this.page = 1;
     void this.loadOrders();
   }
 
   onClearFilters(): void {
     this.filterForm.reset({ fromDate: null, toDate: null, supplierId: null, supplierName: '' });
+    this.activeFilterCount.set(0);
     this.page = 1;
     void this.loadOrders();
   }

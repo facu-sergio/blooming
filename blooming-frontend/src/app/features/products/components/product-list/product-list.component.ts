@@ -76,6 +76,9 @@ export class ProductListComponent implements OnInit {
   private readonly _hasActiveFilters = signal(false);
 
   readonly hasActiveFilters = this._hasActiveFilters.asReadonly();
+  readonly filtersVisible = signal(false);
+  readonly activeFilterCount = signal(0);
+  readonly expandedProducts = signal<Set<number>>(new Set());
 
   readonly noResults = computed(() => this.products().length === 0 && this._hasActiveFilters());
 
@@ -98,13 +101,33 @@ export class ProductListComponent implements OnInit {
     await this.productsService.getProductsPaged(filters);
   }
 
+  toggleFilters(): void {
+    this.filtersVisible.update(v => !v);
+  }
+
+  toggleProduct(id: number): void {
+    this.expandedProducts.update(set => {
+      const next = new Set(set);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  isProductExpanded(id: number): boolean {
+    return this.expandedProducts().has(id);
+  }
+
   onFilterChange(): void {
     if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
     this.searchDebounceTimer = setTimeout(() => {
-      this._hasActiveFilters.set(
-        !!(this.searchTermControl.value || this.categoryControl.value ||
-           this.sizeControl.value || this.colorControl.value)
-      );
+      const count = [
+        this.searchTermControl.value,
+        this.categoryControl.value,
+        this.sizeControl.value,
+        this.colorControl.value,
+      ].filter(Boolean).length;
+      this._hasActiveFilters.set(count > 0);
+      this.activeFilterCount.set(count);
       this.page = 1;
       void this.loadProducts();
     }, 300);
@@ -116,6 +139,7 @@ export class ProductListComponent implements OnInit {
     this.sizeControl.setValue('');
     this.colorControl.setValue('');
     this._hasActiveFilters.set(false);
+    this.activeFilterCount.set(0);
     this.page = 1;
     await this.loadProducts();
   }

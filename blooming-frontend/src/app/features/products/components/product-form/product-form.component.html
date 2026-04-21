@@ -65,118 +65,139 @@
 
         <div formArrayName="variants">
           @for (variant of getVariantControls(); track variant; let variantIndex = $index) {
-            <div [formGroupName]="variantIndex" class="variant-row">
-              <mat-form-field appearance="outline">
-                <mat-label>Talle</mat-label>
-                <input matInput formControlName="size" [maxlength]="constants.sizeMaxLength" />
-                @if (variant.get('size')?.hasError('required') && variant.get('size')?.touched) {
-                  <mat-error>Requerido</mat-error>
-                }
-              </mat-form-field>
-
-              <mat-form-field appearance="outline">
-                <mat-label>Color</mat-label>
-                <input matInput formControlName="color" [maxlength]="constants.colorMaxLength" />
-                @if (variant.get('color')?.hasError('required') && variant.get('color')?.touched) {
-                  <mat-error>Requerido</mat-error>
-                }
-              </mat-form-field>
-
-              <mat-form-field appearance="outline">
-                <mat-label>Costo ($)</mat-label>
-                <input matInput type="number" formControlName="costPrice" [readonly]="isEditMode()" />
-                @if (isEditMode()) {
-                  <mat-hint>Se actualiza al registrar compras</mat-hint>
-                }
-              </mat-form-field>
-
-              <mat-form-field appearance="outline">
-                <mat-label>Recargo (%)</mat-label>
-                <input matInput type="number" formControlName="markupPercentage" min="0" step="0.1" />
-                @if (variant.get('markupPercentage')?.hasError('min')) {
-                  <mat-error>No puede ser negativo</mat-error>
-                }
-              </mat-form-field>
-
-              <mat-form-field appearance="outline">
-                <mat-label>Umbral stock bajo (opcional)</mat-label>
-                <input matInput type="number" formControlName="lowStockThreshold" min="0" step="1" />
-                @if (variant.get('lowStockThreshold')?.hasError('min')) {
-                  <mat-error>No puede ser negativo</mat-error>
-                }
-              </mat-form-field>
-
-              <div class="selling-price">
-                <span class="selling-price-label">Precio venta</span>
-                <span class="selling-price-value">${{ getSellingPrice(variant) | number: '1.2-2' }}</span>
-              </div>
-
-              <button mat-icon-button type="button" color="warn" (click)="removeVariant(variantIndex)"
-                [disabled]="variantsArray.length === 1" aria-label="Eliminar variante">
-                <mat-icon>delete</mat-icon>
-              </button>
-
-              <div class="variant-image-section">
-                <label class="variant-image-label">
-                  Imagen específica
-                  <span class="variant-image-hint">(opcional — si esta variante tiene imagen diferente al producto)</span>
-                </label>
-                @if (getVariantImage(variantIndex).preview) {
-                  <div class="variant-image-preview">
-                    <img [src]="getVariantImage(variantIndex).preview!" alt="Variante" class="variant-preview-img" />
-                    <button mat-icon-button type="button" color="warn" (click)="onRemoveVariantImage(variantIndex)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </div>
-                } @else {
-                  <div>
-                    <input type="file" accept="image/jpeg,image/png"
-                      (change)="onVariantImageSelected(variantIndex, $event)" #vfD style="display:none" />
-                    <button mat-stroked-button type="button" (click)="vfD.click()">
-                      <mat-icon>add_photo_alternate</mat-icon> Subir imagen variante
-                    </button>
-                  </div>
-                }
-              </div>
-
-              <div class="measurements-section" formArrayName="measurements">
-                <div class="measurements-header">
-                  <span class="measurements-label">
-                    <mat-icon class="measurements-icon">straighten</mat-icon> Medidas (cm)
+            <div [formGroupName]="variantIndex" class="variant-card">
+              <div class="variant-header" (click)="toggleVariant(variantIndex)">
+                <div class="variant-summary">
+                  <mat-icon class="expand-icon">{{ isVariantExpanded(variantIndex) ? 'expand_less' : 'expand_more' }}</mat-icon>
+                  <span class="variant-title">
+                    Variante {{ variantIndex + 1 }}
+                    @if (variant.get('size')?.value || variant.get('color')?.value) {
+                      <span class="variant-subtitle">
+                        · {{ variant.get('size')?.value }}{{ variant.get('color')?.value ? ' / ' + variant.get('color')?.value : '' }}
+                        @if (getSellingPrice(variant) > 0) { — ${{ getSellingPrice(variant) | number: '1.2-2' }} }
+                      </span>
+                    }
                   </span>
-                  <button mat-stroked-button type="button" class="add-measurement-btn" (click)="addMeasurement(variantIndex)">
-                    <mat-icon>add</mat-icon> Agregar medida
-                  </button>
                 </div>
-                @for (measurement of getMeasurementsArray(variant).controls; track measurement; let measIndex = $index) {
-                  <div [formGroupName]="measIndex" class="measurement-row">
-                    <mat-form-field appearance="outline" class="measurement-name-field">
-                      <mat-label>Nombre (ej: Busto)</mat-label>
-                      <input matInput formControlName="name" [maxlength]="constants.measurementNameMaxLength" />
-                      @if (measurement.get('name')?.hasError('required') && measurement.get('name')?.touched) {
-                        <mat-error>Requerido</mat-error>
-                      }
-                    </mat-form-field>
-                    <mat-form-field appearance="outline" class="measurement-value-field">
-                      <mat-label>Valor (cm)</mat-label>
-                      <input matInput type="number" formControlName="valueInCm" min="0.01" step="0.5" />
-                      @if (measurement.get('valueInCm')?.hasError('required') && measurement.get('valueInCm')?.touched) {
-                        <mat-error>Requerido</mat-error>
-                      }
-                      @if (measurement.get('valueInCm')?.hasError('min')) {
-                        <mat-error>Debe ser mayor a 0</mat-error>
-                      }
-                    </mat-form-field>
-                    <button mat-icon-button type="button" color="warn"
-                      (click)="removeMeasurement(variantIndex, measIndex)" aria-label="Eliminar medida">
-                      <mat-icon>close</mat-icon>
-                    </button>
-                  </div>
-                }
-                @if (getMeasurementsArray(variant).length === 0) {
-                  <p class="no-measurements-hint">Sin medidas registradas</p>
-                }
+                <button mat-icon-button type="button" color="warn"
+                  (click)="removeVariant(variantIndex); $event.stopPropagation()"
+                  [disabled]="variantsArray.length === 1" aria-label="Eliminar variante">
+                  <mat-icon>delete</mat-icon>
+                </button>
               </div>
+
+              @if (isVariantExpanded(variantIndex)) {
+                <div class="variant-body">
+                  <div class="variant-fields">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Talle</mat-label>
+                      <input matInput formControlName="size" [maxlength]="constants.sizeMaxLength" />
+                      @if (variant.get('size')?.hasError('required') && variant.get('size')?.touched) {
+                        <mat-error>Requerido</mat-error>
+                      }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Color</mat-label>
+                      <input matInput formControlName="color" [maxlength]="constants.colorMaxLength" />
+                      @if (variant.get('color')?.hasError('required') && variant.get('color')?.touched) {
+                        <mat-error>Requerido</mat-error>
+                      }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Costo ($)</mat-label>
+                      <input matInput type="number" formControlName="costPrice" [readonly]="isEditMode()" />
+                      @if (isEditMode()) {
+                        <mat-hint>Se actualiza al registrar compras</mat-hint>
+                      }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Recargo (%)</mat-label>
+                      <input matInput type="number" formControlName="markupPercentage" min="0" step="0.1" />
+                      @if (variant.get('markupPercentage')?.hasError('min')) {
+                        <mat-error>No puede ser negativo</mat-error>
+                      }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Umbral stock bajo (opcional)</mat-label>
+                      <input matInput type="number" formControlName="lowStockThreshold" min="0" step="1" />
+                      @if (variant.get('lowStockThreshold')?.hasError('min')) {
+                        <mat-error>No puede ser negativo</mat-error>
+                      }
+                    </mat-form-field>
+
+                    <div class="selling-price">
+                      <span class="selling-price-label">Precio venta</span>
+                      <span class="selling-price-value">${{ getSellingPrice(variant) | number: '1.2-2' }}</span>
+                    </div>
+                  </div>
+
+                  <div class="variant-image-section">
+                    <label class="variant-image-label">
+                      Imagen específica
+                      <span class="variant-image-hint">(opcional — si esta variante tiene imagen diferente al producto)</span>
+                    </label>
+                    @if (getVariantImage(variantIndex).preview) {
+                      <div class="variant-image-preview">
+                        <img [src]="getVariantImage(variantIndex).preview!" alt="Variante" class="variant-preview-img" />
+                        <button mat-icon-button type="button" color="warn" (click)="onRemoveVariantImage(variantIndex)">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      </div>
+                    } @else {
+                      <div>
+                        <input type="file" accept="image/jpeg,image/png"
+                          (change)="onVariantImageSelected(variantIndex, $event)" #vfD style="display:none" />
+                        <button mat-stroked-button type="button" (click)="vfD.click()">
+                          <mat-icon>add_photo_alternate</mat-icon> Subir imagen variante
+                        </button>
+                      </div>
+                    }
+                  </div>
+
+                  <div class="measurements-section" formArrayName="measurements">
+                    <div class="measurements-header">
+                      <span class="measurements-label">
+                        <mat-icon class="measurements-icon">straighten</mat-icon> Medidas (cm)
+                      </span>
+                      <button mat-stroked-button type="button" class="add-measurement-btn" (click)="addMeasurement(variantIndex)">
+                        <mat-icon>add</mat-icon> Agregar medida
+                      </button>
+                    </div>
+                    @for (measurement of getMeasurementsArray(variant).controls; track measurement; let measIndex = $index) {
+                      <div [formGroupName]="measIndex" class="measurement-row">
+                        <mat-form-field appearance="outline" class="measurement-name-field">
+                          <mat-label>Nombre (ej: Busto)</mat-label>
+                          <input matInput formControlName="name" [maxlength]="constants.measurementNameMaxLength" />
+                          @if (measurement.get('name')?.hasError('required') && measurement.get('name')?.touched) {
+                            <mat-error>Requerido</mat-error>
+                          }
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="measurement-value-field">
+                          <mat-label>Valor (cm)</mat-label>
+                          <input matInput type="number" formControlName="valueInCm" min="0.01" step="0.5" />
+                          @if (measurement.get('valueInCm')?.hasError('required') && measurement.get('valueInCm')?.touched) {
+                            <mat-error>Requerido</mat-error>
+                          }
+                          @if (measurement.get('valueInCm')?.hasError('min')) {
+                            <mat-error>Debe ser mayor a 0</mat-error>
+                          }
+                        </mat-form-field>
+                        <button mat-icon-button type="button" color="warn"
+                          (click)="removeMeasurement(variantIndex, measIndex)" aria-label="Eliminar medida">
+                          <mat-icon>close</mat-icon>
+                        </button>
+                      </div>
+                    }
+                    @if (getMeasurementsArray(variant).length === 0) {
+                      <p class="no-measurements-hint">Sin medidas registradas</p>
+                    }
+                  </div>
+                </div>
+              }
             </div>
           }
         </div>
@@ -270,120 +291,141 @@
 
             <div formArrayName="variants">
               @for (variant of getVariantControls(); track variant; let variantIndex = $index) {
-                <div [formGroupName]="variantIndex" class="variant-row">
-                  <mat-form-field appearance="outline">
-                    <mat-label>Talle</mat-label>
-                    <input matInput formControlName="size" [maxlength]="constants.sizeMaxLength" />
-                    @if (variant.get('size')?.hasError('required') && variant.get('size')?.touched) {
-                      <mat-error>Requerido</mat-error>
-                    }
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    <mat-label>Color</mat-label>
-                    <input matInput formControlName="color" [maxlength]="constants.colorMaxLength" />
-                    @if (variant.get('color')?.hasError('required') && variant.get('color')?.touched) {
-                      <mat-error>Requerido</mat-error>
-                    }
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    <mat-label>Costo ($)</mat-label>
-                    <input matInput type="number" formControlName="costPrice" [readonly]="isEditMode()" />
-                    @if (isEditMode()) {
-                      <mat-hint>Se actualiza al registrar compras</mat-hint>
-                    }
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    <mat-label>Recargo (%)</mat-label>
-                    <input matInput type="number" formControlName="markupPercentage" min="0" step="0.1" />
-                    @if (variant.get('markupPercentage')?.hasError('min')) {
-                      <mat-error>No puede ser negativo</mat-error>
-                    }
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    <mat-label>Umbral de stock bajo (opcional)</mat-label>
-                    <input matInput type="number" formControlName="lowStockThreshold" min="0" step="1"
-                      placeholder="Ej: 2 (dejar vacío para desactivar)" />
-                    <mat-hint>Alerta se activa cuando stock ≤ este valor. Dejar vacío para desactivar.</mat-hint>
-                    @if (variant.get('lowStockThreshold')?.hasError('min')) {
-                      <mat-error>No puede ser negativo</mat-error>
-                    }
-                  </mat-form-field>
-
-                  <div class="selling-price">
-                    <span class="selling-price-label">Precio venta</span>
-                    <span class="selling-price-value">${{ getSellingPrice(variant) | number: '1.2-2' }}</span>
-                  </div>
-
-                  <button mat-icon-button type="button" color="warn" (click)="removeVariant(variantIndex)"
-                    [disabled]="variantsArray.length === 1" aria-label="Eliminar variante">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-
-                  <div class="variant-image-section">
-                    <label class="variant-image-label">
-                      Imagen específica
-                      <span class="variant-image-hint">(opcional — si esta variante tiene imagen diferente al producto)</span>
-                    </label>
-                    @if (getVariantImage(variantIndex).preview) {
-                      <div class="variant-image-preview">
-                        <img [src]="getVariantImage(variantIndex).preview!" alt="Variante" class="variant-preview-img" />
-                        <button mat-icon-button type="button" color="warn" (click)="onRemoveVariantImage(variantIndex)">
-                          <mat-icon>delete</mat-icon>
-                        </button>
-                      </div>
-                    } @else {
-                      <div>
-                        <input type="file" accept="image/jpeg,image/png"
-                          (change)="onVariantImageSelected(variantIndex, $event)" #variantFileInput style="display:none" />
-                        <button mat-stroked-button type="button" (click)="variantFileInput.click()">
-                          <mat-icon>add_photo_alternate</mat-icon> Subir imagen variante
-                        </button>
-                      </div>
-                    }
-                  </div>
-
-                  <div class="measurements-section" formArrayName="measurements">
-                    <div class="measurements-header">
-                      <span class="measurements-label">
-                        <mat-icon class="measurements-icon">straighten</mat-icon> Medidas (cm)
+                <div [formGroupName]="variantIndex" class="variant-card">
+                  <div class="variant-header" (click)="toggleVariant(variantIndex)">
+                    <div class="variant-summary">
+                      <mat-icon class="expand-icon">{{ isVariantExpanded(variantIndex) ? 'expand_less' : 'expand_more' }}</mat-icon>
+                      <span class="variant-title">
+                        Variante {{ variantIndex + 1 }}
+                        @if (variant.get('size')?.value || variant.get('color')?.value) {
+                          <span class="variant-subtitle">
+                            · {{ variant.get('size')?.value }}{{ variant.get('color')?.value ? ' / ' + variant.get('color')?.value : '' }}
+                            @if (getSellingPrice(variant) > 0) { — ${{ getSellingPrice(variant) | number: '1.2-2' }} }
+                          </span>
+                        }
                       </span>
-                      <button mat-stroked-button type="button" class="add-measurement-btn" (click)="addMeasurement(variantIndex)">
-                        <mat-icon>add</mat-icon> Agregar medida
-                      </button>
                     </div>
-                    @for (measurement of getMeasurementsArray(variant).controls; track measurement; let measIndex = $index) {
-                      <div [formGroupName]="measIndex" class="measurement-row">
-                        <mat-form-field appearance="outline" class="measurement-name-field">
-                          <mat-label>Nombre (ej: Busto)</mat-label>
-                          <input matInput formControlName="name" [maxlength]="constants.measurementNameMaxLength" />
-                          @if (measurement.get('name')?.hasError('required') && measurement.get('name')?.touched) {
-                            <mat-error>Requerido</mat-error>
-                          }
-                        </mat-form-field>
-                        <mat-form-field appearance="outline" class="measurement-value-field">
-                          <mat-label>Valor (cm)</mat-label>
-                          <input matInput type="number" formControlName="valueInCm" min="0.01" step="0.5" />
-                          @if (measurement.get('valueInCm')?.hasError('required') && measurement.get('valueInCm')?.touched) {
-                            <mat-error>Requerido</mat-error>
-                          }
-                          @if (measurement.get('valueInCm')?.hasError('min')) {
-                            <mat-error>Debe ser mayor a 0</mat-error>
-                          }
-                        </mat-form-field>
-                        <button mat-icon-button type="button" color="warn"
-                          (click)="removeMeasurement(variantIndex, measIndex)" aria-label="Eliminar medida">
-                          <mat-icon>close</mat-icon>
-                        </button>
-                      </div>
-                    }
-                    @if (getMeasurementsArray(variant).length === 0) {
-                      <p class="no-measurements-hint">Sin medidas registradas</p>
-                    }
+                    <button mat-icon-button type="button" color="warn"
+                      (click)="removeVariant(variantIndex); $event.stopPropagation()"
+                      [disabled]="variantsArray.length === 1" aria-label="Eliminar variante">
+                      <mat-icon>delete</mat-icon>
+                    </button>
                   </div>
+
+                  @if (isVariantExpanded(variantIndex)) {
+                    <div class="variant-body">
+                      <div class="variant-fields">
+                        <mat-form-field appearance="outline">
+                          <mat-label>Talle</mat-label>
+                          <input matInput formControlName="size" [maxlength]="constants.sizeMaxLength" />
+                          @if (variant.get('size')?.hasError('required') && variant.get('size')?.touched) {
+                            <mat-error>Requerido</mat-error>
+                          }
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                          <mat-label>Color</mat-label>
+                          <input matInput formControlName="color" [maxlength]="constants.colorMaxLength" />
+                          @if (variant.get('color')?.hasError('required') && variant.get('color')?.touched) {
+                            <mat-error>Requerido</mat-error>
+                          }
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                          <mat-label>Costo ($)</mat-label>
+                          <input matInput type="number" formControlName="costPrice" [readonly]="isEditMode()" />
+                          @if (isEditMode()) {
+                            <mat-hint>Se actualiza al registrar compras</mat-hint>
+                          }
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                          <mat-label>Recargo (%)</mat-label>
+                          <input matInput type="number" formControlName="markupPercentage" min="0" step="0.1" />
+                          @if (variant.get('markupPercentage')?.hasError('min')) {
+                            <mat-error>No puede ser negativo</mat-error>
+                          }
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                          <mat-label>Umbral de stock bajo (opcional)</mat-label>
+                          <input matInput type="number" formControlName="lowStockThreshold" min="0" step="1"
+                            placeholder="Ej: 2 (dejar vacío para desactivar)" />
+                          <mat-hint>Alerta se activa cuando stock ≤ este valor. Dejar vacío para desactivar.</mat-hint>
+                          @if (variant.get('lowStockThreshold')?.hasError('min')) {
+                            <mat-error>No puede ser negativo</mat-error>
+                          }
+                        </mat-form-field>
+
+                        <div class="selling-price">
+                          <span class="selling-price-label">Precio venta</span>
+                          <span class="selling-price-value">${{ getSellingPrice(variant) | number: '1.2-2' }}</span>
+                        </div>
+                      </div>
+
+                      <div class="variant-image-section">
+                        <label class="variant-image-label">
+                          Imagen específica
+                          <span class="variant-image-hint">(opcional — si esta variante tiene imagen diferente al producto)</span>
+                        </label>
+                        @if (getVariantImage(variantIndex).preview) {
+                          <div class="variant-image-preview">
+                            <img [src]="getVariantImage(variantIndex).preview!" alt="Variante" class="variant-preview-img" />
+                            <button mat-icon-button type="button" color="warn" (click)="onRemoveVariantImage(variantIndex)">
+                              <mat-icon>delete</mat-icon>
+                            </button>
+                          </div>
+                        } @else {
+                          <div>
+                            <input type="file" accept="image/jpeg,image/png"
+                              (change)="onVariantImageSelected(variantIndex, $event)" #variantFileInput style="display:none" />
+                            <button mat-stroked-button type="button" (click)="variantFileInput.click()">
+                              <mat-icon>add_photo_alternate</mat-icon> Subir imagen variante
+                            </button>
+                          </div>
+                        }
+                      </div>
+
+                      <div class="measurements-section" formArrayName="measurements">
+                        <div class="measurements-header">
+                          <span class="measurements-label">
+                            <mat-icon class="measurements-icon">straighten</mat-icon> Medidas (cm)
+                          </span>
+                          <button mat-stroked-button type="button" class="add-measurement-btn" (click)="addMeasurement(variantIndex)">
+                            <mat-icon>add</mat-icon> Agregar medida
+                          </button>
+                        </div>
+                        @for (measurement of getMeasurementsArray(variant).controls; track measurement; let measIndex = $index) {
+                          <div [formGroupName]="measIndex" class="measurement-row">
+                            <mat-form-field appearance="outline" class="measurement-name-field">
+                              <mat-label>Nombre (ej: Busto)</mat-label>
+                              <input matInput formControlName="name" [maxlength]="constants.measurementNameMaxLength" />
+                              @if (measurement.get('name')?.hasError('required') && measurement.get('name')?.touched) {
+                                <mat-error>Requerido</mat-error>
+                              }
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="measurement-value-field">
+                              <mat-label>Valor (cm)</mat-label>
+                              <input matInput type="number" formControlName="valueInCm" min="0.01" step="0.5" />
+                              @if (measurement.get('valueInCm')?.hasError('required') && measurement.get('valueInCm')?.touched) {
+                                <mat-error>Requerido</mat-error>
+                              }
+                              @if (measurement.get('valueInCm')?.hasError('min')) {
+                                <mat-error>Debe ser mayor a 0</mat-error>
+                              }
+                            </mat-form-field>
+                            <button mat-icon-button type="button" color="warn"
+                              (click)="removeMeasurement(variantIndex, measIndex)" aria-label="Eliminar medida">
+                              <mat-icon>close</mat-icon>
+                            </button>
+                          </div>
+                        }
+                        @if (getMeasurementsArray(variant).length === 0) {
+                          <p class="no-measurements-hint">Sin medidas registradas</p>
+                        }
+                      </div>
+                    </div>
+                  }
                 </div>
               }
             </div>
