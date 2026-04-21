@@ -8,61 +8,79 @@
   </div>
 
   <!-- Filtros de búsqueda -->
-  <div class="filters-section" [class.filters-desktop]="isDesktop()">
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Buscar por nombre</mat-label>
-      <input
-        matInput
-        [formControl]="searchTermControl"
-        (input)="onFilterChange()"
-        placeholder="Ej: remera"
-      />
-      <mat-icon matSuffix>search</mat-icon>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Categoría</mat-label>
-      <input
-        matInput
-        [formControl]="categoryControl"
-        [matAutocomplete]="autoCat"
-        (input)="onFilterChange()"
-        placeholder="Ej: Pantalones"
-      />
-      <mat-autocomplete #autoCat="matAutocomplete" (optionSelected)="onFilterChange()">
-        @for (cat of categories(); track cat) {
-          <mat-option [value]="cat">{{ cat }}</mat-option>
-        }
-      </mat-autocomplete>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Talle</mat-label>
-      <input
-        matInput
-        [formControl]="sizeControl"
-        (input)="onFilterChange()"
-        placeholder="Ej: M"
-      />
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Color</mat-label>
-      <input
-        matInput
-        [formControl]="colorControl"
-        (input)="onFilterChange()"
-        placeholder="Ej: Azul"
-      />
-    </mat-form-field>
-
-    @if (hasActiveFilters()) {
-      <button mat-stroked-button color="warn" class="clear-filters-btn" (click)="clearFilters()">
-        <mat-icon>clear</mat-icon>
-        Limpiar filtros
+  @if (isMobile()) {
+    <div class="filters-mobile-bar">
+      <button mat-stroked-button [color]="activeFilterCount() > 0 ? 'primary' : ''"
+        class="filters-toggle-btn" (click)="toggleFilters()">
+        <mat-icon>tune</mat-icon>
+        Filtros@if (activeFilterCount() > 0) { ({{ activeFilterCount() }}) }
+        <mat-icon class="toggle-chevron">{{ filtersVisible() ? 'expand_less' : 'expand_more' }}</mat-icon>
       </button>
-    }
-  </div>
+      @if (hasActiveFilters()) {
+        <button mat-icon-button color="warn" class="btn-delete" (click)="clearFilters()" aria-label="Limpiar filtros" matTooltip="Limpiar filtros">
+          <mat-icon>clear</mat-icon>
+        </button>
+      }
+    </div>
+  }
+
+  @if (!isMobile() || filtersVisible()) {
+    <div class="filters-section" [class.filters-desktop]="isDesktop()">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Buscar por nombre</mat-label>
+        <input
+          matInput
+          [formControl]="searchTermControl"
+          (input)="onFilterChange()"
+          placeholder="Ej: remera"
+        />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Categoría</mat-label>
+        <input
+          matInput
+          [formControl]="categoryControl"
+          [matAutocomplete]="autoCat"
+          (input)="onFilterChange()"
+          placeholder="Ej: Pantalones"
+        />
+        <mat-autocomplete #autoCat="matAutocomplete" (optionSelected)="onFilterChange()">
+          @for (cat of categories(); track cat) {
+            <mat-option [value]="cat">{{ cat }}</mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Talle</mat-label>
+        <input
+          matInput
+          [formControl]="sizeControl"
+          (input)="onFilterChange()"
+          placeholder="Ej: M"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Color</mat-label>
+        <input
+          matInput
+          [formControl]="colorControl"
+          (input)="onFilterChange()"
+          placeholder="Ej: Azul"
+        />
+      </mat-form-field>
+
+      @if (hasActiveFilters()) {
+        <button mat-stroked-button color="warn" class="btn-delete" class="clear-filters-btn" (click)="clearFilters()">
+          <mat-icon>clear</mat-icon>
+          Limpiar filtros
+        </button>
+      }
+    </div>
+  }
 
   @if (isLoading()) {
     <div class="loading-container">
@@ -74,7 +92,7 @@
         <div class="empty-state">
           <mat-icon class="empty-state-icon">search_off</mat-icon>
           <p>No se encontraron productos con los filtros aplicados.</p>
-          <button mat-stroked-button (click)="clearFilters()">
+          <button mat-stroked-button class="btn-delete" (click)="clearFilters()">
             <mat-icon>clear</mat-icon>
             Limpiar filtros
           </button>
@@ -95,76 +113,74 @@
       </mat-card-content>
     </mat-card>
   } @else if (isMobile()) {
-    <!-- Vista móvil: cards separadas -->
-    <div class="cards-list">
+    <!-- Vista móvil: lista compacta con expansión -->
+    <div class="mobile-list">
       @for (product of products(); track product.id) {
-        <mat-card class="product-card">
-          <mat-card-header>
-            @if (product.imageUrl) {
-              <img mat-card-avatar [src]="product.imageUrl" [alt]="product.name" class="product-card-avatar" />
-            } @else {
-              <div mat-card-avatar class="product-card-avatar-placeholder">
-                <mat-icon>image_not_supported</mat-icon>
-              </div>
-            }
-            <mat-card-title>{{ product.name }}</mat-card-title>
-            <mat-card-subtitle>
-              {{ product.categoryName }} · {{ product.variants.length }} variante(s) ·
-              <span [class]="getStockClass(getTotalStock(product.variants))">
-                Stock: {{ getTotalStock(product.variants) }}
-              </span>
-            </mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="variants-mobile">
-              @for (variant of product.variants; track variant.id) {
-                <div class="variant-mobile-row">
-                  <div class="variant-mobile-info">
-                    <div class="variant-mobile-main">
-                      <span class="variant-label">{{ variant.size }} / {{ variant.color }}</span>
-                      <span class="variant-price">${{ variant.sellingPrice | number: '1.2-2' }}</span>
-                      <span class="stock-badge" [class]="getStockClass(variant.stock)">
-                        {{ variant.stock }} u.
-                      </span>
-                      @if (isLowStock(variant)) {
-                        <mat-icon
-                          class="low-stock-icon-sm"
-                          [matTooltip]="getLowStockTooltip(variant)"
-                        >warning</mat-icon>
-                      }
-                    </div>
-                    @if (variant.measurements && variant.measurements.length > 0) {
-                      <div class="variant-measurements-mobile">
-                        <mat-icon class="measurements-icon-sm">straighten</mat-icon>
-                        <span>{{ variant.measurements | formatMeasurements }}</span>
-                      </div>
-                    }
-                  </div>
+        <div class="mobile-list-item" [class.mobile-list-item--expanded]="isProductExpanded(product.id)">
+
+          <!-- Fila principal (siempre visible) -->
+          <div class="mobile-item-row" (click)="toggleProduct(product.id)">
+            <div class="mobile-item-thumb">
+              @if (product.imageUrl) {
+                <img [src]="product.imageUrl" [alt]="product.name" class="mobile-thumb-img" />
+              } @else {
+                <div class="mobile-thumb-placeholder">
+                  <mat-icon>image_not_supported</mat-icon>
                 </div>
               }
             </div>
-          </mat-card-content>
-          <mat-card-actions align="end">
-            <button
-              mat-icon-button
-              color="primary"
-              (click)="navigateToDetail(product.id)"
-              aria-label="Ver detalle"
-              matTooltip="Ver detalle"
-            >
-              <mat-icon>visibility</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              color="primary"
-              (click)="navigateToEdit(product.id)"
-              aria-label="Editar producto"
-              matTooltip="Editar"
-            >
-              <mat-icon>edit</mat-icon>
-            </button>
-          </mat-card-actions>
-        </mat-card>
+            <div class="mobile-item-info">
+              <span class="mobile-item-name">{{ product.name }}</span>
+              <span class="mobile-item-meta">{{ product.categoryName }} · {{ product.variants.length }} var.</span>
+            </div>
+            <div class="mobile-item-right">
+              <span class="mobile-stock-badge" [class]="getStockClass(getTotalStock(product.variants))">
+                {{ getTotalStock(product.variants) }} u.
+              </span>
+              <button mat-icon-button class="btn-edit"
+                (click)="navigateToEdit(product.id); $event.stopPropagation()"
+                aria-label="Editar producto">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Detalle expandido -->
+          @if (isProductExpanded(product.id)) {
+            <div class="mobile-item-detail">
+              <div class="variants-mobile">
+                @for (variant of product.variants; track variant.id) {
+                  <div class="variant-mobile-row">
+                    <div class="variant-mobile-info">
+                      <div class="variant-mobile-main">
+                        <span class="variant-label">{{ variant.size }} / {{ variant.color }}</span>
+                        <span class="variant-price">${{ variant.sellingPrice | number: '1.2-2' }}</span>
+                        <span class="stock-badge" [class]="getStockClass(variant.stock)">
+                          {{ variant.stock }} u.
+                        </span>
+                        @if (isLowStock(variant)) {
+                          <mat-icon class="low-stock-icon-sm" [matTooltip]="getLowStockTooltip(variant)">warning</mat-icon>
+                        }
+                      </div>
+                      @if (variant.measurements && variant.measurements.length > 0) {
+                        <div class="variant-measurements-mobile">
+                          <mat-icon class="measurements-icon-sm">straighten</mat-icon>
+                          <span>{{ variant.measurements | formatMeasurements }}</span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+              <div class="mobile-item-actions">
+                <button mat-stroked-button color="primary" (click)="navigateToDetail(product.id)">
+                  <mat-icon>visibility</mat-icon> Ver detalle
+                </button>
+              </div>
+            </div>
+          }
+
+        </div>
       }
     </div>
   } @else {
@@ -199,6 +215,7 @@
             </mat-panel-title>
             <mat-panel-description>
               <button
+                class="btn-view"
                 mat-icon-button
                 color="primary"
                 (click)="$event.stopPropagation(); navigateToDetail(product.id)"
@@ -208,6 +225,7 @@
                 <mat-icon>visibility</mat-icon>
               </button>
               <button
+                class="btn-edit"
                 mat-icon-button
                 color="primary"
                 (click)="$event.stopPropagation(); navigateToEdit(product.id)"
@@ -301,6 +319,7 @@
       [pageSize]="pageSize"
       [pageSizeOptions]="[10, 20, 50]"
       [pageIndex]="page - 1"
+      [hidePageSize]="isMobile()"
       (page)="onPageChange($event)"
       aria-label="Seleccionar página de productos"
     ></mat-paginator>

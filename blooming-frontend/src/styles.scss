@@ -68,6 +68,27 @@ body {
   height: 100%;
 }
 
+// ── Botones de acción globales ────────────────────────────────────────────────
+.btn-view.mat-mdc-icon-button {
+  color: #1E88E5;
+}
+
+.btn-edit.mat-mdc-icon-button {
+  color: #1E88E5;
+}
+
+
+.btn-delete.mat-mdc-icon-button {
+  color: #EF5350
+}
+
+body.dark-mode {
+  .btn-view.mat-mdc-icon-button  { --mdc-icon-button-icon-color: #90caf9; background-color: #0d2137 !important; &:hover { background-color: #152d4a !important; } }
+  .btn-edit.mat-mdc-icon-button  { --mdc-icon-button-icon-color: #ffb74d; background-color: #2a1800 !important; &:hover { background-color: #3d2400 !important; } }
+  .btn-delete.mat-mdc-icon-button { --mdc-icon-button-icon-color: #ef9a9a; background-color: #2a0a0a !important; &:hover { background-color: #3d1010 !important; } }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 // Dialog de producto: full-screen en mobile, flotante en desktop
 .product-form-dialog {
   @media (max-width: 599px) {

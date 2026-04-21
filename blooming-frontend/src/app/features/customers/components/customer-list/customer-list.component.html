@@ -13,12 +13,12 @@
     <mat-card-content>
       <div class="search-section">
         <mat-form-field appearance="outline" class="search-field">
-          <mat-label>Buscar por nombre o teléfono</mat-label>
+          <mat-label>Buscar cliente</mat-label>
           <input
             matInput
             [formControl]="searchControl"
             (input)="onSearchChange()"
-            placeholder="Buscar por nombre o teléfono..."
+            [placeholder]="isMobile ? 'Nombre o teléfono...' : 'Buscar por nombre o teléfono'"
             aria-label="Buscar clientes"
           />
           <mat-icon matSuffix>search</mat-icon>
@@ -45,29 +45,30 @@
           <p>No hay clientes registrados. Crea el primero.</p>
         </div>
       } @else if (isMobile) {
-        <div class="cards-mobile">
+        <div class="mobile-list">
           @for (customer of customers(); track customer.id) {
-            <mat-card class="customer-card">
-              <mat-card-content>
-                <div class="customer-card-header">
-                  <span class="customer-name">{{ customer.name }}</span>
-                  <div class="card-actions">
-                    <button mat-icon-button (click)="viewCustomer(customer)" aria-label="Ver detalle">
-                      <mat-icon>visibility</mat-icon>
-                    </button>
-                    <button mat-icon-button (click)="editCustomer(customer)" aria-label="Editar">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                  </div>
-                </div>
-                <div class="customer-card-details">
-                  <span><mat-icon class="inline-icon">phone</mat-icon> {{ customer.phone }}</span>
-                  @if (customer.address) {
-                    <span><mat-icon class="inline-icon">location_on</mat-icon> {{ truncate(customer.address) }}</span>
-                  }
-                </div>
-              </mat-card-content>
-            </mat-card>
+            <div class="mobile-list-item">
+              <div class="mobile-item-info">
+                <span class="mobile-item-name">{{ customer.name }}</span>
+                @if (customer.phone) {
+                  <span class="mobile-item-meta">
+                    <mat-icon class="inline-icon">phone</mat-icon> {{ customer.phone }}
+                  </span>
+                } @else if (customer.address) {
+                  <span class="mobile-item-meta">
+                    <mat-icon class="inline-icon">location_on</mat-icon> {{ truncate(customer.address, 35) }}
+                  </span>
+                }
+              </div>
+              <div class="mobile-item-actions">
+                <button mat-icon-button class="btn-view" (click)="viewCustomer(customer)" aria-label="Ver detalle">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button mat-icon-button class="btn-edit" (click)="editCustomer(customer)" aria-label="Editar">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
           }
         </div>
       } @else {
@@ -90,10 +91,10 @@
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let customer">
-              <button mat-icon-button (click)="viewCustomer(customer)" aria-label="Ver detalle">
+              <button mat-icon-button class="btn-view" (click)="viewCustomer(customer)" aria-label="Ver detalle">
                 <mat-icon>visibility</mat-icon>
               </button>
-              <button mat-icon-button (click)="editCustomer(customer)" aria-label="Editar">
+              <button mat-icon-button class="btn-edit" (click)="editCustomer(customer)" aria-label="Editar">
                 <mat-icon>edit</mat-icon>
               </button>
             </td>
@@ -112,6 +113,7 @@
       [pageSize]="pageSize"
       [pageSizeOptions]="[10, 20, 50]"
       [pageIndex]="page - 1"
+      [hidePageSize]="isMobile"
       (page)="onPageChange($event)"
       aria-label="Seleccionar página de clientes"
     ></mat-paginator>

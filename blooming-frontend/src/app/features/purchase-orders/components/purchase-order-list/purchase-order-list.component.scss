@@ -10,6 +10,10 @@ mat-card-header {
   display: flex;
   align-items: center;
   margin-bottom: 16px;
+
+  button {
+    white-space: nowrap;
+  }
 }
 
 .spacer {
@@ -74,41 +78,94 @@ mat-table {
   padding-top: 4px;
 }
 
-.cards-mobile {
+// Filtros mobile toggle
+.filters-mobile-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.filters-toggle-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+}
+
+.toggle-chevron {
+  margin-left: auto;
+}
+
+// Lista compacta mobile
+.mobile-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-.order-card {
-  cursor: pointer;
-  &:hover { background-color: rgba(0, 0, 0, 0.02); }
-}
-
-.order-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.order-id { font-weight: 600; }
-.order-total { font-weight: 600; color: #1976d2; }
-
-.order-supplier {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin: 4px 0;
-  color: rgba(0, 0, 0, 0.7);
-}
-
-.order-footer {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
-  color: rgba(0, 0, 0, 0.54);
+  gap: 8px;
   margin-top: 8px;
+}
+
+.mobile-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 8px 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+
+  &:active {
+    background: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.mobile-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mobile-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-item-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-item-total {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  flex-shrink: 0;
+}
+
+.mobile-item-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mobile-item-meta {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.mobile-item-chevron {
+  color: rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
 }
 
 .inline-icon {
@@ -116,4 +173,14 @@ mat-table {
   height: 16px;
   width: 16px;
   vertical-align: middle;
+}
+
+@media (max-width: 600px) {
+  .purchase-order-list-container {
+    padding: 16px;
+  }
+
+  mat-paginator {
+    padding: 0 8px;
+  }
 }

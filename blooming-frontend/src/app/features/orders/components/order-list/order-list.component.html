@@ -8,63 +8,81 @@
   </div>
 
   <!-- Filtros -->
-  <mat-card class="filters-card">
-    <mat-card-content>
-      <form [formGroup]="filterForm" class="filters-form">
-        <mat-form-field appearance="outline" class="filter-field">
-          <mat-label>Estado</mat-label>
-          <mat-select formControlName="status">
-            @for (opt of statusOptions; track opt.value) {
-              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+  @if (isMobile()) {
+    <div class="filters-mobile-bar">
+      <button mat-stroked-button [color]="activeFilterCount() > 0 ? 'primary' : ''"
+        class="filters-toggle-btn" (click)="toggleFilters()">
+        <mat-icon>tune</mat-icon>
+        Filtros@if (activeFilterCount() > 0) { ({{ activeFilterCount() }}) }
+        <mat-icon class="toggle-chevron">{{ filtersVisible() ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </button>
+      @if (activeFilterCount() > 0) {
+        <button mat-icon-button color="warn" (click)="onClearFilters()" aria-label="Limpiar filtros" matTooltip="Limpiar filtros">
+          <mat-icon>clear</mat-icon>
+        </button>
+      }
+    </div>
+  }
 
-        <mat-form-field appearance="outline" class="filter-field">
-          <mat-label>Desde</mat-label>
-          <input matInput [matDatepicker]="fromPicker" formControlName="fromDate" />
-          <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
-          <mat-datepicker #fromPicker></mat-datepicker>
-        </mat-form-field>
+  @if (!isMobile() || filtersVisible()) {
+    <mat-card class="filters-card">
+      <mat-card-content>
+        <form [formGroup]="filterForm" class="filters-form">
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Estado</mat-label>
+            <mat-select formControlName="status">
+              @for (opt of statusOptions; track opt.value) {
+                <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" class="filter-field">
-          <mat-label>Hasta</mat-label>
-          <input matInput [matDatepicker]="toPicker" formControlName="toDate" />
-          <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
-          <mat-datepicker #toPicker></mat-datepicker>
-        </mat-form-field>
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Desde</mat-label>
+            <input matInput [matDatepicker]="fromPicker" formControlName="fromDate" />
+            <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
+            <mat-datepicker #fromPicker></mat-datepicker>
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" class="filter-field">
-          <mat-label>Cliente</mat-label>
-          <input
-            type="text"
-            matInput
-            formControlName="customerName"
-            [matAutocomplete]="auto"
-            placeholder="Buscar por nombre o teléfono"
-          />
-          <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayCustomer">
-            @for (customer of filteredCustomers | async; track customer.id) {
-              <mat-option [value]="customer" (onSelectionChange)="onCustomerSelected(customer)">
-                {{ customer.name }} ({{ customer.phone || 'sin teléfono' }})
-              </mat-option>
-            }
-          </mat-autocomplete>
-        </mat-form-field>
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Hasta</mat-label>
+            <input matInput [matDatepicker]="toPicker" formControlName="toDate" />
+            <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
+            <mat-datepicker #toPicker></mat-datepicker>
+          </mat-form-field>
 
-        <div class="filter-actions">
-          <button mat-flat-button color="primary" type="button" (click)="onApplyFilters()">
-            <mat-icon>search</mat-icon>
-            Filtrar
-          </button>
-          <button mat-stroked-button type="button" (click)="onClearFilters()">
-            <mat-icon>clear</mat-icon>
-            Limpiar
-          </button>
-        </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Cliente</mat-label>
+            <input
+              type="text"
+              matInput
+              formControlName="customerName"
+              [matAutocomplete]="auto"
+              placeholder="Buscar por nombre o teléfono"
+            />
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayCustomer">
+              @for (customer of filteredCustomers | async; track customer.id) {
+                <mat-option [value]="customer" (onSelectionChange)="onCustomerSelected(customer)">
+                  {{ customer.name }} ({{ customer.phone || 'sin teléfono' }})
+                </mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
+
+          <div class="filter-actions">
+            <button mat-flat-button color="primary" type="button" (click)="onApplyFilters()">
+              <mat-icon>search</mat-icon>
+              Filtrar
+            </button>
+            <button mat-stroked-button type="button" (click)="onClearFilters()">
+              <mat-icon>clear</mat-icon>
+              Limpiar
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
 
   <!-- Estado de carga -->
   @if (isLoading() && orders().length === 0) {
@@ -91,9 +109,8 @@
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef>Estado</th>
             <td mat-cell *matCellDef="let order">
-              <span class="status-chip" [class]="getStatusClass(order.status)">
-                <mat-icon class="status-chip-icon">{{ getStatusIcon(order.status) }}</mat-icon>
-                {{ order.status }}
+              <span [class]="'status-chip ' + getStatusClass(order.status)">
+                <span class="status-dot"></span>{{ order.status }}
               </span>
             </td>
           </ng-container>
@@ -135,31 +152,25 @@
     </mat-card>
   }
 
-  <!-- Vista móvil: cards -->
+  <!-- Vista móvil: lista compacta -->
   @if (isMobile()) {
-    <div class="cards-list">
+    <div class="mobile-list">
       @for (order of orders(); track order.id) {
-        <mat-card class="order-card" (click)="goToDetail(order)">
-          <mat-card-header>
-            <mat-card-title>Pedido #{{ order.id }}</mat-card-title>
-            <mat-card-subtitle>
-              <span class="status-chip" [class]="getStatusClass(order.status)">
-                <mat-icon class="status-chip-icon">{{ getStatusIcon(order.status) }}</mat-icon>
-                {{ order.status }}
-              </span>
-            </mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
-            <p class="card-customer">
-              <mat-icon class="inline-icon">person</mat-icon>
-              {{ order.customerName }}
-            </p>
-            <div class="card-footer">
-              <span class="card-total">{{ order.total | currency: 'ARS' : '$' : '1.0-0' }}</span>
-              <span class="card-date">{{ order.createdAt | date: 'dd/MM/yyyy' }}</span>
+        <div class="mobile-list-item" (click)="goToDetail(order)">
+          <div class="mobile-item-info">
+            <div class="mobile-item-top">
+              <span class="mobile-item-name">#{{ order.id }} · {{ order.customerName }}</span>
+              <span class="mobile-item-total">{{ order.total | currency: 'ARS' : '$' : '1.0-0' }}</span>
             </div>
-          </mat-card-content>
-        </mat-card>
+            <div class="mobile-item-bottom">
+              <span [class]="'status-chip ' + getStatusClass(order.status)">
+                <span class="status-dot"></span>{{ order.status }}
+              </span>
+              <span class="mobile-item-date">{{ order.createdAt | date: 'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+          <mat-icon class="mobile-item-chevron">chevron_right</mat-icon>
+        </div>
       }
 
       @if (!isLoading() && orders().length === 0) {
@@ -182,6 +193,7 @@
       [pageSize]="pageSize"
       [pageSizeOptions]="[10, 20, 50]"
       [pageIndex]="page - 1"
+      [hidePageSize]="isMobile()"
       (page)="onPageChange($event)"
       aria-label="Seleccionar página de pedidos"
     ></mat-paginator>

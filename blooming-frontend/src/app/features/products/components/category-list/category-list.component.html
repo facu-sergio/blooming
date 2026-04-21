@@ -21,25 +21,25 @@
           <p>No hay categorías creadas. Crea la primera para poder agregar productos.</p>
         </div>
       } @else if (isMobile()) {
-        <!-- Vista móvil: cards separadas -->
-        <div class="cards-list">
+        <!-- Vista móvil: lista compacta -->
+        <div class="mobile-list">
           @for (category of categories(); track category.id) {
-            <mat-card class="category-card">
-              <mat-card-header>
-                <mat-card-title>{{ category.name }}</mat-card-title>
+            <div class="mobile-list-item">
+              <div class="mobile-item-info">
+                <span class="mobile-item-name">{{ category.name }}</span>
                 @if (category.description) {
-                  <mat-card-subtitle>{{ category.description }}</mat-card-subtitle>
+                  <span class="mobile-item-desc">{{ category.description }}</span>
                 }
-              </mat-card-header>
-              <mat-card-actions align="end">
-                <button mat-icon-button (click)="openEditDialog(category)" aria-label="Editar">
+              </div>
+              <div class="mobile-item-actions">
+                <button mat-icon-button class="btn-edit" (click)="openEditDialog(category)" aria-label="Editar">
                   <mat-icon>edit</mat-icon>
                 </button>
-                <button mat-icon-button color="warn" (click)="deleteCategory(category)" aria-label="Eliminar">
+                <button mat-icon-button class="btn-delete" (click)="deleteCategory(category)" aria-label="Eliminar">
                   <mat-icon>delete</mat-icon>
                 </button>
-              </mat-card-actions>
-            </mat-card>
+              </div>
+            </div>
           }
         </div>
       } @else {
@@ -58,10 +58,11 @@
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let category">
-              <button mat-icon-button (click)="openEditDialog(category)" aria-label="Editar">
+              <button mat-icon-button class="btn-edit" (click)="openEditDialog(category)" aria-label="Editar">
                 <mat-icon>edit</mat-icon>
               </button>
               <button
+                class="btn-delete"
                 mat-icon-button
                 color="warn"
                 (click)="deleteCategory(category)"
