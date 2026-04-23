@@ -76,16 +76,19 @@ export class ProductFormComponent implements OnInit {
     color?: string;
     costPrice?: number;
     markupPercentage?: number;
-    lowStockThreshold?: number;
     measurements?: ProductVariantMeasurement[];
   }) {
+    const cost = data?.costPrice ?? 0;
+    const markup = data?.markupPercentage ?? 0;
     return this.fb.group({
       id: [data?.id ?? null],
       size: [data?.size ?? '', [Validators.required, Validators.maxLength(productsConstants.sizeMaxLength)]],
       color: [data?.color ?? '', [Validators.required, Validators.maxLength(productsConstants.colorMaxLength)]],
-      costPrice: [{ value: data?.costPrice ?? 0, disabled: false }],
-      markupPercentage: [data?.markupPercentage ?? 0, [Validators.required, Validators.min(0)]],
-      lowStockThreshold: [data?.lowStockThreshold ?? null, [Validators.min(0)]],
+      costPrice: [{ value: cost, disabled: false }],
+      markupPercentage: [markup, [Validators.required, Validators.min(0)]],
+      sellingPrice: [Math.round(cost * (1 + markup / 100) * 100) / 100],
+      // TODO: exponer lowStockThreshold por variante si en el futuro se necesita configurar por producto
+      lowStockThreshold: [1],
       measurements: this.fb.array(
         (data?.measurements ?? []).map((m) => this.createMeasurementGroup(m))
       ),
@@ -113,10 +116,19 @@ export class ProductFormComponent implements OnInit {
     this.getMeasurementsArray(variant).removeAt(measurementIndex);
   }
 
-  getSellingPrice(variantControl: AbstractControl): number {
+  onCostOrMarkupBlur(variantControl: AbstractControl): void {
     const cost = variantControl.get('costPrice')?.value ?? 0;
     const markup = variantControl.get('markupPercentage')?.value ?? 0;
-    return cost * (1 + markup / 100);
+    const price = Math.round(cost * (1 + markup / 100) * 100) / 100;
+    variantControl.get('sellingPrice')?.setValue(price, { emitEvent: false });
+  }
+
+  onSellingPriceBlur(variantControl: AbstractControl): void {
+    const cost = variantControl.get('costPrice')?.value ?? 0;
+    if (cost <= 0) return;
+    const price = variantControl.get('sellingPrice')?.value ?? 0;
+    const markup = Math.round((price / cost - 1) * 100 * 100) / 100;
+    variantControl.get('markupPercentage')?.setValue(markup, { emitEvent: false });
   }
 
   toggleVariant(index: number): void {
@@ -236,7 +248,6 @@ export class ProductFormComponent implements OnInit {
             color: v.color,
             costPrice: v.costPrice,
             markupPercentage: v.markupPercentage,
-            lowStockThreshold: v.lowStockThreshold,
             measurements: v.measurements ?? [],
           }));
           imgs.push({ file: null, preview: v.imageUrl ?? null, existingUrl: v.imageUrl ?? null, remove: false });
@@ -258,11 +269,14 @@ export class ProductFormComponent implements OnInit {
     const variantImgs = this.variantImages();
 
     const variantDtos = this.isEditMode()
-      ? (variants as UpdateVariantDto[]).map((v, i) => ({
-          ...v,
-          removeVariantImage: variantImgs[i]?.remove ?? false,
-        }))
-      : (variants as CreateVariantDto[]);
+      ? (variants as (UpdateVariantDto & { sellingPrice?: number })[]).map((v, i) => {
+          const { sellingPrice, ...rest } = v;
+          return { ...rest, removeVariantImage: variantImgs[i]?.remove ?? false };
+        })
+      : (variants as (CreateVariantDto & { sellingPrice?: number })[]).map((v) => {
+          const { sellingPrice, ...rest } = v;
+          return rest as CreateVariantDto;
+        });
 
     const formData = this.productsService.buildFormData(
       name!,
