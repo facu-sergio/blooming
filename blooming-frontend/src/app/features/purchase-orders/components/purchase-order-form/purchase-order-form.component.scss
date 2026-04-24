@@ -28,6 +28,11 @@
   .section-title {
     margin-bottom: 0;
   }
+
+  button {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 }
 
 .selected-badge {
@@ -39,6 +44,22 @@
   border-radius: 4px;
   color: #2e7d32;
   font-weight: 500;
+}
+
+::ng-deep .form-card .mat-mdc-form-field-infix {
+  padding-top: 0;
+  padding-bottom: 0;
+  min-height: unset;
+}
+
+::ng-deep .form-card .mat-mdc-text-field-wrapper {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+::ng-deep .form-card .mdc-text-field--outlined .mat-mdc-form-field-infix {
+  padding-top: 13px;
+  padding-bottom: 13px;
 }
 
 .items-table {
@@ -81,4 +102,73 @@
 mat-card-actions {
   padding: 16px;
   gap: 8px;
+}
+
+@media (max-width: 600px) {
+  .form-card {
+    margin: 8px;
+    padding: 8px;
+  }
+
+  .items-table {
+    mat-header-row {
+      display: none;
+    }
+
+    mat-row {
+      flex-wrap: wrap;
+      height: auto;
+      min-height: unset;
+      padding: 10px 8px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 4px;
+      gap: 4px;
+      align-items: center;
+    }
+
+    mat-cell {
+      border-bottom: none;
+      min-height: unset;
+      padding: 2px 4px;
+    }
+
+    .mat-column-product {
+      flex: 1 0 60%;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .mat-column-variant {
+      flex: 1 0 35%;
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.6);
+    }
+
+    .mat-column-quantity {
+      flex: 0 0 auto;
+    }
+
+    .mat-column-unitCostPrice {
+      flex: 1 0 auto;
+    }
+
+    .mat-column-lineTotal {
+      flex: 0 0 auto;
+      font-weight: 500;
+    }
+
+    .mat-column-actions {
+      flex: 0 0 auto;
+      margin-left: auto;
+    }
+
+    .qty-field {
+      width: 72px;
+    }
+
+    .price-field {
+      width: 100px;
+    }
+  }
 }
