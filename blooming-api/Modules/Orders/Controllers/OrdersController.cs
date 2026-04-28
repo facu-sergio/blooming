@@ -74,7 +74,7 @@ public class OrdersController : ControllerBase
     public async Task<ActionResult<ChangeOrderStatusResult>> ChangeStatus(int id, [FromBody] ChangeOrderStatusRequest request)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-        var result = await _mediator.Send(new ChangeOrderStatusCommand(id, request.NewStatus, userId));
+        var result = await _mediator.Send(new ChangeOrderStatusCommand(id, request.NewStatus, userId, request.DeliveredAt));
         return Ok(result);
     }
 

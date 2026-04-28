@@ -10,8 +10,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatDividerModule } from '@angular/material/divider';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
@@ -38,8 +36,6 @@ import { ProductResponse, VariantResponse } from '../../../products/models/produ
     MatCardModule,
     MatIconModule,
     MatTableModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
     MatAutocompleteModule,
     MatDividerModule,
   ],
@@ -62,7 +58,6 @@ export class CreateOrderComponent implements OnInit {
 
   readonly constants = ordersConstants;
   readonly isLoading = this.ordersService.isLoading;
-  readonly today = new Date(new Date().setHours(0, 0, 0, 0));
 
   // Estado de búsqueda y selección de cliente
   readonly customerSearchControl = new FormControl('', { updateOn: 'change' });
@@ -97,7 +92,6 @@ export class CreateOrderComponent implements OnInit {
       [Validators.maxLength(ordersConstants.shippingAddressMaxLength)],
     ],
     notes: ['', [Validators.maxLength(ordersConstants.notesMaxLength)]],
-    estimatedDeliveryDate: [null as Date | null],
   });
 
   ngOnInit(): void {
@@ -197,7 +191,7 @@ export class CreateOrderComponent implements OnInit {
     }
     if (this.form.invalid || this.isLoading()) return;
 
-    const { shippingAddress, notes, estimatedDeliveryDate } = this.form.value;
+    const { shippingAddress, notes } = this.form.value;
 
     const dto = {
       customerId: this._selectedCustomer()!.id,
@@ -207,9 +201,6 @@ export class CreateOrderComponent implements OnInit {
       })),
       shippingAddress: shippingAddress || undefined,
       notes: notes || undefined,
-      estimatedDeliveryDate: estimatedDeliveryDate
-        ? (estimatedDeliveryDate as Date).toISOString()
-        : undefined,
     };
 
     const result = await this.ordersService.createOrder(dto);

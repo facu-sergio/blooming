@@ -4,6 +4,7 @@ using blooming_api.Modules.Dashboard.Queries.GetMonthlyMargin;
 using blooming_api.Modules.Dashboard.Queries.GetMonthlyProfits;
 using blooming_api.Modules.Dashboard.Queries.GetMonthlySalesMetrics;
 using blooming_api.Modules.Dashboard.Queries.GetTopProducts;
+using blooming_api.Modules.Dashboard.Queries.GetYearlyProfits;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -61,6 +62,13 @@ public class DashboardController : ControllerBase
     public async Task<ActionResult<MonthlyProfitsDto>> GetMonthlyProfits()
     {
         var result = await _mediator.Send(new GetMonthlyProfitsQuery());
+        return Ok(result);
+    }
+
+    [HttpGet("yearly-profits")]
+    public async Task<ActionResult<YearlyProfitsDto>> GetYearlyProfits()
+    {
+        var result = await _mediator.Send(new GetYearlyProfitsQuery());
         return Ok(result);
     }
 }

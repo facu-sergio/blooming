@@ -181,6 +181,17 @@ mat-divider {
   min-width: 200px;
 }
 
+.custom-delivery-date-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.delivery-date-field {
+  max-width: 240px;
+}
+
 mat-card-actions {
   display: flex;
   gap: 8px;
@@ -208,6 +219,19 @@ mat-card-actions {
     button {
       width: 100%;
     }
+  }
+
+  .status-change-row-button {
+    width: 100%;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .delivery-date-field {
+    width: 100%;
+    max-width: unset;
   }
 
   mat-card-actions {

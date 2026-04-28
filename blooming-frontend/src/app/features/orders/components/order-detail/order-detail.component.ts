@@ -11,7 +11,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { FormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { OrdersService } from '../../services/orders.service';
 import { OrderDetailDto, OrderStatus, getValidTransitions, mapOrderStatusToSpanish } from '../../models/order.models';
 
@@ -21,6 +25,7 @@ import { OrderDetailDto, OrderStatus, getValidTransitions, mapOrderStatusToSpani
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -30,6 +35,10 @@ import { OrderDetailDto, OrderStatus, getValidTransitions, mapOrderStatusToSpani
     MatChipsModule,
     MatSelectModule,
     MatFormFieldModule,
+    MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatCheckboxModule,
   ],
   templateUrl: './order-detail.component.html',
   styleUrl: './order-detail.component.scss',
@@ -43,6 +52,8 @@ export class OrderDetailComponent implements OnInit {
   readonly isLoading = this.ordersService.isLoading;
   readonly tableColumns = ['product', 'variant', 'unitPrice', 'quantity', 'lineTotal'];
 
+  readonly today = new Date();
+
   private readonly _order = signal<OrderDetailDto | null>(null);
   readonly order = this._order.asReadonly();
 
@@ -51,6 +62,14 @@ export class OrderDetailComponent implements OnInit {
 
   private readonly _selectedNewStatus = signal<OrderStatus | null>(null);
   readonly selectedNewStatus = this._selectedNewStatus.asReadonly();
+
+  private readonly _showCustomDeliveredDate = signal(false);
+  readonly showCustomDeliveredDate = this._showCustomDeliveredDate.asReadonly();
+
+  private readonly _customDeliveryDate = signal<Date | null>(null);
+  readonly customDeliveryDate = this._customDeliveryDate.asReadonly();
+
+  readonly customDeliveryDateControl = new FormControl<Date | null>(null);
 
   readonly validTransitions = computed<OrderStatus[]>(() => {
     const order = this._order();
@@ -82,6 +101,21 @@ export class OrderDetailComponent implements OnInit {
 
   onSelectNewStatus(status: OrderStatus): void {
     this._selectedNewStatus.set(status);
+    this._showCustomDeliveredDate.set(false);
+    this._customDeliveryDate.set(null);
+    this.customDeliveryDateControl.setValue(null, { emitEvent: false });
+  }
+
+  toggleCustomDeliveredDate(checked: boolean): void {
+    this._showCustomDeliveredDate.set(checked);
+    if (!checked) {
+      this._customDeliveryDate.set(null);
+      this.customDeliveryDateControl.setValue(null, { emitEvent: false });
+    }
+  }
+
+  onCustomDeliveryDateChange(date: Date | null): void {
+    this._customDeliveryDate.set(date);
   }
 
   async onChangeStatus(): Promise<void> {
@@ -90,7 +124,12 @@ export class OrderDetailComponent implements OnInit {
     if (!order || !newStatus || this.isLoading()) return;
 
     try {
-      const result = await this.ordersService.changeOrderStatus(order.id, newStatus);
+      const deliveredAt =
+        newStatus === 'Delivered' && this._showCustomDeliveredDate() && this._customDeliveryDate()
+          ? this._customDeliveryDate()!.toISOString()
+          : undefined;
+
+      const result = await this.ordersService.changeOrderStatus(order.id, newStatus, deliveredAt);
       const changedAt = result.changedAt;
 
       this._order.update((o) => {
@@ -107,6 +146,9 @@ export class OrderDetailComponent implements OnInit {
       });
 
       this._selectedNewStatus.set(null);
+      this._showCustomDeliveredDate.set(false);
+      this._customDeliveryDate.set(null);
+      this.customDeliveryDateControl.setValue(null, { emitEvent: false });
       this.snackBar.open(
         `Estado cambiado a "${result.status}" correctamente`,
         'Cerrar',

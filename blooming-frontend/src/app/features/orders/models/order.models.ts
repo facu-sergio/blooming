@@ -25,6 +25,7 @@ export function getValidTransitions(currentStatus: OrderStatus): OrderStatus[] {
 
 export interface ChangeOrderStatusRequest {
   newStatus: OrderStatus;
+  deliveredAt?: string;
 }
 
 export interface ChangeOrderStatusResult {
@@ -43,7 +44,6 @@ export interface CreateOrderDto {
   items: CreateOrderItemDto[];
   shippingAddress?: string;
   notes?: string;
-  estimatedDeliveryDate?: string;
 }
 
 export interface CreateOrderResult {

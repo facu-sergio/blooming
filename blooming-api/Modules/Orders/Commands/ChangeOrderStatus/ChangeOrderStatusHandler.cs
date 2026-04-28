@@ -38,6 +38,7 @@ public class ChangeOrderStatusHandler : IRequestHandler<ChangeOrderStatusCommand
         {
             var changedAt = DateTime.UtcNow;
             var previousStatus = order.Status;
+            DateTime resultTimestamp = changedAt;
 
             order.Status = newStatus;
             order.UpdatedAt = changedAt;
@@ -50,7 +51,9 @@ public class ChangeOrderStatusHandler : IRequestHandler<ChangeOrderStatusCommand
                     order.ShippedAt = changedAt;
                     break;
                 case OrderStatus.Delivered:
-                    order.DeliveredAt = changedAt;
+                    var deliveredAt = request.DeliveredAt?.ToUniversalTime() ?? changedAt;
+                    order.DeliveredAt = deliveredAt;
+                    resultTimestamp = deliveredAt;
                     break;
                 case OrderStatus.Cancelled:
                     order.CancelledAt = changedAt;
@@ -66,7 +69,7 @@ public class ChangeOrderStatusHandler : IRequestHandler<ChangeOrderStatusCommand
             return new ChangeOrderStatusResult(
                 order.Id,
                 OrderStatusTransitions.MapToSpanish(newStatus),
-                changedAt);
+                resultTimestamp);
         }
         catch
         {

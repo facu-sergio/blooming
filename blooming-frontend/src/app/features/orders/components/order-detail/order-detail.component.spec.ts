@@ -1,10 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
 import { WritableSignal, signal } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { of } from 'rxjs';
 import { OrderDetailComponent } from './order-detail.component';
 import { OrdersService } from '../../services/orders.service';
 import { OrderDetailDto } from '../../models/order.models';
@@ -61,13 +59,11 @@ describe('OrderDetailComponent', () => {
     isLoading: ReturnType<typeof signal<boolean>>;
     selectedOrder: ReturnType<typeof signal<OrderDetailDto | null>>;
     getOrder: ReturnType<typeof vi.fn>;
-    confirmOrder: ReturnType<typeof vi.fn>;
     changeOrderStatus: ReturnType<typeof vi.fn>;
     cancelOrder: ReturnType<typeof vi.fn>;
     clearSelectedOrder: ReturnType<typeof vi.fn>;
   };
   let snackBarSpy: { open: ReturnType<typeof vi.fn> };
-  let dialogOpenFn: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     isLoadingWritable = signal(false);
@@ -77,11 +73,6 @@ describe('OrderDetailComponent', () => {
       isLoading: isLoadingWritable.asReadonly() as unknown as ReturnType<typeof signal<boolean>>,
       selectedOrder: selectedOrderSignal.asReadonly() as unknown as ReturnType<typeof signal<OrderDetailDto | null>>,
       getOrder: vi.fn().mockResolvedValue(mockPendingOrder),
-      confirmOrder: vi.fn().mockResolvedValue({
-        orderId: 42,
-        status: 'Confirmed',
-        confirmedAt: '2026-03-24T11:00:00Z',
-      }),
       changeOrderStatus: vi.fn().mockResolvedValue({
         orderId: 42,
         status: 'Enviado',
@@ -96,7 +87,6 @@ describe('OrderDetailComponent', () => {
     };
 
     snackBarSpy = { open: vi.fn() };
-    dialogOpenFn = vi.fn().mockReturnValue({ afterClosed: () => of(true) });
 
     await TestBed.configureTestingModule({
       imports: [OrderDetailComponent],
@@ -106,13 +96,7 @@ describe('OrderDetailComponent', () => {
         { provide: OrdersService, useValue: ordersServiceSpy },
         { provide: MatSnackBar, useValue: snackBarSpy },
       ],
-    })
-      .overrideComponent(OrderDetailComponent, {
-        add: {
-          providers: [{ provide: MatDialog, useValue: { open: dialogOpenFn } }],
-        },
-      })
-      .compileComponents();
+    }).compileComponents();
 
     const fixture = TestBed.createComponent(OrderDetailComponent);
     component = fixture.componentInstance;
@@ -122,24 +106,6 @@ describe('OrderDetailComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('isPending', () => {
-    it('should return true when order status is Pendiente', () => {
-      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
-        ['_order'].set(mockPendingOrder);
-      expect(component.isPending).toBe(true);
-    });
-
-    it('should return false when order status is Confirmado', () => {
-      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
-        ['_order'].set(mockConfirmedOrder);
-      expect(component.isPending).toBe(false);
-    });
-
-    it('should return false when no order is loaded', () => {
-      expect(component.isPending).toBe(false);
-    });
-  });
-
   describe('validTransitions', () => {
     it('should return [Confirmed, Cancelled] for Pending order', () => {
       (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
@@ -147,10 +113,10 @@ describe('OrderDetailComponent', () => {
       expect(component.validTransitions()).toEqual(['Confirmed', 'Cancelled']);
     });
 
-    it('should return [Shipped, Cancelled] for Confirmed order', () => {
+    it('should return [Shipped, Delivered, Cancelled] for Confirmed order', () => {
       (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
         ['_order'].set(mockConfirmedOrder);
-      expect(component.validTransitions()).toEqual(['Shipped', 'Cancelled']);
+      expect(component.validTransitions()).toEqual(['Shipped', 'Delivered', 'Cancelled']);
     });
 
     it('should return [Delivered, Cancelled] for Shipped order', () => {
@@ -170,59 +136,15 @@ describe('OrderDetailComponent', () => {
     });
   });
 
-  describe('onConfirm()', () => {
-    it('should call ordersService.confirmOrder with the order id', async () => {
-      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
-        ['_order'].set(mockPendingOrder);
-
-      await component.onConfirm();
-
-      expect(ordersServiceSpy.confirmOrder).toHaveBeenCalledWith(42);
-    });
-
-    it('should update order status to Confirmado after successful confirmation', async () => {
-      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
-        ['_order'].set(mockPendingOrder);
-
-      await component.onConfirm();
-
-      expect(component.order()?.status).toBe('Confirmado');
-      expect(component.order()?.statusKey).toBe('Confirmed');
-    });
-
-    it('should show success snackbar after confirmation', async () => {
-      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
-        ['_order'].set(mockPendingOrder);
-
-      await component.onConfirm();
-
-      expect(snackBarSpy.open).toHaveBeenCalledWith(
-        'Pedido confirmado correctamente',
-        'Cerrar',
-        { duration: 3000 }
-      );
-    });
-
-    it('should not call confirmOrder if isLoading is true', async () => {
-      isLoadingWritable.set(true);
-      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
-        ['_order'].set(mockPendingOrder);
-
-      await component.onConfirm();
-
-      expect(ordersServiceSpy.confirmOrder).not.toHaveBeenCalled();
-    });
-  });
-
   describe('onChangeStatus()', () => {
-    it('should call ordersService.changeOrderStatus with orderId and new status', async () => {
+    it('should call ordersService.changeOrderStatus with orderId, new status and undefined deliveredAt', async () => {
       (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
         ['_order'].set(mockConfirmedOrder);
       component.onSelectNewStatus('Shipped');
 
       await component.onChangeStatus();
 
-      expect(ordersServiceSpy.changeOrderStatus).toHaveBeenCalledWith(42, 'Shipped');
+      expect(ordersServiceSpy.changeOrderStatus).toHaveBeenCalledWith(42, 'Shipped', undefined);
     });
 
     it('should update order status after successful change', async () => {
@@ -297,98 +219,92 @@ describe('OrderDetailComponent', () => {
     });
   });
 
-  describe('isCancellable', () => {
-    it('should return true for Pending order', () => {
-      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
-        ['_order'].set(mockPendingOrder);
-      expect(component.isCancellable()).toBe(true);
+  describe('custom delivery date (AC #3)', () => {
+    it('should start with showCustomDeliveredDate as false', () => {
+      expect(component.showCustomDeliveredDate()).toBe(false);
     });
 
-    it('should return true for Confirmed order', () => {
-      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
-        ['_order'].set(mockConfirmedOrder);
-      expect(component.isCancellable()).toBe(true);
+    it('should start with customDeliveryDate as null', () => {
+      expect(component.customDeliveryDate()).toBeNull();
     });
 
-    it('should return true for Shipped order', () => {
+    it('toggleCustomDeliveredDate(true) sets showCustomDeliveredDate to true', () => {
+      component.toggleCustomDeliveredDate(true);
+      expect(component.showCustomDeliveredDate()).toBe(true);
+    });
+
+    it('toggleCustomDeliveredDate(false) resets customDeliveryDate to null', () => {
+      component.toggleCustomDeliveredDate(true);
+      component.onCustomDeliveryDateChange(new Date('2026-04-20'));
+      component.toggleCustomDeliveredDate(false);
+      expect(component.customDeliveryDate()).toBeNull();
+    });
+
+    it('onSelectNewStatus resets showCustomDeliveredDate and customDeliveryDate', () => {
+      component.toggleCustomDeliveredDate(true);
+      component.onCustomDeliveryDateChange(new Date('2026-04-20'));
       (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
         ['_order'].set(mockShippedOrder);
-      expect(component.isCancellable()).toBe(true);
+
+      component.onSelectNewStatus('Delivered');
+
+      expect(component.showCustomDeliveredDate()).toBe(false);
+      expect(component.customDeliveryDate()).toBeNull();
     });
 
-    it('should return false for Delivered order', () => {
+    it('should call changeOrderStatus with deliveredAt ISO string when custom date is set', async () => {
+      ordersServiceSpy.changeOrderStatus.mockResolvedValue({
+        orderId: 42,
+        status: 'Entregado',
+        changedAt: '2026-04-20T00:00:00.000Z',
+      });
       (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
-        ['_order'].set(mockDeliveredOrder);
-      expect(component.isCancellable()).toBe(false);
-    });
+        ['_order'].set(mockShippedOrder);
+      component.onSelectNewStatus('Delivered');
+      component.toggleCustomDeliveredDate(true);
+      const customDate = new Date('2026-04-20T00:00:00.000Z');
+      component.onCustomDeliveryDateChange(customDate);
 
-    it('should return false when no order is loaded', () => {
-      expect(component.isCancellable()).toBe(false);
-    });
-  });
+      await component.onChangeStatus();
 
-  describe('onCancelOrder()', () => {
-    it('should open confirmation dialog before cancelling', async () => {
-      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
-        ['_order'].set(mockConfirmedOrder);
-
-      await component.onCancelOrder();
-
-      expect(dialogOpenFn).toHaveBeenCalled();
-    });
-
-    it('should call ordersService.cancelOrder when dialog is confirmed', async () => {
-      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
-        ['_order'].set(mockConfirmedOrder);
-
-      await component.onCancelOrder();
-
-      expect(ordersServiceSpy.cancelOrder).toHaveBeenCalledWith(42);
-    });
-
-    it('should not call cancelOrder when dialog is dismissed', async () => {
-      dialogOpenFn.mockReturnValueOnce({ afterClosed: () => of(false) });
-      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
-        ['_order'].set(mockConfirmedOrder);
-
-      await component.onCancelOrder();
-
-      expect(ordersServiceSpy.cancelOrder).not.toHaveBeenCalled();
-    });
-
-    it('should update order status to Cancelado after cancellation', async () => {
-      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
-        ['_order'].set(mockConfirmedOrder);
-
-      await component.onCancelOrder();
-
-      expect(component.order()?.status).toBe('Cancelado');
-      expect(component.order()?.statusKey).toBe('Cancelled');
-      expect(component.order()?.cancelledAt).toBe('2026-03-24T16:00:00Z');
-    });
-
-    it('should show success snackbar after cancellation', async () => {
-      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
-        ['_order'].set(mockConfirmedOrder);
-
-      await component.onCancelOrder();
-
-      expect(snackBarSpy.open).toHaveBeenCalledWith(
-        'Pedido cancelado correctamente',
-        'Cerrar',
-        { duration: 3000 }
+      expect(ordersServiceSpy.changeOrderStatus).toHaveBeenCalledWith(
+        42,
+        'Delivered',
+        customDate.toISOString()
       );
     });
 
-    it('should not call cancelOrder if isLoading is true', async () => {
-      isLoadingWritable.set(true);
+    it('should call changeOrderStatus with undefined deliveredAt when Delivered but no custom date', async () => {
+      ordersServiceSpy.changeOrderStatus.mockResolvedValue({
+        orderId: 42,
+        status: 'Entregado',
+        changedAt: '2026-04-27T10:00:00Z',
+      });
       (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
-        ['_order'].set(mockConfirmedOrder);
+        ['_order'].set(mockShippedOrder);
+      component.onSelectNewStatus('Delivered');
 
-      await component.onCancelOrder();
+      await component.onChangeStatus();
 
-      expect(dialogOpenFn).not.toHaveBeenCalled();
-      expect(ordersServiceSpy.cancelOrder).not.toHaveBeenCalled();
+      expect(ordersServiceSpy.changeOrderStatus).toHaveBeenCalledWith(42, 'Delivered', undefined);
+    });
+
+    it('should clear custom date signals after successful status change', async () => {
+      ordersServiceSpy.changeOrderStatus.mockResolvedValue({
+        orderId: 42,
+        status: 'Entregado',
+        changedAt: '2026-04-20T00:00:00.000Z',
+      });
+      (component as unknown as { _order: ReturnType<typeof signal<OrderDetailDto | null>> })
+        ['_order'].set(mockShippedOrder);
+      component.onSelectNewStatus('Delivered');
+      component.toggleCustomDeliveredDate(true);
+      component.onCustomDeliveryDateChange(new Date('2026-04-20'));
+
+      await component.onChangeStatus();
+
+      expect(component.showCustomDeliveredDate()).toBe(false);
+      expect(component.customDeliveryDate()).toBeNull();
     });
   });
 });

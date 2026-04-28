@@ -89,13 +89,13 @@ export class OrdersService {
     }
   }
 
-  async changeOrderStatus(orderId: number, newStatus: OrderStatus): Promise<ChangeOrderStatusResult> {
+  async changeOrderStatus(orderId: number, newStatus: OrderStatus, deliveredAt?: string): Promise<ChangeOrderStatusResult> {
     this._isLoading.set(true);
     try {
+      const body: ChangeOrderStatusRequest = { newStatus };
+      if (deliveredAt) body.deliveredAt = deliveredAt;
       const result = await firstValueFrom(
-        this.http.post<ChangeOrderStatusResult>(`${this.baseUrl}/${orderId}/change-status`, {
-          newStatus,
-        } satisfies ChangeOrderStatusRequest)
+        this.http.post<ChangeOrderStatusResult>(`${this.baseUrl}/${orderId}/change-status`, body)
       );
       return result;
     } finally {

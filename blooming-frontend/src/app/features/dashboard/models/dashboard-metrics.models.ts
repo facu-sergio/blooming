@@ -13,6 +13,11 @@ export interface MonthlyProfitsMetrics {
   totalProfit: number;
 }
 
+export interface YearlyProfitsMetrics {
+  orderCount: number;
+  totalProfit: number;
+}
+
 export interface TopProduct {
   productName: string;
   imageUrl: string | null;

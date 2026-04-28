@@ -12,6 +12,10 @@ public class CreatePurchaseOrderValidator : AbstractValidator<CreatePurchaseOrde
         RuleFor(x => x.Items)
             .NotEmpty().WithMessage("La orden debe tener al menos un ítem");
 
+        RuleFor(x => x.OrderDate)
+            .Must(d => d == null || d.Value.ToUniversalTime().Date <= DateTime.UtcNow.Date)
+            .WithMessage("La fecha de la orden no puede ser una fecha futura");
+
         RuleForEach(x => x.Items).ChildRules(item =>
         {
             item.RuleFor(i => i.ProductVariantId)

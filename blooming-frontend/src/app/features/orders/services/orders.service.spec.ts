@@ -278,6 +278,32 @@ describe('OrdersService', () => {
 
       await changePromise;
     });
+
+    it('should include deliveredAt in body when provided', async () => {
+      const deliveredAt = '2026-04-20T00:00:00.000Z';
+      const changePromise = service.changeOrderStatus(42, 'Delivered', deliveredAt);
+
+      const req = httpMock.expectOne((r) =>
+        r.url.includes('/api/orders/42/change-status') && r.method === 'POST'
+      );
+      expect(req.request.body).toEqual({ newStatus: 'Delivered', deliveredAt });
+      req.flush({ orderId: 42, status: 'Entregado', changedAt: deliveredAt });
+
+      await changePromise;
+    });
+
+    it('should NOT include deliveredAt in body when not provided', async () => {
+      const changePromise = service.changeOrderStatus(42, 'Delivered');
+
+      const req = httpMock.expectOne((r) =>
+        r.url.includes('/api/orders/42/change-status') && r.method === 'POST'
+      );
+      expect(req.request.body).toEqual({ newStatus: 'Delivered' });
+      expect(req.request.body.deliveredAt).toBeUndefined();
+      req.flush({ orderId: 42, status: 'Entregado', changedAt: '2026-04-27T10:00:00Z' });
+
+      await changePromise;
+    });
   });
 
   describe('cancelOrder()', () => {

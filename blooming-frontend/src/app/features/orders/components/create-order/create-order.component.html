@@ -181,18 +181,6 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Fecha estimada de entrega</mat-label>
-            <input
-              matInput
-              [matDatepicker]="datePicker"
-              formControlName="estimatedDeliveryDate"
-              [min]="today"
-            />
-            <mat-datepicker-toggle matIconSuffix [for]="datePicker" />
-            <mat-datepicker #datePicker />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
             <mat-label>Notas del pedido</mat-label>
             <textarea
               matInput

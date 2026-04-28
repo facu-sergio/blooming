@@ -11,6 +11,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -35,6 +37,8 @@ import { ProductFormComponent } from '../../../products/components/product-form/
     MatCardModule,
     MatIconModule,
     MatTableModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     MatAutocompleteModule,
     MatDividerModule,
   ],
@@ -52,6 +56,9 @@ export class PurchaseOrderFormComponent implements OnInit {
   private readonly purchaseOrdersService = inject(PurchaseOrdersService);
 
   readonly isLoading = this.purchaseOrdersService.isLoading;
+
+  readonly today = new Date();
+  readonly orderDateControl = new FormControl<Date>(new Date(), { nonNullable: true });
 
   // Supplier selection
   readonly supplierSearchControl = new FormControl('', { updateOn: 'change' });
@@ -194,6 +201,7 @@ export class PurchaseOrderFormComponent implements OnInit {
 
     const dto = {
       supplierId: this._selectedSupplier()!.id,
+      orderDate: this.orderDateControl.value.toISOString(),
       items: this._items().map((i) => ({
         productVariantId: i.productVariantId,
         quantity: i.quantity,
