@@ -148,6 +148,32 @@
                   }
                 </mat-select>
               </mat-form-field>
+            </div>
+            @if (selectedNewStatus() === 'Delivered') {
+              <div class="custom-delivery-date-section">
+                <mat-checkbox
+                  [checked]="showCustomDeliveredDate()"
+                  (change)="toggleCustomDeliveredDate($event.checked)"
+                >
+                  Registrar fecha diferente
+                </mat-checkbox>
+                @if (showCustomDeliveredDate()) {
+                  <mat-form-field appearance="outline" class="delivery-date-field">
+                    <mat-label>Fecha de entrega (opcional)</mat-label>
+                    <input
+                      matInput
+                      [matDatepicker]="deliveryDatePicker"
+                      [formControl]="customDeliveryDateControl"
+                      [max]="today"
+                      (dateChange)="onCustomDeliveryDateChange($event.value)"
+                    />
+                    <mat-datepicker-toggle matIconSuffix [for]="deliveryDatePicker" />
+                    <mat-datepicker #deliveryDatePicker />
+                  </mat-form-field>
+                }
+              </div>
+            }
+            <div class="status-change-row-button">
               <button
                 mat-flat-button
                 color="primary"

@@ -8,6 +8,7 @@ import { MonthlySalesCardComponent } from '../monthly-sales-card/monthly-sales-c
 import { MarginCardComponent } from '../margin-card/margin-card.component';
 import { TopProductsCardComponent } from '../top-products-card/top-products-card.component';
 import { StockAlertsCardComponent } from '../stock-alerts-card/stock-alerts-card.component';
+import { YearlyProfitsCardComponent } from '../yearly-profits-card/yearly-profits-card.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,6 +21,7 @@ import { StockAlertsCardComponent } from '../stock-alerts-card/stock-alerts-card
     MarginCardComponent,
     TopProductsCardComponent,
     StockAlertsCardComponent,
+    YearlyProfitsCardComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',

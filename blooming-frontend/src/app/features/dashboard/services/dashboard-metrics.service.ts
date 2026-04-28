@@ -6,6 +6,7 @@ import {
   DailySalesMetrics,
   MonthlySalesMetrics,
   MonthlyProfitsMetrics,
+  YearlyProfitsMetrics,
   TopProduct,
   StockAlert,
   MonthlyMargin,
@@ -20,6 +21,7 @@ export class DashboardMetricsService {
   private readonly _dailySales = signal<DailySalesMetrics>({ orderCount: 0, totalAmount: 0 });
   private readonly _monthlySales = signal<MonthlySalesMetrics>({ orderCount: 0, totalAmount: 0 });
   private readonly _monthlyProfits = signal<MonthlyProfitsMetrics>({ orderCount: 0, totalProfit: 0 });
+  private readonly _yearlyProfits = signal<YearlyProfitsMetrics>({ orderCount: 0, totalProfit: 0 });
   private readonly _topProducts = signal<TopProduct[]>([]);
   private readonly _stockAlerts = signal<StockAlert[]>([]);
   private readonly _monthlyMargin = signal<MonthlyMargin>({ revenue: 0, cost: 0, margin: 0 });
@@ -29,6 +31,7 @@ export class DashboardMetricsService {
   readonly dailySales = this._dailySales.asReadonly();
   readonly monthlySales = this._monthlySales.asReadonly();
   readonly monthlyProfits = this._monthlyProfits.asReadonly();
+  readonly yearlyProfits = this._yearlyProfits.asReadonly();
   readonly topProducts = this._topProducts.asReadonly();
   readonly stockAlerts = this._stockAlerts.asReadonly();
   readonly monthlyMargin = this._monthlyMargin.asReadonly();
@@ -42,6 +45,7 @@ export class DashboardMetricsService {
         this.loadDailySales(),
         this.loadMonthlySales(),
         this.loadMonthlyProfits(),
+        this.loadYearlyProfits(),
         this.loadTopProducts(),
         this.loadStockAlerts(),
         this.loadMonthlyMargin(),
@@ -84,6 +88,13 @@ export class DashboardMetricsService {
       this.http.get<MonthlyProfitsMetrics>(`${this.baseUrl}/monthly-profits`)
     );
     this._monthlyProfits.set(result);
+  }
+
+  private async loadYearlyProfits(): Promise<void> {
+    const result = await firstValueFrom(
+      this.http.get<YearlyProfitsMetrics>(`${this.baseUrl}/yearly-profits`)
+    );
+    this._yearlyProfits.set(result);
   }
 
   private async loadMonthlyMargin(): Promise<void> {

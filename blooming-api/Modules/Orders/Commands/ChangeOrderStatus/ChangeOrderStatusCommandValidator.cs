@@ -20,5 +20,9 @@ public class ChangeOrderStatusCommandValidator : AbstractValidator<ChangeOrderSt
         RuleFor(x => x.ChangedByUserId)
             .GreaterThan(0)
             .WithMessage("El usuario que realiza el cambio es requerido");
+
+        RuleFor(x => x.DeliveredAt)
+            .Must(d => d == null || d.Value.ToUniversalTime() <= DateTime.UtcNow)
+            .WithMessage("La fecha de entrega no puede ser en el futuro");
     }
 }
