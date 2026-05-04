@@ -21,6 +21,12 @@ public class CreateProductInlineHandler : IRequestHandler<CreateProductInlineCom
         var category = await _db.Categories.FindAsync([request.CategoryId], cancellationToken)
             ?? throw new NotFoundException($"Categoría {request.CategoryId} no encontrada");
 
+        var size = await _db.Sizes.FindAsync([request.SizeId], cancellationToken)
+            ?? throw new NotFoundException($"Talle {request.SizeId} no encontrado");
+
+        var color = await _db.Colors.FindAsync([request.ColorId], cancellationToken)
+            ?? throw new NotFoundException($"Color {request.ColorId} no encontrado");
+
         var now = DateTime.UtcNow;
 
         var product = new Product
@@ -32,8 +38,10 @@ public class CreateProductInlineHandler : IRequestHandler<CreateProductInlineCom
             {
                 new()
                 {
-                    Size = request.Size,
-                    Color = request.Color,
+                    SizeId = request.SizeId,
+                    Size = size,
+                    ColorId = request.ColorId,
+                    Color = color,
                     CostPrice = 0,
                     MarkupPercentage = request.MarkupPercentage,
                     SellingPrice = 0,

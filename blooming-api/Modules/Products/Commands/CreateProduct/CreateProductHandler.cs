@@ -24,6 +24,23 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
         var category = await _db.Categories.FindAsync([request.CategoryId], cancellationToken)
             ?? throw new NotFoundException($"Categoría {request.CategoryId} no encontrada");
 
+        var sizeIds = request.Variants.Select(v => v.SizeId).Distinct().ToList();
+        var colorIds = request.Variants.Select(v => v.ColorId).Distinct().ToList();
+
+        var sizes = await _db.Sizes
+            .Where(s => sizeIds.Contains(s.Id))
+            .ToDictionaryAsync(s => s.Id, cancellationToken);
+        var colors = await _db.Colors
+            .Where(c => colorIds.Contains(c.Id))
+            .ToDictionaryAsync(c => c.Id, cancellationToken);
+
+        foreach (var sizeId in sizeIds)
+            if (!sizes.ContainsKey(sizeId))
+                throw new NotFoundException($"Talle {sizeId} no encontrado");
+        foreach (var colorId in colorIds)
+            if (!colors.ContainsKey(colorId))
+                throw new NotFoundException($"Color {colorId} no encontrado");
+
         string? imageUrl = null;
         if (request.Image != null)
         {
@@ -45,8 +62,10 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
 
             variants.Add(new ProductVariant
             {
-                Size = v.Size,
-                Color = v.Color,
+                SizeId = v.SizeId,
+                Size = sizes[v.SizeId],
+                ColorId = v.ColorId,
+                Color = colors[v.ColorId],
                 CostPrice = v.CostPrice,
                 MarkupPercentage = v.MarkupPercentage,
                 SellingPrice = v.CostPrice * (1 + v.MarkupPercentage / 100),
@@ -84,13 +103,17 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
         Name = product.Name,
         CategoryId = product.CategoryId,
         CategoryName = categoryName,
+        SizeSystemId = product.SizeSystemId,
         ImageUrl = product.ImageUrl,
         CreatedAt = product.CreatedAt,
         Variants = product.Variants.Select(v => new VariantResponse
         {
             Id = v.Id,
-            Size = v.Size,
-            Color = v.Color,
+            SizeId = v.SizeId,
+            SizeName = v.Size.DisplayName,
+            SizeDescription = v.Size.Description,
+            ColorId = v.ColorId,
+            ColorName = v.Color.DisplayName,
             CostPrice = v.CostPrice,
             MarkupPercentage = v.MarkupPercentage,
             SellingPrice = v.SellingPrice,

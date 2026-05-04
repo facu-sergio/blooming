@@ -6,6 +6,7 @@ public class ProductResponse
     public string Name { get; set; } = string.Empty;
     public int CategoryId { get; set; }
     public string CategoryName { get; set; } = string.Empty;
+    public int? SizeSystemId { get; set; }
     public string? ImageUrl { get; set; }
     public DateTime CreatedAt { get; set; }
     public List<VariantResponse> Variants { get; set; } = new();
@@ -14,8 +15,11 @@ public class ProductResponse
 public class VariantResponse
 {
     public int Id { get; set; }
-    public string Size { get; set; } = string.Empty;
-    public string Color { get; set; } = string.Empty;
+    public int SizeId { get; set; }
+    public string SizeName { get; set; } = string.Empty;
+    public string? SizeDescription { get; set; }
+    public int ColorId { get; set; }
+    public string ColorName { get; set; } = string.Empty;
     public decimal CostPrice { get; set; }
     public decimal MarkupPercentage { get; set; }
     public decimal SellingPrice { get; set; }

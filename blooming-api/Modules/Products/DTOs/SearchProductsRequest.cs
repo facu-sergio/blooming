@@ -4,6 +4,6 @@ public class SearchProductsRequest
 {
     public string? SearchTerm { get; set; }
     public string? Category { get; set; }
-    public string? Size { get; set; }
-    public string? Color { get; set; }
+    public int? SizeId { get; set; }
+    public int? ColorId { get; set; }
 }

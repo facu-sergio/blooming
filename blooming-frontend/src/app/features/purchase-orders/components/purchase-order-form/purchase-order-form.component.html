@@ -77,7 +77,7 @@
           (optionSelected)="addVariantToOrder($event.option.value)"
         >
           <mat-option *ngFor="let item of filteredVariants()" [value]="item">
-            {{ item.product.name }} — {{ item.variant.size }} {{ item.variant.color }}
+            {{ item.product.name }} — {{ item.variant.sizeName }} {{ item.variant.colorName }}
             <span class="variant-price">(Costo: ${{ item.variant.costPrice | number: '1.2-2' }})</span>
           </mat-option>
         </mat-autocomplete>

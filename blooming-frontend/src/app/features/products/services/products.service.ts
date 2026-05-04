@@ -40,8 +40,8 @@ export class ProductsService {
         .set('pageSize', filters.pageSize.toString());
       if (filters.searchTerm) params = params.set('searchTerm', filters.searchTerm);
       if (filters.category) params = params.set('category', filters.category);
-      if (filters.size) params = params.set('size', filters.size);
-      if (filters.color) params = params.set('color', filters.color);
+      if (filters.sizeId) params = params.set('sizeId', filters.sizeId.toString());
+      if (filters.colorId) params = params.set('colorId', filters.colorId.toString());
 
       const result = await firstValueFrom(
         this.http.get<PagedProductsResult>(this.baseUrl, { params })
@@ -60,8 +60,8 @@ export class ProductsService {
       let params = new HttpParams();
       if (filters.searchTerm) params = params.set('searchTerm', filters.searchTerm);
       if (filters.category) params = params.set('category', filters.category);
-      if (filters.size) params = params.set('size', filters.size);
-      if (filters.color) params = params.set('color', filters.color);
+      if (filters.sizeId) params = params.set('sizeId', filters.sizeId.toString());
+      if (filters.colorId) params = params.set('colorId', filters.colorId.toString());
 
       const result = await firstValueFrom(
         this.http.get<ProductResponse[]>(`${this.baseUrl}/search`, { params })

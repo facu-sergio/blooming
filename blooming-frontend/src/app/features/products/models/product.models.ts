@@ -3,10 +3,9 @@ export interface ProductVariantMeasurement {
   valueInCm: number;
 }
 
-
 export interface CreateVariantDto {
-  size: string;
-  color: string;
+  sizeId: number;
+  colorId: number;
   costPrice: number;
   markupPercentage: number;
   lowStockThreshold?: number;
@@ -15,8 +14,8 @@ export interface CreateVariantDto {
 
 export interface UpdateVariantDto {
   id?: number;
-  size: string;
-  color: string;
+  sizeId: number;
+  colorId: number;
   costPrice: number;
   markupPercentage: number;
   lowStockThreshold?: number;
@@ -29,6 +28,7 @@ export interface ProductResponse {
   name: string;
   categoryId: number;
   categoryName: string;
+  sizeSystemId?: number;
   imageUrl?: string;
   createdAt: string;
   variants: VariantResponse[];
@@ -36,8 +36,11 @@ export interface ProductResponse {
 
 export interface VariantResponse {
   id: number;
-  size: string;
-  color: string;
+  sizeId: number;
+  sizeName: string;
+  sizeDescription?: string;
+  colorId: number;
+  colorName: string;
   costPrice: number;
   markupPercentage: number;
   sellingPrice: number;
@@ -47,19 +50,18 @@ export interface VariantResponse {
   measurements: ProductVariantMeasurement[];
 }
 
-
 export interface SearchFilters {
   searchTerm?: string;
   category?: string;
-  size?: string;
-  color?: string;
+  sizeId?: number;
+  colorId?: number;
 }
 
 export interface ProductListFilters {
   searchTerm?: string;
   category?: string;
-  size?: string;
-  color?: string;
+  sizeId?: number;
+  colorId?: number;
   page: number;
   pageSize: number;
 }
@@ -74,8 +76,8 @@ export interface PagedProductsResult {
 export interface CreateProductInlineDto {
   name: string;
   categoryId: number;
-  size: string;
-  color: string;
+  sizeId: number;
+  colorId: number;
   markupPercentage: number;
   lowStockThreshold?: number;
 }

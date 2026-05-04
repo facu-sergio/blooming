@@ -24,21 +24,19 @@
     </mat-form-field>
 
     <div class="row-two">
-      <mat-form-field appearance="outline">
-        <mat-label>Talle inicial</mat-label>
-        <input matInput formControlName="size" [maxlength]="constants.sizeMaxLength" />
-        @if (form.get('size')?.hasError('required') && form.get('size')?.touched) {
-          <mat-error>Requerido</mat-error>
-        }
-      </mat-form-field>
+      <app-hybrid-autocomplete
+        label="Talle inicial"
+        [control]="form.get('sizeId')!"
+        [optionGroups]="sizeOptionGroups()"
+        [required]="true"
+      />
 
-      <mat-form-field appearance="outline">
-        <mat-label>Color inicial</mat-label>
-        <input matInput formControlName="color" [maxlength]="constants.colorMaxLength" />
-        @if (form.get('color')?.hasError('required') && form.get('color')?.touched) {
-          <mat-error>Requerido</mat-error>
-        }
-      </mat-form-field>
+      <app-hybrid-autocomplete
+        label="Color inicial"
+        [control]="form.get('colorId')!"
+        [options]="colorOptions()"
+        [required]="true"
+      />
     </div>
 
     <div class="row-two">

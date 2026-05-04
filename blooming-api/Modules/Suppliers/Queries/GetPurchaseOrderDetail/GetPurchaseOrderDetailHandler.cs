@@ -21,6 +21,12 @@ public class GetPurchaseOrderDetailHandler : IRequestHandler<GetPurchaseOrderDet
             .Include(p => p.Items)
                 .ThenInclude(i => i.ProductVariant)
                     .ThenInclude(v => v.Product)
+            .Include(p => p.Items)
+                .ThenInclude(i => i.ProductVariant)
+                    .ThenInclude(v => v.Size)
+            .Include(p => p.Items)
+                .ThenInclude(i => i.ProductVariant)
+                    .ThenInclude(v => v.Color)
             .FirstOrDefaultAsync(p => p.Id == request.PurchaseOrderId, cancellationToken);
 
         if (order == null)
@@ -30,7 +36,7 @@ public class GetPurchaseOrderDetailHandler : IRequestHandler<GetPurchaseOrderDet
             i.Id,
             i.ProductVariantId,
             i.ProductVariant.Product.Name,
-            $"{i.ProductVariant.Size} {i.ProductVariant.Color}",
+            $"{i.ProductVariant.Size.DisplayName} {i.ProductVariant.Color.DisplayName}",
             i.Quantity,
             i.UnitCostPrice,
             i.UnitCostPrice * i.Quantity

@@ -9,6 +9,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
@@ -16,6 +17,7 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { ProductsService } from '../../services/products.service';
+import { CatalogService } from '../../services/catalog.service';
 import { ProductListFilters, VariantResponse } from '../../models/product.models';
 import { FormatMeasurementsPipe } from '../../pipes/format-measurements.pipe';
 import { CategoriesService } from '../../services/categories.service';
@@ -33,6 +35,7 @@ import { CategoriesService } from '../../services/categories.service';
     MatProgressSpinnerModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
     MatAutocompleteModule,
     MatTooltipModule,
     MatPaginatorModule,
@@ -44,6 +47,7 @@ import { CategoriesService } from '../../services/categories.service';
 export class ProductListComponent implements OnInit {
   private readonly productsService = inject(ProductsService);
   private readonly categoriesService = inject(CategoriesService);
+  readonly catalogService = inject(CatalogService);
   private readonly router = inject(Router);
   private readonly breakpointObserver = inject(BreakpointObserver);
 
@@ -63,8 +67,8 @@ export class ProductListComponent implements OnInit {
 
   readonly searchTermControl = new FormControl<string>('');
   readonly categoryControl = new FormControl<string>('');
-  readonly sizeControl = new FormControl<string>('');
-  readonly colorControl = new FormControl<string>('');
+  readonly sizeIdControl = new FormControl<number | null>(null);
+  readonly colorIdControl = new FormControl<number | null>(null);
 
   page = 1;
   pageSize = 20;
@@ -85,7 +89,10 @@ export class ProductListComponent implements OnInit {
   private searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   async ngOnInit(): Promise<void> {
-    await this.categoriesService.loadAll();
+    await Promise.all([
+      this.categoriesService.loadAll(),
+      this.catalogService.loadAll(),
+    ]);
     await this.loadProducts();
   }
 
@@ -95,8 +102,8 @@ export class ProductListComponent implements OnInit {
       pageSize: this.pageSize,
       searchTerm: this.searchTermControl.value || undefined,
       category: this.categoryControl.value || undefined,
-      size: this.sizeControl.value || undefined,
-      color: this.colorControl.value || undefined,
+      sizeId: this.sizeIdControl.value ?? undefined,
+      colorId: this.colorIdControl.value ?? undefined,
     };
     await this.productsService.getProductsPaged(filters);
   }
@@ -123,9 +130,9 @@ export class ProductListComponent implements OnInit {
       const count = [
         this.searchTermControl.value,
         this.categoryControl.value,
-        this.sizeControl.value,
-        this.colorControl.value,
-      ].filter(Boolean).length;
+        this.sizeIdControl.value,
+        this.colorIdControl.value,
+      ].filter(v => v !== null && v !== '' && v !== undefined).length;
       this._hasActiveFilters.set(count > 0);
       this.activeFilterCount.set(count);
       this.page = 1;
@@ -136,8 +143,8 @@ export class ProductListComponent implements OnInit {
   async clearFilters(): Promise<void> {
     this.searchTermControl.setValue('');
     this.categoryControl.setValue('');
-    this.sizeControl.setValue('');
-    this.colorControl.setValue('');
+    this.sizeIdControl.setValue(null);
+    this.colorIdControl.setValue(null);
     this._hasActiveFilters.set(false);
     this.activeFilterCount.set(0);
     this.page = 1;

@@ -21,8 +21,9 @@ public class SearchProductsHandler : IRequestHandler<SearchProductsQuery, List<P
         var request = query.Request;
 
         IQueryable<Product> q = _db.Products
-            .Include(p => p.Variants)
-                .ThenInclude(v => v.Measurements)
+            .Include(p => p.Variants).ThenInclude(v => v.Size)
+            .Include(p => p.Variants).ThenInclude(v => v.Color)
+            .Include(p => p.Variants).ThenInclude(v => v.Measurements)
             .Include(p => p.Category)
             .AsQueryable();
 
@@ -38,17 +39,11 @@ public class SearchProductsHandler : IRequestHandler<SearchProductsQuery, List<P
             q = q.Where(p => p.Category.Name.ToLower() == cat);
         }
 
-        if (!string.IsNullOrWhiteSpace(request.Size))
-        {
-            var size = request.Size;
-            q = q.Where(p => p.Variants.Any(v => v.Size == size));
-        }
+        if (request.SizeId.HasValue)
+            q = q.Where(p => p.Variants.Any(v => v.SizeId == request.SizeId.Value));
 
-        if (!string.IsNullOrWhiteSpace(request.Color))
-        {
-            var color = request.Color;
-            q = q.Where(p => p.Variants.Any(v => v.Color == color));
-        }
+        if (request.ColorId.HasValue)
+            q = q.Where(p => p.Variants.Any(v => v.ColorId == request.ColorId.Value));
 
         var products = await q.OrderBy(p => p.Name).ToListAsync(cancellationToken);
 

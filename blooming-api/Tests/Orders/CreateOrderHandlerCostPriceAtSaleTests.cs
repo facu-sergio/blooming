@@ -45,8 +45,8 @@ public class CreateOrderHandlerCostPriceAtSaleTests : IDisposable
         var variant = new ProductVariant
         {
             ProductId = product.Id,
-            Size = "M",
-            Color = "Rojo",
+            SizeId = 1,
+            ColorId = 1,
             CostPrice = 800m,
             MarkupPercentage = 50m,
             SellingPrice = 1200m,

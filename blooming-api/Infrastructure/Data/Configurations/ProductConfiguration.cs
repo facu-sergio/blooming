@@ -18,6 +18,12 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .WithMany()
             .HasForeignKey(p => p.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
+        builder.Property(p => p.SizeSystemId).HasColumnName("size_system_id");
+        builder.HasOne(p => p.SizeSystem)
+            .WithMany()
+            .HasForeignKey(p => p.SizeSystemId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(false);
         builder.Property(p => p.ImageUrl).HasColumnName("image_url").HasMaxLength(500);
         builder.Property(p => p.CreatedAt).HasColumnName("created_at").IsRequired();
         builder.Property(p => p.UpdatedAt).HasColumnName("updated_at");
