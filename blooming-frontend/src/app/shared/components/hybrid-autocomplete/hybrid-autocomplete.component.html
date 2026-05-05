@@ -1,0 +1,42 @@
+<mat-form-field appearance="outline">
+  <mat-label>{{ label() }}</mat-label>
+  <input
+    matInput
+    [formControl]="searchControl"
+    [matAutocomplete]="auto"
+    [required]="required()"
+    (focus)="onFocus()"
+    (click)="onFocus()"
+    #trigger="matAutocompleteTrigger"
+  />
+  @if (searchControl.value && !isSelected()) {
+    <button matSuffix class="clear-btn" type="button" (click)="clear($event)" aria-label="Limpiar">
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+  <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onSelected($event)">
+    @if (filteredGroups().length) {
+      @for (group of filteredGroups(); track group.label) {
+        <mat-optgroup [label]="group.label">
+          @for (option of group.options; track option.id) {
+            <mat-option [value]="option">
+              {{ option.displayName }}
+              @if (option.description) {
+                <span [matTooltip]="option.description"> ⓘ</span>
+              }
+            </mat-option>
+          }
+        </mat-optgroup>
+      }
+    } @else {
+      @for (option of flatOptions(); track option.id) {
+        <mat-option [value]="option">
+          {{ option.displayName }}
+          @if (option.description) {
+            <span [matTooltip]="option.description"> ⓘ</span>
+          }
+        </mat-option>
+      }
+    }
+  </mat-autocomplete>
+</mat-form-field>

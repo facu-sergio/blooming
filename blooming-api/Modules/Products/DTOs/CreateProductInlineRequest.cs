@@ -4,8 +4,8 @@ public class CreateProductInlineRequest
 {
     public string Name { get; set; } = string.Empty;
     public int CategoryId { get; set; }
-    public string Size { get; set; } = string.Empty;
-    public string Color { get; set; } = string.Empty;
+    public int SizeId { get; set; }
+    public int ColorId { get; set; }
     public decimal MarkupPercentage { get; set; }
     public int? LowStockThreshold { get; set; }
 }

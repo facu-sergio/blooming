@@ -44,13 +44,22 @@ public class GetPurchaseOrderDetailHandlerTests : IDisposable
             CreatedAt = DateTime.UtcNow
         };
         _db.Products.Add(product);
+
+        var sizeM = new Size { SizeSystemId = 1, Name = "m", DisplayName = "M", SortOrder = 1, IsActive = true };
+        var sizeL = new Size { SizeSystemId = 1, Name = "l", DisplayName = "L", SortOrder = 2, IsActive = true };
+        var colorRojo = new Color { Name = "rojo", DisplayName = "Rojo", SortOrder = 1, IsActive = true };
+        var colorAzul = new Color { Name = "azul", DisplayName = "Azul", SortOrder = 2, IsActive = true };
+        _db.Sizes.AddRange(sizeM, sizeL);
+        _db.Colors.AddRange(colorRojo, colorAzul);
         _db.SaveChanges();
 
         var variant1 = new ProductVariant
         {
             ProductId = product.Id,
-            Size = "M",
-            Color = "Rojo",
+            SizeId = sizeM.Id,
+            Size = sizeM,
+            ColorId = colorRojo.Id,
+            Color = colorRojo,
             CostPrice = 1000m,
             MarkupPercentage = 50m,
             SellingPrice = 1500m,
@@ -60,8 +69,10 @@ public class GetPurchaseOrderDetailHandlerTests : IDisposable
         var variant2 = new ProductVariant
         {
             ProductId = product.Id,
-            Size = "L",
-            Color = "Azul",
+            SizeId = sizeL.Id,
+            Size = sizeL,
+            ColorId = colorAzul.Id,
+            Color = colorAzul,
             CostPrice = 1200m,
             MarkupPercentage = 50m,
             SellingPrice = 1800m,

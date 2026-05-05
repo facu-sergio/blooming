@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormArray, Validators, AbstractControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -9,12 +9,15 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { ProductsService } from '../../services/products.service';
 import { CategoriesService } from '../../services/categories.service';
+import { CatalogService } from '../../services/catalog.service';
 import { productsConstants } from '../../constants/products.constants';
 import { UpdateVariantDto, CreateVariantDto, ProductVariantMeasurement } from '../../models/product.models';
+import { HybridAutocompleteComponent } from '../../../../shared/components/hybrid-autocomplete/hybrid-autocomplete.component';
 
 @Component({
   selector: 'app-product-form',
@@ -29,7 +32,9 @@ import { UpdateVariantDto, CreateVariantDto, ProductVariantMeasurement } from '.
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
     MatDialogModule,
+    HybridAutocompleteComponent,
   ],
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.scss',
@@ -38,7 +43,26 @@ export class ProductFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly productsService = inject(ProductsService);
   private readonly categoriesService = inject(CategoriesService);
+  readonly catalogService = inject(CatalogService);
   readonly router = inject(Router);
+
+  readonly sizeOptionGroups = computed(() =>
+    this.catalogService.sizeSystems().map(ss => ({
+      label: ss.displayName,
+      options: ss.sizes.map(s => ({
+        id: s.id,
+        displayName: s.displayName,
+        description: s.description,
+      })),
+    }))
+  );
+
+  readonly colorOptions = computed(() =>
+    this.catalogService.colors().map(c => ({
+      id: c.id,
+      displayName: c.displayName,
+    }))
+  );
   private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -72,22 +96,23 @@ export class ProductFormComponent implements OnInit {
 
   createVariantGroup(data?: {
     id?: number;
-    size?: string;
-    color?: string;
+    sizeId?: number;
+    colorId?: number;
     costPrice?: number;
     markupPercentage?: number;
+    description?: string;
     measurements?: ProductVariantMeasurement[];
   }) {
     const cost = data?.costPrice ?? 0;
     const markup = data?.markupPercentage ?? 0;
     return this.fb.group({
       id: [data?.id ?? null],
-      size: [data?.size ?? '', [Validators.required, Validators.maxLength(productsConstants.sizeMaxLength)]],
-      color: [data?.color ?? '', [Validators.required, Validators.maxLength(productsConstants.colorMaxLength)]],
+      sizeId: [data?.sizeId ?? null, [Validators.required]],
+      colorId: [data?.colorId ?? null, [Validators.required]],
+      description: [data?.description ?? null, [Validators.maxLength(255)]],
       costPrice: [{ value: cost, disabled: false }],
       markupPercentage: [markup, [Validators.required, Validators.min(0)]],
       sellingPrice: [Math.round(cost * (1 + markup / 100) * 100) / 100],
-      // TODO: exponer lowStockThreshold por variante si en el futuro se necesita configurar por producto
       lowStockThreshold: [1],
       measurements: this.fb.array(
         (data?.measurements ?? []).map((m) => this.createMeasurementGroup(m))
@@ -166,10 +191,8 @@ export class ProductFormComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-
     if (!(productsConstants.allowedImageTypes as readonly string[]).includes(file.type)) return;
     if (file.size > productsConstants.imageMaxSizeBytes) return;
-
     this.variantImages.update((imgs) => {
       const updated = [...imgs];
       updated[variantIndex] = { ...updated[variantIndex], file, preview: URL.createObjectURL(file), remove: false };
@@ -189,11 +212,24 @@ export class ProductFormComponent implements OnInit {
     return this.variantImages()[index] ?? { file: null, preview: null, existingUrl: null, remove: false };
   }
 
+  getVariantLabel(variantControl: AbstractControl): string {
+    const sizeId = variantControl.get('sizeId')?.value;
+    const colorId = variantControl.get('colorId')?.value;
+    const sizeName = sizeId ? this.catalogService.getSizeName(sizeId) : '';
+    const colorName = colorId ? this.catalogService.getColorName(colorId) : '';
+    if (!sizeName && !colorName) return '';
+    return `${sizeName}${colorName ? ' / ' + colorName : ''}`;
+  }
+
+  getSizeTooltip(sizeId: number | null): string | null {
+    if (!sizeId) return null;
+    return this.catalogService.getSizeDescription(sizeId) ?? null;
+  }
+
   onImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-
     if (!(productsConstants.allowedImageTypes as readonly string[]).includes(file.type)) {
       this.imageError.set('La imagen debe ser JPEG o PNG');
       return;
@@ -202,7 +238,6 @@ export class ProductFormComponent implements OnInit {
       this.imageError.set('La imagen no puede superar 5MB');
       return;
     }
-
     this.imageError.set(null);
     this.selectedImage.set(file);
     this.removeImage.set(false);
@@ -225,7 +260,10 @@ export class ProductFormComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    await this.categoriesService.loadAll();
+    await Promise.all([
+      this.categoriesService.loadAll(),
+      this.catalogService.loadAll(),
+    ]);
 
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
@@ -244,10 +282,11 @@ export class ProductFormComponent implements OnInit {
         for (const v of product.variants) {
           this.variantsArray.push(this.createVariantGroup({
             id: v.id,
-            size: v.size,
-            color: v.color,
+            sizeId: v.sizeId,
+            colorId: v.colorId,
             costPrice: v.costPrice,
             markupPercentage: v.markupPercentage,
+            description: v.description,
             measurements: v.measurements ?? [],
           }));
           imgs.push({ file: null, preview: v.imageUrl ?? null, existingUrl: v.imageUrl ?? null, remove: false });

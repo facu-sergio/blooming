@@ -112,7 +112,7 @@ export class PurchaseOrderFormComponent implements OnInit {
 
     for (const product of this.productsService.products()) {
       for (const variant of product.variants) {
-        const label = `${product.name} ${variant.size} ${variant.color}`.toLowerCase();
+        const label = `${product.name} ${variant.sizeName} ${variant.colorName}`.toLowerCase();
         if (label.includes(lower)) {
           results.push({ product, variant });
           if (results.length >= 15) break;
@@ -134,7 +134,7 @@ export class PurchaseOrderFormComponent implements OnInit {
   }
 
   variantDisplayFn(item: { product: ProductResponse; variant: VariantResponse } | null): string {
-    return item ? `${item.product.name} - ${item.variant.size} ${item.variant.color}` : '';
+    return item ? `${item.product.name} - ${item.variant.sizeName} ${item.variant.colorName}` : '';
   }
 
   addVariantToOrder(item: { product: ProductResponse; variant: VariantResponse }): void {
@@ -152,7 +152,7 @@ export class PurchaseOrderFormComponent implements OnInit {
       const entry: PurchaseOrderItemFormEntry = {
         productVariantId: item.variant.id,
         productName: item.product.name,
-        variantLabel: `${item.variant.size} ${item.variant.color}`,
+        variantLabel: `${item.variant.sizeName} ${item.variant.colorName}`,
         quantity: 1,
         unitCostPrice: item.variant.costPrice ?? 0,
         lineTotal: item.variant.costPrice ?? 0,

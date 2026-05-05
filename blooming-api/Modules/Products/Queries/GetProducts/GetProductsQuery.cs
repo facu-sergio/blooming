@@ -6,8 +6,8 @@ namespace blooming_api.Modules.Products.Queries.GetProducts;
 public record GetProductsQuery(
     string? SearchTerm = null,
     string? Category = null,
-    string? Size = null,
-    string? Color = null,
+    int? SizeId = null,
+    int? ColorId = null,
     int Page = 1,
     int PageSize = 1000
 ) : IRequest<PagedProductsResult>;

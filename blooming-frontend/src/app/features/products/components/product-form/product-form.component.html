@@ -71,9 +71,9 @@
                   <mat-icon class="expand-icon">{{ isVariantExpanded(variantIndex) ? 'expand_less' : 'expand_more' }}</mat-icon>
                   <span class="variant-title">
                     Variante {{ variantIndex + 1 }}
-                    @if (variant.get('size')?.value || variant.get('color')?.value) {
+                    @if (getVariantLabel(variant)) {
                       <span class="variant-subtitle">
-                        · {{ variant.get('size')?.value }}{{ variant.get('color')?.value ? ' / ' + variant.get('color')?.value : '' }}
+                        · {{ getVariantLabel(variant) }}
                         @if (variant.get('sellingPrice')?.value > 0) { — ${{ variant.get('sellingPrice')?.value | number: '1.2-2' }} }
                       </span>
                     }
@@ -89,19 +89,26 @@
               @if (isVariantExpanded(variantIndex)) {
                 <div class="variant-body">
                   <div class="variant-fields">
-                    <mat-form-field appearance="outline">
-                      <mat-label>Talle</mat-label>
-                      <input matInput formControlName="size" [maxlength]="constants.sizeMaxLength" />
-                      @if (variant.get('size')?.hasError('required') && variant.get('size')?.touched) {
-                        <mat-error>Requerido</mat-error>
-                      }
-                    </mat-form-field>
 
-                    <mat-form-field appearance="outline">
-                      <mat-label>Color</mat-label>
-                      <input matInput formControlName="color" [maxlength]="constants.colorMaxLength" />
-                      @if (variant.get('color')?.hasError('required') && variant.get('color')?.touched) {
-                        <mat-error>Requerido</mat-error>
+                    <app-hybrid-autocomplete
+                      label="Talle"
+                      [control]="variant.get('sizeId')!"
+                      [optionGroups]="sizeOptionGroups()"
+                      [required]="true"
+                    />
+
+                    <app-hybrid-autocomplete
+                      label="Color"
+                      [control]="variant.get('colorId')!"
+                      [options]="colorOptions()"
+                      [required]="true"
+                    />
+
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Aclaración (opcional)</mat-label>
+                      <input matInput formControlName="description" maxlength="255" />
+                      @if (variant.get('description')?.hasError('maxlength')) {
+                        <mat-error>Máximo 255 caracteres</mat-error>
                       }
                     </mat-form-field>
 
@@ -288,9 +295,9 @@
                       <mat-icon class="expand-icon">{{ isVariantExpanded(variantIndex) ? 'expand_less' : 'expand_more' }}</mat-icon>
                       <span class="variant-title">
                         Variante {{ variantIndex + 1 }}
-                        @if (variant.get('size')?.value || variant.get('color')?.value) {
+                        @if (getVariantLabel(variant)) {
                           <span class="variant-subtitle">
-                            · {{ variant.get('size')?.value }}{{ variant.get('color')?.value ? ' / ' + variant.get('color')?.value : '' }}
+                            · {{ getVariantLabel(variant) }}
                             @if (variant.get('sellingPrice')?.value > 0) { — ${{ variant.get('sellingPrice')?.value | number: '1.2-2' }} }
                           </span>
                         }
@@ -306,19 +313,26 @@
                   @if (isVariantExpanded(variantIndex)) {
                     <div class="variant-body">
                       <div class="variant-fields">
-                        <mat-form-field appearance="outline">
-                          <mat-label>Talle</mat-label>
-                          <input matInput formControlName="size" [maxlength]="constants.sizeMaxLength" />
-                          @if (variant.get('size')?.hasError('required') && variant.get('size')?.touched) {
-                            <mat-error>Requerido</mat-error>
-                          }
-                        </mat-form-field>
 
-                        <mat-form-field appearance="outline">
-                          <mat-label>Color</mat-label>
-                          <input matInput formControlName="color" [maxlength]="constants.colorMaxLength" />
-                          @if (variant.get('color')?.hasError('required') && variant.get('color')?.touched) {
-                            <mat-error>Requerido</mat-error>
+                        <app-hybrid-autocomplete
+                          label="Talle"
+                          [control]="variant.get('sizeId')!"
+                          [optionGroups]="sizeOptionGroups()"
+                          [required]="true"
+                        />
+
+                        <app-hybrid-autocomplete
+                          label="Color"
+                          [control]="variant.get('colorId')!"
+                          [options]="colorOptions()"
+                          [required]="true"
+                        />
+
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Aclaración (opcional)</mat-label>
+                          <input matInput formControlName="description" maxlength="255" />
+                          @if (variant.get('description')?.hasError('maxlength')) {
+                            <mat-error>Máximo 255 caracteres</mat-error>
                           }
                         </mat-form-field>
 

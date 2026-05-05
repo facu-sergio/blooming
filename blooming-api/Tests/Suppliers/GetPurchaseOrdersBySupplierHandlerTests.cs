@@ -56,8 +56,8 @@ public class GetPurchaseOrdersBySupplierHandlerTests : IDisposable
         var variant = new ProductVariant
         {
             ProductId = product.Id,
-            Size = "M",
-            Color = "Rojo",
+            SizeId = 1,
+            ColorId = 1,
             CostPrice = 1000m,
             MarkupPercentage = 50m,
             SellingPrice = 1500m,

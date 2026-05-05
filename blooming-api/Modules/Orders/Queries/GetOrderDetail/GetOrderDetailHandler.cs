@@ -23,6 +23,12 @@ public class GetOrderDetailHandler : IRequestHandler<GetOrderDetailQuery, OrderD
             .Include(o => o.Items)
                 .ThenInclude(i => i.ProductVariant)
                     .ThenInclude(v => v.Product)
+            .Include(o => o.Items)
+                .ThenInclude(i => i.ProductVariant)
+                    .ThenInclude(v => v.Size)
+            .Include(o => o.Items)
+                .ThenInclude(i => i.ProductVariant)
+                    .ThenInclude(v => v.Color)
             .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
 
         if (order == null)
@@ -35,7 +41,7 @@ public class GetOrderDetailHandler : IRequestHandler<GetOrderDetailQuery, OrderD
             i.Id,
             i.ProductVariantId,
             i.ProductVariant.Product.Name,
-            $"{i.ProductVariant.Size} {i.ProductVariant.Color}",
+            $"{i.ProductVariant.Size.DisplayName} {i.ProductVariant.Color.DisplayName}",
             i.UnitPrice,
             i.Quantity,
             i.LineTotal

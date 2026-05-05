@@ -17,12 +17,14 @@ public class GetActiveStockAlertsHandler : IRequestHandler<GetActiveStockAlertsQ
     {
         var alerts = await _db.ProductVariants
             .Include(v => v.Product)
+            .Include(v => v.Size)
+            .Include(v => v.Color)
             .Where(v => v.LowStockThreshold.HasValue && v.Stock < v.LowStockThreshold.Value)
             .OrderBy(v => v.Stock)
             .Select(v => new StockAlertDto(
                 v.Product.Name,
-                v.Size,
-                v.Color,
+                v.Size.DisplayName,
+                v.Color.DisplayName,
                 v.Stock,
                 v.LowStockThreshold!.Value))
             .ToListAsync(cancellationToken);

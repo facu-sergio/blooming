@@ -65,7 +65,7 @@
               <mat-option [value]="item">
                 <span class="autocomplete-name">{{ item.product.name }}</span>
                 <span class="autocomplete-sub">
-                  {{ item.variant.size }} · {{ item.variant.color }} ·
+                  {{ item.variant.sizeName }} · {{ item.variant.colorName }} ·
                   ${{ item.variant.sellingPrice | number: '1.0-2' }} ·
                   Stock: {{ item.variant.stock }}
                 </span>

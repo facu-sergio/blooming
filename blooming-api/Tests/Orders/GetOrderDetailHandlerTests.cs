@@ -32,13 +32,20 @@ public class GetOrderDetailHandlerTests : IDisposable
         var product = new Product { Id = 1, Name = "Remera", CategoryId = 1, CreatedAt = DateTime.UtcNow };
         _db.Products.Add(product);
 
+        var size = new Size { Id = 1, SizeSystemId = 1, Name = "m", DisplayName = "M", SortOrder = 1, IsActive = true };
+        var color = new Color { Id = 1, Name = "azul", DisplayName = "Azul", SortOrder = 1, IsActive = true };
+        _db.Sizes.Add(size);
+        _db.Colors.Add(color);
+
         var variant = new ProductVariant
         {
             Id = 5,
             ProductId = 1,
             Product = product,
-            Size = "M",
-            Color = "Azul",
+            SizeId = 1,
+            Size = size,
+            ColorId = 1,
+            Color = color,
             SellingPrice = 2500m,
             Stock = 10,
             CreatedAt = DateTime.UtcNow,

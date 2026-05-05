@@ -6,8 +6,8 @@ namespace blooming_api.Modules.Products.Commands.CreateProductInline;
 public record CreateProductInlineCommand(
     string Name,
     int CategoryId,
-    string Size,
-    string Color,
+    int SizeId,
+    int ColorId,
     decimal MarkupPercentage,
     int? LowStockThreshold
 ) : IRequest<ProductResponse>;

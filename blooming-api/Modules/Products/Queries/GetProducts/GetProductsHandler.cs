@@ -18,6 +18,8 @@ public class GetProductsHandler : IRequestHandler<GetProductsQuery, PagedProduct
     public async Task<PagedProductsResult> Handle(GetProductsQuery request, CancellationToken cancellationToken)
     {
         var query = _db.Products
+            .Include(p => p.Variants).ThenInclude(v => v.Size)
+            .Include(p => p.Variants).ThenInclude(v => v.Color)
             .Include(p => p.Variants).ThenInclude(v => v.Measurements)
             .Include(p => p.Category)
             .AsQueryable();
@@ -27,17 +29,19 @@ public class GetProductsHandler : IRequestHandler<GetProductsQuery, PagedProduct
             var term = request.SearchTerm.ToLower();
             query = query.Where(p =>
                 p.Name.ToLower().Contains(term) ||
-                p.Variants.Any(v => v.Color.ToLower().Contains(term) || v.Size.ToLower().Contains(term)));
+                p.Variants.Any(v =>
+                    v.Color.Name.ToLower().Contains(term) ||
+                    v.Size.Name.ToLower().Contains(term)));
         }
 
         if (!string.IsNullOrWhiteSpace(request.Category))
             query = query.Where(p => p.Category.Name == request.Category);
 
-        if (!string.IsNullOrWhiteSpace(request.Size))
-            query = query.Where(p => p.Variants.Any(v => v.Size.ToLower().Contains(request.Size.ToLower())));
+        if (request.SizeId.HasValue)
+            query = query.Where(p => p.Variants.Any(v => v.SizeId == request.SizeId.Value));
 
-        if (!string.IsNullOrWhiteSpace(request.Color))
-            query = query.Where(p => p.Variants.Any(v => v.Color.ToLower().Contains(request.Color.ToLower())));
+        if (request.ColorId.HasValue)
+            query = query.Where(p => p.Variants.Any(v => v.ColorId == request.ColorId.Value));
 
         var totalCount = await query.CountAsync(cancellationToken);
 

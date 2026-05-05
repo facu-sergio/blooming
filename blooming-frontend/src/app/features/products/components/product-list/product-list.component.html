@@ -55,22 +55,26 @@
 
       <mat-form-field appearance="outline" class="filter-field">
         <mat-label>Talle</mat-label>
-        <input
-          matInput
-          [formControl]="sizeControl"
-          (input)="onFilterChange()"
-          placeholder="Ej: M"
-        />
+        <mat-select [formControl]="sizeIdControl" (selectionChange)="onFilterChange()">
+          <mat-option [value]="null">Todos</mat-option>
+          @for (ss of catalogService.sizeSystems(); track ss.id) {
+            <mat-optgroup [label]="ss.displayName">
+              @for (size of ss.sizes; track size.id) {
+                <mat-option [value]="size.id">{{ size.displayName }}</mat-option>
+              }
+            </mat-optgroup>
+          }
+        </mat-select>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="filter-field">
         <mat-label>Color</mat-label>
-        <input
-          matInput
-          [formControl]="colorControl"
-          (input)="onFilterChange()"
-          placeholder="Ej: Azul"
-        />
+        <mat-select [formControl]="colorIdControl" (selectionChange)="onFilterChange()">
+          <mat-option [value]="null">Todos</mat-option>
+          @for (color of catalogService.colors(); track color.id) {
+            <mat-option [value]="color.id">{{ color.displayName }}</mat-option>
+          }
+        </mat-select>
       </mat-form-field>
 
       @if (hasActiveFilters()) {
@@ -153,7 +157,7 @@
                   <div class="variant-mobile-row">
                     <div class="variant-mobile-info">
                       <div class="variant-mobile-main">
-                        <span class="variant-label">{{ variant.size }} / {{ variant.color }}</span>
+                        <span class="variant-label">{{ variant.sizeName }} / {{ variant.colorName }}</span>
                         <span class="variant-price">${{ variant.sellingPrice | number: '1.2-2' }}</span>
                         <span class="stock-badge" [class]="getStockClass(variant.stock)">
                           {{ variant.stock }} u.
@@ -162,6 +166,9 @@
                           <mat-icon class="low-stock-icon-sm" [matTooltip]="getLowStockTooltip(variant)">warning</mat-icon>
                         }
                       </div>
+                      @if (variant.description) {
+                        <div class="variant-description-mobile">{{ variant.description }}</div>
+                      }
                       @if (variant.measurements && variant.measurements.length > 0) {
                         <div class="variant-measurements-mobile">
                           <mat-icon class="measurements-icon-sm">straighten</mat-icon>
@@ -250,8 +257,8 @@
               </div>
               @for (variant of product.variants; track variant.id) {
                 <div class="variants-row">
-                  <span>{{ variant.size }}</span>
-                  <span>{{ variant.color }}</span>
+                  <span>{{ variant.sizeName }}</span>
+                  <span>{{ variant.colorName }}</span>
                   <span>${{ variant.costPrice | number: '1.2-2' }}</span>
                   <span>{{ variant.markupPercentage }}%</span>
                   <span>${{ variant.sellingPrice | number: '1.2-2' }}</span>
@@ -268,6 +275,11 @@
                     }
                   </span>
                 </div>
+                @if (variant.description) {
+                  <div class="description-row">
+                    <span class="variant-description">{{ variant.description }}</span>
+                  </div>
+                }
                 @if (variant.measurements && variant.measurements.length > 0) {
                   <div class="measurements-row">
                     <span class="measurements-label">
@@ -285,7 +297,7 @@
                 <div class="variant-mobile-row">
                   <div class="variant-mobile-info">
                     <div class="variant-mobile-main">
-                      <span class="variant-label">{{ variant.size }} / {{ variant.color }}</span>
+                      <span class="variant-label">{{ variant.sizeName }} / {{ variant.colorName }}</span>
                       <span class="variant-price">${{ variant.sellingPrice | number: '1.2-2' }}</span>
                       <span class="stock-badge" [class]="getStockClass(variant.stock)">
                         {{ variant.stock }} u.
@@ -297,6 +309,9 @@
                         >warning</mat-icon>
                       }
                     </div>
+                    @if (variant.description) {
+                      <div class="variant-description-mobile">{{ variant.description }}</div>
+                    }
                     @if (variant.measurements && variant.measurements.length > 0) {
                       <div class="variant-measurements-mobile">
                         <mat-icon class="measurements-icon-sm">straighten</mat-icon>

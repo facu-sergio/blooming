@@ -30,12 +30,12 @@ public class ProductsController : ControllerBase
     public async Task<ActionResult<PagedProductsResult>> GetAll(
         [FromQuery] string? searchTerm,
         [FromQuery] string? category,
-        [FromQuery] string? size,
-        [FromQuery] string? color,
+        [FromQuery] int? sizeId,
+        [FromQuery] int? colorId,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 1000)
     {
-        var result = await _mediator.Send(new GetProductsQuery(searchTerm, category, size, color, page, pageSize));
+        var result = await _mediator.Send(new GetProductsQuery(searchTerm, category, sizeId, colorId, page, pageSize));
         return Ok(result);
     }
 
@@ -43,15 +43,15 @@ public class ProductsController : ControllerBase
     public async Task<ActionResult<List<ProductResponse>>> Search(
         [FromQuery] string? searchTerm,
         [FromQuery] string? category,
-        [FromQuery] string? size,
-        [FromQuery] string? color)
+        [FromQuery] int? sizeId,
+        [FromQuery] int? colorId)
     {
         var request = new SearchProductsRequest
         {
             SearchTerm = searchTerm,
             Category = category,
-            Size = size,
-            Color = color
+            SizeId = sizeId,
+            ColorId = colorId
         };
         var result = await _mediator.Send(new SearchProductsQuery(request));
         return Ok(result);
@@ -113,7 +113,7 @@ public class ProductsController : ControllerBase
     public async Task<ActionResult<ProductResponse>> CreateInline([FromBody] CreateProductInlineRequest request)
     {
         var command = new CreateProductInlineCommand(
-            request.Name, request.CategoryId, request.Size, request.Color,
+            request.Name, request.CategoryId, request.SizeId, request.ColorId,
             request.MarkupPercentage, request.LowStockThreshold);
         var result = await _mediator.Send(command);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);

@@ -23,20 +23,36 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
     public async Task<ProductResponse> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
         var product = await _db.Products
-            .Include(p => p.Variants)
-                .ThenInclude(v => v.Measurements)
+            .Include(p => p.Variants).ThenInclude(v => v.Size)
+            .Include(p => p.Variants).ThenInclude(v => v.Color)
+            .Include(p => p.Variants).ThenInclude(v => v.Measurements)
             .FirstOrDefaultAsync(p => p.Id == request.ProductId, cancellationToken)
             ?? throw new NotFoundException($"Producto {request.ProductId} no encontrado");
 
         var category = await _db.Categories.FindAsync([request.CategoryId], cancellationToken)
             ?? throw new NotFoundException($"Categoría {request.CategoryId} no encontrada");
 
-        // Manejar imagen
+        var sizeIds = request.Variants.Select(v => v.SizeId).Distinct().ToList();
+        var colorIds = request.Variants.Select(v => v.ColorId).Distinct().ToList();
+
+        var sizes = await _db.Sizes
+            .Where(s => sizeIds.Contains(s.Id))
+            .ToDictionaryAsync(s => s.Id, cancellationToken);
+        var colors = await _db.Colors
+            .Where(c => colorIds.Contains(c.Id))
+            .ToDictionaryAsync(c => c.Id, cancellationToken);
+
+        foreach (var sizeId in sizeIds)
+            if (!sizes.ContainsKey(sizeId))
+                throw new NotFoundException($"Talle {sizeId} no encontrado");
+        foreach (var colorId in colorIds)
+            if (!colors.ContainsKey(colorId))
+                throw new NotFoundException($"Color {colorId} no encontrado");
+
         if (request.Image != null)
         {
             if (product.ImageUrl != null)
                 await DeleteCloudinaryImage(product.ImageUrl);
-
             using var stream = request.Image.OpenReadStream();
             product.ImageUrl = await _cloudinary.UploadImageAsync(stream, request.Image.FileName);
         }
@@ -50,7 +66,6 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
         product.CategoryId = request.CategoryId;
         product.UpdatedAt = DateTime.UtcNow;
 
-        // Actualizar variantes
         for (var idx = 0; idx < request.Variants.Count; idx++)
         {
             var variantDto = request.Variants[idx];
@@ -61,12 +76,15 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
                 var existing = product.Variants.FirstOrDefault(v => v.Id == variantDto.Id.Value);
                 if (existing != null)
                 {
-                    existing.Size = variantDto.Size;
-                    existing.Color = variantDto.Color;
+                    existing.SizeId = variantDto.SizeId;
+                    existing.Size = sizes[variantDto.SizeId];
+                    existing.ColorId = variantDto.ColorId;
+                    existing.Color = colors[variantDto.ColorId];
                     existing.CostPrice = variantDto.CostPrice;
                     existing.MarkupPercentage = variantDto.MarkupPercentage;
                     existing.SellingPrice = variantDto.CostPrice * (1 + variantDto.MarkupPercentage / 100);
                     existing.LowStockThreshold = variantDto.LowStockThreshold;
+                    existing.Description = variantDto.Description;
                     existing.UpdatedAt = DateTime.UtcNow;
 
                     if (variantImageFile != null)
@@ -105,14 +123,17 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
 
                 product.Variants.Add(new ProductVariant
                 {
-                    Size = variantDto.Size,
-                    Color = variantDto.Color,
+                    SizeId = variantDto.SizeId,
+                    Size = sizes[variantDto.SizeId],
+                    ColorId = variantDto.ColorId,
+                    Color = colors[variantDto.ColorId],
                     CostPrice = variantDto.CostPrice,
                     MarkupPercentage = variantDto.MarkupPercentage,
                     SellingPrice = variantDto.CostPrice * (1 + variantDto.MarkupPercentage / 100),
                     Stock = 0,
                     LowStockThreshold = variantDto.LowStockThreshold,
                     ImageUrl = variantImageUrl,
+                    Description = variantDto.Description,
                     CreatedAt = DateTime.UtcNow,
                     Measurements = (variantDto.Measurements ?? []).Select(m => new ProductVariantMeasurement
                     {

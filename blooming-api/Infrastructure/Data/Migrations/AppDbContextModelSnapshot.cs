@@ -22,6 +22,45 @@ namespace blooming_api.Infrastructure.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("blooming_api.Common.Color", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("display_name");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<decimal>("SortOrder")
+                        .HasColumnType("decimal(5,1)")
+                        .HasColumnName("sort_order");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("colors", (string)null);
+                });
+
             modelBuilder.Entity("blooming_api.Common.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -50,6 +89,10 @@ namespace blooming_api.Infrastructure.Data.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
 
+                    b.Property<int?>("SizeSystemId")
+                        .HasColumnType("integer")
+                        .HasColumnName("size_system_id");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -57,6 +100,8 @@ namespace blooming_api.Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("SizeSystemId");
 
                     b.ToTable("products", (string)null);
                 });
@@ -70,11 +115,9 @@ namespace blooming_api.Infrastructure.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Color")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("color");
+                    b.Property<int>("ColorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("color_id");
 
                     b.Property<decimal>("CostPrice")
                         .HasColumnType("decimal(18,2)")
@@ -83,6 +126,11 @@ namespace blooming_api.Infrastructure.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("description");
 
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(500)
@@ -105,11 +153,9 @@ namespace blooming_api.Infrastructure.Data.Migrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("selling_price");
 
-                    b.Property<string>("Size")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("size");
+                    b.Property<int>("SizeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("size_id");
 
                     b.Property<int>("Stock")
                         .ValueGeneratedOnAdd()
@@ -123,7 +169,11 @@ namespace blooming_api.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId", "Size", "Color")
+                    b.HasIndex("ColorId");
+
+                    b.HasIndex("SizeId");
+
+                    b.HasIndex("ProductId", "SizeId", "ColorId")
                         .IsUnique();
 
                     b.ToTable("product_variants", (string)null);
@@ -166,6 +216,93 @@ namespace blooming_api.Infrastructure.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("product_variant_measurements", (string)null);
+                });
+
+            modelBuilder.Entity("blooming_api.Common.Size", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("display_name");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("SizeSystemId")
+                        .HasColumnType("integer")
+                        .HasColumnName("size_system_id");
+
+                    b.Property<decimal>("SortOrder")
+                        .HasColumnType("decimal(5,1)")
+                        .HasColumnName("sort_order");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SizeSystemId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("sizes", (string)null);
+                });
+
+            modelBuilder.Entity("blooming_api.Common.SizeSystem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("display_name");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<decimal>("SortOrder")
+                        .HasColumnType("decimal(5,1)")
+                        .HasColumnName("sort_order");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("size_systems", (string)null);
                 });
 
             modelBuilder.Entity("blooming_api.Common.User", b =>
@@ -623,18 +760,41 @@ namespace blooming_api.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("blooming_api.Common.SizeSystem", "SizeSystem")
+                        .WithMany()
+                        .HasForeignKey("SizeSystemId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Category");
+
+                    b.Navigation("SizeSystem");
                 });
 
             modelBuilder.Entity("blooming_api.Common.ProductVariant", b =>
                 {
+                    b.HasOne("blooming_api.Common.Color", "Color")
+                        .WithMany()
+                        .HasForeignKey("ColorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("blooming_api.Common.Product", "Product")
                         .WithMany("Variants")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("blooming_api.Common.Size", "Size")
+                        .WithMany()
+                        .HasForeignKey("SizeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Color");
+
                     b.Navigation("Product");
+
+                    b.Navigation("Size");
                 });
 
             modelBuilder.Entity("blooming_api.Common.ProductVariantMeasurement", b =>
@@ -646,6 +806,17 @@ namespace blooming_api.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("ProductVariant");
+                });
+
+            modelBuilder.Entity("blooming_api.Common.Size", b =>
+                {
+                    b.HasOne("blooming_api.Common.SizeSystem", "SizeSystem")
+                        .WithMany("Sizes")
+                        .HasForeignKey("SizeSystemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("SizeSystem");
                 });
 
             modelBuilder.Entity("blooming_api.Modules.Orders.Entities.Order", b =>
@@ -745,6 +916,11 @@ namespace blooming_api.Infrastructure.Data.Migrations
             modelBuilder.Entity("blooming_api.Common.ProductVariant", b =>
                 {
                     b.Navigation("Measurements");
+                });
+
+            modelBuilder.Entity("blooming_api.Common.SizeSystem", b =>
+                {
+                    b.Navigation("Sizes");
                 });
 
             modelBuilder.Entity("blooming_api.Modules.Orders.Entities.Order", b =>

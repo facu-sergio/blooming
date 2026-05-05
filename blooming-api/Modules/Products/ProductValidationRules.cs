@@ -11,7 +11,7 @@ public static class ProductValidationRules
 
     public static void ApplyVariantRules(AbstractValidator<CreateVariantDto> v)
     {
-        ApplyVariantRulesCore(v, x => x.Size, x => x.Color, x => x.CostPrice, x => x.MarkupPercentage);
+        ApplyVariantRulesCore(v, x => x.SizeId, x => x.ColorId, x => x.CostPrice, x => x.MarkupPercentage);
         v.RuleFor(x => x.LowStockThreshold)
             .GreaterThanOrEqualTo(0).WithMessage("El umbral de stock bajo no puede ser negativo")
             .When(x => x.LowStockThreshold.HasValue);
@@ -19,7 +19,7 @@ public static class ProductValidationRules
 
     public static void ApplyVariantRules(AbstractValidator<UpdateVariantDto> v)
     {
-        ApplyVariantRulesCore(v, x => x.Size, x => x.Color, x => x.CostPrice, x => x.MarkupPercentage);
+        ApplyVariantRulesCore(v, x => x.SizeId, x => x.ColorId, x => x.CostPrice, x => x.MarkupPercentage);
         v.RuleFor(x => x.LowStockThreshold)
             .GreaterThanOrEqualTo(0).WithMessage("El umbral de stock bajo no puede ser negativo")
             .When(x => x.LowStockThreshold.HasValue);
@@ -44,20 +44,16 @@ public static class ProductValidationRules
 
     private static void ApplyVariantRulesCore<T>(
         AbstractValidator<T> v,
-        Expression<Func<T, string>> sizeExpr,
-        Expression<Func<T, string>> colorExpr,
+        Expression<Func<T, int>> sizeIdExpr,
+        Expression<Func<T, int>> colorIdExpr,
         Expression<Func<T, decimal>> costPriceExpr,
         Expression<Func<T, decimal>> markupExpr)
     {
-        v.RuleFor(sizeExpr)
-            .NotEmpty().WithMessage("El talle es requerido")
-            .MaximumLength(ProductsConstants.SizeMaxLength)
-                .WithMessage($"El talle no puede superar {ProductsConstants.SizeMaxLength} caracteres");
+        v.RuleFor(sizeIdExpr)
+            .GreaterThan(0).WithMessage("El talle es requerido");
 
-        v.RuleFor(colorExpr)
-            .NotEmpty().WithMessage("El color es requerido")
-            .MaximumLength(ProductsConstants.ColorMaxLength)
-                .WithMessage($"El color no puede superar {ProductsConstants.ColorMaxLength} caracteres");
+        v.RuleFor(colorIdExpr)
+            .GreaterThan(0).WithMessage("El color es requerido");
 
         v.RuleFor(costPriceExpr)
             .GreaterThan(0).WithMessage("El precio de costo debe ser mayor a 0");

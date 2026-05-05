@@ -47,8 +47,8 @@ public class CreatePurchaseOrderHandlerTests : IDisposable
         var variant = new ProductVariant
         {
             ProductId = product.Id,
-            Size = "M",
-            Color = "Rojo",
+            SizeId = 1,
+            ColorId = 1,
             CostPrice = 1000m,
             MarkupPercentage = 50m,
             SellingPrice = 1500m,
@@ -129,8 +129,8 @@ public class CreatePurchaseOrderHandlerTests : IDisposable
         var variant2 = new ProductVariant
         {
             ProductId = product2.Id,
-            Size = "L",
-            Color = "Azul",
+            SizeId = 2,
+            ColorId = 2,
             CostPrice = 2000m,
             MarkupPercentage = 50m,
             SellingPrice = 3000m,

@@ -6,8 +6,10 @@ import { ProductResponse } from '../models/product.models';
 
 const mockVariant = {
   id: 1,
-  size: 'M',
-  color: 'Azul',
+  sizeId: 1,
+  sizeName: 'M',
+  colorId: 1,
+  colorName: 'Negro',
   costPrice: 1000,
   markupPercentage: 50,
   sellingPrice: 1500,
@@ -107,7 +109,7 @@ describe('ProductsService', () => {
       const fd = new FormData();
       fd.append('name', 'Remera');
       fd.append('categoryId', '1');
-      fd.append('variants', JSON.stringify([{ size: 'M', color: 'Azul', costPrice: 1000, markupPercentage: 50 }]));
+      fd.append('variants', JSON.stringify([{ sizeId: 1, colorId: 1, costPrice: 1000, markupPercentage: 50 }]));
 
       const createPromise = service.create(fd);
 
@@ -130,7 +132,7 @@ describe('ProductsService', () => {
       const fd = new FormData();
       fd.append('name', 'Remera Actualizada');
       fd.append('categoryId', '1');
-      fd.append('variants', JSON.stringify([{ id: 1, size: 'L', color: 'Rojo', costPrice: 1200, markupPercentage: 50 }]));
+      fd.append('variants', JSON.stringify([{ id: 1, sizeId: 2, colorId: 1, costPrice: 1200, markupPercentage: 50 }]));
 
       const updatePromise = service.update(1, fd);
 
@@ -150,14 +152,14 @@ describe('ProductsService', () => {
 
   describe('buildFormData()', () => {
     it('should build FormData with name, categoryId and variants as JSON string', () => {
-      const variants = [{ size: 'M', color: 'Azul', costPrice: 1000, markupPercentage: 50 }];
+      const variants = [{ sizeId: 1, colorId: 1, costPrice: 1000, markupPercentage: 50 }];
       const fd = service.buildFormData('Remera', 1, variants);
 
       expect(fd.get('name')).toBe('Remera');
       expect(fd.get('categoryId')).toBe('1');
       const parsedVariants = JSON.parse(fd.get('variants') as string);
-      expect(parsedVariants[0].size).toBe('M');
-      expect(parsedVariants[0].color).toBe('Azul');
+      expect(parsedVariants[0].sizeId).toBe(1);
+      expect(parsedVariants[0].colorId).toBe(1);
       expect(parsedVariants[0].costPrice).toBe(1000);
       expect(parsedVariants[0].markupPercentage).toBe(50);
       expect(parsedVariants[0].lowStockThreshold).toBeNull();
@@ -165,7 +167,7 @@ describe('ProductsService', () => {
     });
 
     it('should include lowStockThreshold in processed variants', () => {
-      const variants = [{ size: 'M', color: 'Azul', costPrice: 1000, markupPercentage: 50, lowStockThreshold: 3 }];
+      const variants = [{ sizeId: 1, colorId: 1, costPrice: 1000, markupPercentage: 50, lowStockThreshold: 3 }];
       const fd = service.buildFormData('Remera', 1, variants);
 
       const parsedVariants = JSON.parse(fd.get('variants') as string);
@@ -173,7 +175,7 @@ describe('ProductsService', () => {
     });
 
     it('should set lowStockThreshold to null when empty string', () => {
-      const variants = [{ size: 'M', color: 'Azul', costPrice: 1000, markupPercentage: 50, lowStockThreshold: '' as unknown as number }];
+      const variants = [{ sizeId: 1, colorId: 1, costPrice: 1000, markupPercentage: 50, lowStockThreshold: '' as unknown as number }];
       const fd = service.buildFormData('Remera', 1, variants);
 
       const parsedVariants = JSON.parse(fd.get('variants') as string);
@@ -182,21 +184,21 @@ describe('ProductsService', () => {
 
     it('should include image in FormData when provided', () => {
       const file = new File(['content'], 'test.jpg', { type: 'image/jpeg' });
-      const variants = [{ size: 'M', color: 'Azul', costPrice: 1000, markupPercentage: 50 }];
+      const variants = [{ sizeId: 1, colorId: 1, costPrice: 1000, markupPercentage: 50 }];
       const fd = service.buildFormData('Remera', 1, variants, file);
 
       expect(fd.get('image')).toBe(file);
     });
 
     it('should include removeImage in FormData when provided', () => {
-      const variants = [{ id: 1, size: 'M', color: 'Azul', costPrice: 1000, markupPercentage: 50 }];
+      const variants = [{ id: 1, sizeId: 1, colorId: 1, costPrice: 1000, markupPercentage: 50 }];
       const fd = service.buildFormData('Remera', 1, variants, undefined, true);
 
       expect(fd.get('removeImage')).toBe('true');
     });
 
     it('should not include removeImage in FormData when not provided', () => {
-      const variants = [{ size: 'M', color: 'Azul', costPrice: 1000, markupPercentage: 50 }];
+      const variants = [{ sizeId: 1, colorId: 1, costPrice: 1000, markupPercentage: 50 }];
       const fd = service.buildFormData('Remera', 1, variants);
 
       expect(fd.get('removeImage')).toBeNull();
@@ -204,7 +206,10 @@ describe('ProductsService', () => {
   });
 
   describe('isLowStock()', () => {
-    const baseVariant = { id: 1, size: 'M', color: 'Azul', costPrice: 1000, markupPercentage: 50, sellingPrice: 1500, stock: 5, measurements: [] };
+    const baseVariant = {
+      id: 1, sizeId: 1, sizeName: 'M', colorId: 1, colorName: 'Negro',
+      costPrice: 1000, markupPercentage: 50, sellingPrice: 1500, stock: 5, measurements: []
+    };
 
     it('should return false when lowStockThreshold is undefined', () => {
       expect(service.isLowStock({ ...baseVariant, lowStockThreshold: undefined })).toBe(false);
