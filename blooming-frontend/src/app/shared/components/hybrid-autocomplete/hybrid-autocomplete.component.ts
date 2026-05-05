@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, inject, DestroyRef, viewChild, input } from '@angular/core';
+import { Component, OnInit, signal, computed, inject, effect, DestroyRef, viewChild, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormControl, AbstractControl } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -67,6 +67,23 @@ export class HybridAutocompleteComponent implements OnInit {
       }))
       .filter(g => g.options.length > 0);
   });
+
+  constructor() {
+    // Initializes the visible input when options load (handles edit mode preloading)
+    effect(() => {
+      const allOptions = this.options().length
+        ? this.options()
+        : this.optionGroups().flatMap(g => g.options);
+      const value = this.control()?.value;
+      if (value != null && allOptions.length > 0 && !this.isSelected()) {
+        const match = allOptions.find(o => o.id === value);
+        if (match) {
+          this.isSelected.set(true);
+          this.searchControl.setValue(match, { emitEvent: false });
+        }
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.searchControl.valueChanges
