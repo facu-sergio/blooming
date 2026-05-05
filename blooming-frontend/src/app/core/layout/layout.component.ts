@@ -74,6 +74,12 @@ export class LayoutComponent {
     this._sidenavOpened.set(opened);
   }
 
+  readonly configExpanded = signal(true);
+
+  toggleConfig(): void {
+    this.configExpanded.update((v) => !v);
+  }
+
   onNavItemClick(): void {
     if (this.isMobile()) {
       this._sidenavOpened.set(false);
