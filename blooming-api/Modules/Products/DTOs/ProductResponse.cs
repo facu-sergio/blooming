@@ -26,6 +26,7 @@ public class VariantResponse
     public int Stock { get; set; }
     public int? LowStockThreshold { get; set; }
     public string? ImageUrl { get; set; }
+    public string? Description { get; set; }
     public List<MeasurementResponse> Measurements { get; set; } = new();
 }
 

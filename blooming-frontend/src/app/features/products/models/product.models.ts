@@ -9,6 +9,7 @@ export interface CreateVariantDto {
   costPrice: number;
   markupPercentage: number;
   lowStockThreshold?: number;
+  description?: string;
   measurements?: ProductVariantMeasurement[];
 }
 
@@ -19,6 +20,7 @@ export interface UpdateVariantDto {
   costPrice: number;
   markupPercentage: number;
   lowStockThreshold?: number;
+  description?: string;
   removeVariantImage?: boolean;
   measurements?: ProductVariantMeasurement[];
 }
@@ -47,6 +49,7 @@ export interface VariantResponse {
   stock: number;
   lowStockThreshold?: number;
   imageUrl?: string;
+  description?: string;
   measurements: ProductVariantMeasurement[];
 }
 

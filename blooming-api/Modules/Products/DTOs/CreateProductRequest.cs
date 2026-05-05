@@ -16,6 +16,7 @@ public class CreateVariantDto
     public decimal CostPrice { get; set; }
     public decimal MarkupPercentage { get; set; }
     public int? LowStockThreshold { get; set; }
+    public string? Description { get; set; }
     public List<MeasurementDto>? Measurements { get; set; }
 }
 

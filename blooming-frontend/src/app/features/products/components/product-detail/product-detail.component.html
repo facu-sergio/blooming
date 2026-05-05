@@ -57,6 +57,12 @@
                   <span>{{ variant.lowStockThreshold }}</span>
                 </div>
               }
+              @if (variant.description) {
+                <div class="info-row">
+                  <span class="label">Aclaración:</span>
+                  <span>{{ variant.description }}</span>
+                </div>
+              }
               @if (variant.measurements && variant.measurements.length > 0) {
                 <div class="info-row">
                   <span class="label">Medidas:</span>

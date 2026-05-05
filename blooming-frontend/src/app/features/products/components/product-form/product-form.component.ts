@@ -100,6 +100,7 @@ export class ProductFormComponent implements OnInit {
     colorId?: number;
     costPrice?: number;
     markupPercentage?: number;
+    description?: string;
     measurements?: ProductVariantMeasurement[];
   }) {
     const cost = data?.costPrice ?? 0;
@@ -108,6 +109,7 @@ export class ProductFormComponent implements OnInit {
       id: [data?.id ?? null],
       sizeId: [data?.sizeId ?? null, [Validators.required]],
       colorId: [data?.colorId ?? null, [Validators.required]],
+      description: [data?.description ?? null, [Validators.maxLength(255)]],
       costPrice: [{ value: cost, disabled: false }],
       markupPercentage: [markup, [Validators.required, Validators.min(0)]],
       sellingPrice: [Math.round(cost * (1 + markup / 100) * 100) / 100],
@@ -284,6 +286,7 @@ export class ProductFormComponent implements OnInit {
             colorId: v.colorId,
             costPrice: v.costPrice,
             markupPercentage: v.markupPercentage,
+            description: v.description,
             measurements: v.measurements ?? [],
           }));
           imgs.push({ file: null, preview: v.imageUrl ?? null, existingUrl: v.imageUrl ?? null, remove: false });

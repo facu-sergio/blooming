@@ -84,6 +84,7 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
                     existing.MarkupPercentage = variantDto.MarkupPercentage;
                     existing.SellingPrice = variantDto.CostPrice * (1 + variantDto.MarkupPercentage / 100);
                     existing.LowStockThreshold = variantDto.LowStockThreshold;
+                    existing.Description = variantDto.Description;
                     existing.UpdatedAt = DateTime.UtcNow;
 
                     if (variantImageFile != null)
@@ -132,6 +133,7 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
                     Stock = 0,
                     LowStockThreshold = variantDto.LowStockThreshold,
                     ImageUrl = variantImageUrl,
+                    Description = variantDto.Description,
                     CreatedAt = DateTime.UtcNow,
                     Measurements = (variantDto.Measurements ?? []).Select(m => new ProductVariantMeasurement
                     {

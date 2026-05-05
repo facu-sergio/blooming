@@ -72,6 +72,7 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
                 Stock = 0,
                 LowStockThreshold = v.LowStockThreshold,
                 ImageUrl = variantImageUrl,
+                Description = v.Description,
                 CreatedAt = DateTime.UtcNow,
                 Measurements = (v.Measurements ?? []).Select(m => new ProductVariantMeasurement
                 {
@@ -120,6 +121,7 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
             Stock = v.Stock,
             LowStockThreshold = v.LowStockThreshold,
             ImageUrl = v.ImageUrl,
+            Description = v.Description,
             Measurements = v.Measurements.Select(m => new MeasurementResponse
             {
                 Name = m.MeasurementName,

@@ -166,6 +166,9 @@
                           <mat-icon class="low-stock-icon-sm" [matTooltip]="getLowStockTooltip(variant)">warning</mat-icon>
                         }
                       </div>
+                      @if (variant.description) {
+                        <div class="variant-description-mobile">{{ variant.description }}</div>
+                      }
                       @if (variant.measurements && variant.measurements.length > 0) {
                         <div class="variant-measurements-mobile">
                           <mat-icon class="measurements-icon-sm">straighten</mat-icon>
@@ -272,6 +275,11 @@
                     }
                   </span>
                 </div>
+                @if (variant.description) {
+                  <div class="description-row">
+                    <span class="variant-description">{{ variant.description }}</span>
+                  </div>
+                }
                 @if (variant.measurements && variant.measurements.length > 0) {
                   <div class="measurements-row">
                     <span class="measurements-label">
@@ -301,6 +309,9 @@
                         >warning</mat-icon>
                       }
                     </div>
+                    @if (variant.description) {
+                      <div class="variant-description-mobile">{{ variant.description }}</div>
+                    }
                     @if (variant.measurements && variant.measurements.length > 0) {
                       <div class="variant-measurements-mobile">
                         <mat-icon class="measurements-icon-sm">straighten</mat-icon>
