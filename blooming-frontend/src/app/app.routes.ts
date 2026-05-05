@@ -29,6 +29,13 @@ export const routes: Routes = [
           import('./features/products/products.routes').then((m) => m.productsRoutes),
       },
       {
+        path: 'colors',
+        loadComponent: () =>
+          import('./features/products/components/color-admin/color-admin.component').then(
+            (m) => m.ColorAdminComponent
+          ),
+      },
+      {
         path: 'customers',
         loadChildren: () =>
           import('./features/customers/customers.routes').then((m) => m.customersRoutes),
