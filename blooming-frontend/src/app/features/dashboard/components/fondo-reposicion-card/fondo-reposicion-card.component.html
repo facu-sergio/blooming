@@ -1,0 +1,14 @@
+<mat-card class="metric-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar>savings</mat-icon>
+    <mat-card-title>Fondo de Reposición</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <p class="metric-label">Calculado desde última OC</p>
+    <p class="metric-value">{{ fondoReposicion().fondoCalculado | currency: 'ARS' : '$' : '1.0-0' }}</p>
+    <p class="metric-label saldo-label">Saldo disponible</p>
+    <p class="metric-saldo" [class.negativo]="fondoReposicion().saldoFondo < 0">
+      {{ fondoReposicion().saldoFondo | currency: 'ARS' : '$' : '1.0-0' }}
+    </p>
+  </mat-card-content>
+</mat-card>

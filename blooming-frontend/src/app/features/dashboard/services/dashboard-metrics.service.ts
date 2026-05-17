@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
   DailySalesMetrics,
+  FondoReposicion,
   MonthlySalesMetrics,
   MonthlyProfitsMetrics,
   YearlyProfitsMetrics,
@@ -26,6 +27,7 @@ export class DashboardMetricsService {
   private readonly _stockAlerts = signal<StockAlert[]>([]);
   private readonly _monthlyMargin = signal<MonthlyMargin>({ revenue: 0, cost: 0, margin: 0 });
   private readonly _monthlyNetProfit = signal<MonthlyNetProfit>({ revenue: 0, cost: 0, netProfit: 0 });
+  private readonly _fondoReposicion = signal<FondoReposicion>({ fondoCalculado: 0, saldoFondo: 0 });
   private readonly _isLoading = signal(false);
 
   readonly dailySales = this._dailySales.asReadonly();
@@ -36,6 +38,7 @@ export class DashboardMetricsService {
   readonly stockAlerts = this._stockAlerts.asReadonly();
   readonly monthlyMargin = this._monthlyMargin.asReadonly();
   readonly monthlyNetProfit = this._monthlyNetProfit.asReadonly();
+  readonly fondoReposicion = this._fondoReposicion.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
 
   async loadAll(): Promise<void> {
@@ -49,6 +52,7 @@ export class DashboardMetricsService {
         this.loadTopProducts(),
         this.loadStockAlerts(),
         this.loadMonthlyMargin(),
+        this.loadFondoReposicion(),
       ]);
     } finally {
       this._isLoading.set(false);
@@ -103,5 +107,12 @@ export class DashboardMetricsService {
     );
     this._monthlyMargin.set(result);
     this._monthlyNetProfit.set({ revenue: result.revenue, cost: result.cost, netProfit: result.margin });
+  }
+
+  private async loadFondoReposicion(): Promise<void> {
+    const result = await firstValueFrom(
+      this.http.get<FondoReposicion>(`${this.baseUrl}/fondo-reposicion`)
+    );
+    this._fondoReposicion.set(result);
   }
 }

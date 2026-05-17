@@ -1,5 +1,6 @@
 using System.Reflection;
 using blooming_api.Common;
+using blooming_api.Modules.Configuracion.Entities;
 using blooming_api.Modules.Customers.Entities;
 using blooming_api.Modules.Orders.Entities;
 using blooming_api.Modules.Products.Entities;
@@ -29,6 +30,8 @@ public class AppDbContext : DbContext
     public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
     public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
     public DbSet<ProductVariantPriceHistory> ProductVariantPriceHistories { get; set; }
+    public DbSet<ConfiguracionNegocio> ConfiguracionNegocio { get; set; }
+    public DbSet<AuditoriaFondoReposicion> AuditoriaFondoReposicion { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

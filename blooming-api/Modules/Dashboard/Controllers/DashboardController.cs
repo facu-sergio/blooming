@@ -1,5 +1,6 @@
 using blooming_api.Modules.Dashboard.Queries.GetActiveStockAlerts;
 using blooming_api.Modules.Dashboard.Queries.GetDailySalesMetrics;
+using blooming_api.Modules.Dashboard.Queries.GetFondoReposicion;
 using blooming_api.Modules.Dashboard.Queries.GetMonthlyMargin;
 using blooming_api.Modules.Dashboard.Queries.GetMonthlyProfits;
 using blooming_api.Modules.Dashboard.Queries.GetMonthlySalesMetrics;
@@ -69,6 +70,13 @@ public class DashboardController : ControllerBase
     public async Task<ActionResult<YearlyProfitsDto>> GetYearlyProfits()
     {
         var result = await _mediator.Send(new GetYearlyProfitsQuery());
+        return Ok(result);
+    }
+
+    [HttpGet("fondo-reposicion")]
+    public async Task<ActionResult<FondoReposicionDto>> GetFondoReposicion()
+    {
+        var result = await _mediator.Send(new GetFondoReposicionQuery());
         return Ok(result);
     }
 }
