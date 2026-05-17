@@ -12,7 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatDividerModule } from '@angular/material/divider';
-import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs/operators';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CustomersService } from '../../../customers/services/customers.service';
@@ -61,14 +61,24 @@ export class CreateOrderComponent implements OnInit {
 
   // Estado de búsqueda y selección de cliente
   readonly customerSearchControl = new FormControl('', { updateOn: 'change' });
+  readonly customerSearchTerm = toSignal(
+    this.customerSearchControl.valueChanges.pipe(
+      startWith(this.customerSearchControl.value ?? '')
+    ),
+    { initialValue: '' }
+  );
   private readonly _selectedCustomer = signal<Customer | null>(null);
   readonly selectedCustomer = this._selectedCustomer.asReadonly();
   readonly filteredCustomers = computed(() => {
-    const term = (this.customerSearchControl.value ?? '').toLowerCase();
+    const term = (this.customerSearchTerm() ?? '').toLowerCase().trim();
     if (!term) return this.customersService.customers().slice(0, 10);
     return this.customersService
       .customers()
-      .filter((c) => c.name.toLowerCase().includes(term) || c.phone.includes(term))
+      .filter((c) =>
+        c.name.toLowerCase().includes(term) ||
+        c.phone.toLowerCase().includes(term) ||
+        c.id.toString().includes(term)
+      )
       .slice(0, 10);
   });
 
