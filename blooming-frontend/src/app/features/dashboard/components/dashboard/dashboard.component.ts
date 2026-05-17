@@ -9,6 +9,7 @@ import { MarginCardComponent } from '../margin-card/margin-card.component';
 import { TopProductsCardComponent } from '../top-products-card/top-products-card.component';
 import { StockAlertsCardComponent } from '../stock-alerts-card/stock-alerts-card.component';
 import { YearlyProfitsCardComponent } from '../yearly-profits-card/yearly-profits-card.component';
+import { FondoReposicionCardComponent } from '../fondo-reposicion-card/fondo-reposicion-card.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -22,6 +23,7 @@ import { YearlyProfitsCardComponent } from '../yearly-profits-card/yearly-profit
     TopProductsCardComponent,
     StockAlertsCardComponent,
     YearlyProfitsCardComponent,
+    FondoReposicionCardComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',

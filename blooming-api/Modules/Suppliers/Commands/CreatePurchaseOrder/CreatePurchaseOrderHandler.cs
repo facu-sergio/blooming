@@ -1,5 +1,7 @@
 using blooming_api.Common.Exceptions;
 using blooming_api.Infrastructure.Data;
+using blooming_api.Modules.Configuracion;
+using blooming_api.Modules.Configuracion.Entities;
 using blooming_api.Modules.Products.Entities;
 using blooming_api.Modules.Suppliers.Entities;
 using MediatR;
@@ -90,6 +92,35 @@ public class CreatePurchaseOrderHandler : IRequestHandler<CreatePurchaseOrderCom
                     CreatedAt = now
                 });
             }
+
+            await _db.SaveChangesAsync(cancellationToken);
+
+            var config = await _db.ConfiguracionNegocio
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (config == null)
+            {
+                config = new ConfiguracionNegocio
+                {
+                    Id = ConfiguracionConstants.ConfiguracionId,
+                    SaldoFondo = 0m,
+                    UpdatedAt = now
+                };
+                _db.ConfiguracionNegocio.Add(config);
+            }
+
+            var saldoAnterior = config.SaldoFondo;
+            config.SaldoFondo -= purchaseOrder.TotalAmount;
+            config.UpdatedAt = now;
+
+            _db.AuditoriaFondoReposicion.Add(new AuditoriaFondoReposicion
+            {
+                SaldoAnterior = saldoAnterior,
+                SaldoNuevo = config.SaldoFondo,
+                Motivo = $"Descuento por OC #{purchaseOrder.Id}",
+                UsuarioId = null,
+                CreatedAt = now
+            });
 
             await _db.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);

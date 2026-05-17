@@ -1,0 +1,8 @@
+Hola, necesito tu ayuda para planificar una nueva funcionalidad para mi aplicación de gestión de ventas llamada Blooming, que uso para administrar mi negocio de reventa de ropa. La app ya tiene módulos de pedidos de ventas,
+ órdenes de compra a mayoristas y un dashboard con métricas. Investiga un poco todas las HU que fuimos armando para tener contexto y validar que no me equivoque en lo que digo
+La funcionalidad se llama Fondo de reposición y quiero agregarla al dashboard. La problemática es que hoy no tengo visibilidad de cuánto dinero debo reservar para volver a comprar en el mayorista y cuánto es ganancia real disponible.
+La solución que propongo es la siguiente dame tu opinion: el fondo se calcula multiplicando el costo unitario de cada producto por las cantidades vendidas desde la fecha de la última orden de compra registrada.
+Ese costo unitario lo obtengo del campo costo en la tabla de productos, que se actualiza automáticamente cada vez que registro una OC.
+La fecha de corte la obtengo dinámicamente haciendo MAX(fecha) sobre la tabla de órdenes de compra. Cada vez que registro una nueva OC, se resta del saldo acumulado lo que gasté en esa compra, conservando el remanente sin resetear a cero.
+El único dato que persisto es un campo saldo_fondo en una tabla de configuración del negocio, ya que es el único valor que no puedo derivar del resto de las tablas.
+Necesito que me ayudes a definir si esto amerita una historia de usuario propia o es una tarea técnica dentro de una historia de dashboard existente, redactar los criterios de aceptación, identificar dependencias con otros módulos y evaluar si el saldo_fondo necesita algún mecanismo de auditoría o log de cambios.

@@ -43,3 +43,8 @@ export interface MonthlyNetProfit {
   cost: number;
   netProfit: number;
 }
+
+export interface FondoReposicion {
+  fondoCalculado: number;
+  saldoFondo: number;
+}
