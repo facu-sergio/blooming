@@ -44,7 +44,8 @@ public class GetOrdersHandler : IRequestHandler<GetOrdersQuery, PagedOrdersResul
                 MapToSpanish(o.Status),
                 o.Status.ToString(),
                 o.Total,
-                o.CreatedAt
+                o.CreatedAt,
+                o.DeliveredAt
             ))
             .ToListAsync(cancellationToken);
 

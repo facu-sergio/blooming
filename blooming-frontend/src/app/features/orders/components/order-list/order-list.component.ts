@@ -56,7 +56,7 @@ export class OrderListComponent implements OnInit {
   readonly orders = this.ordersService.orders;
   readonly totalCount = this.ordersService.totalCount;
 
-  readonly tableColumns = ['id', 'customer', 'status', 'total', 'createdAt'];
+  readonly tableColumns = ['id', 'customer', 'status', 'total', 'deliveredAt'];
   readonly statusOptions: { value: OrderStatus | ''; label: string }[] = [
     { value: '', label: 'Todos' },
     { value: 'Pending', label: 'Pendiente' },

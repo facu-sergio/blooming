@@ -16,6 +16,7 @@ const mockOrders: OrderListItemDto[] = [
     statusKey: 'Pending',
     total: 1000,
     createdAt: '2026-01-10T00:00:00Z',
+    deliveredAt: undefined,
   },
   {
     id: 2,
@@ -25,6 +26,7 @@ const mockOrders: OrderListItemDto[] = [
     statusKey: 'Confirmed',
     total: 2000,
     createdAt: '2026-02-15T00:00:00Z',
+    deliveredAt: undefined,
   },
 ];
 

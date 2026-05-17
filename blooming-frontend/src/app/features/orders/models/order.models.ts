@@ -102,6 +102,7 @@ export interface OrderListItemDto {
   statusKey: OrderStatus;
   total: number;
   createdAt: string;
+  deliveredAt?: string;
 }
 
 export interface PagedOrdersResult {
