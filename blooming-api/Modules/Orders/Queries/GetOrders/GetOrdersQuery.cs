@@ -25,5 +25,6 @@ public record OrderListItemDto(
     string Status,
     string StatusKey,
     decimal Total,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    DateTime? DeliveredAt
 );
