@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -15,7 +15,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, startWith } from 'rxjs/operators';
 import { SuppliersService } from '../../../suppliers/services/suppliers.service';
 import { ProductsService } from '../../../products/services/products.service';
 import { PurchaseOrdersService } from '../../services/purchase-orders.service';
@@ -54,6 +55,7 @@ export class PurchaseOrderFormComponent implements OnInit {
   private readonly suppliersService = inject(SuppliersService);
   private readonly productsService = inject(ProductsService);
   private readonly purchaseOrdersService = inject(PurchaseOrdersService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly isLoading = this.purchaseOrdersService.isLoading;
 
@@ -62,10 +64,14 @@ export class PurchaseOrderFormComponent implements OnInit {
 
   // Supplier selection
   readonly supplierSearchControl = new FormControl('', { updateOn: 'change' });
+  private readonly supplierSearchTerm = toSignal(
+    this.supplierSearchControl.valueChanges.pipe(startWith('')),
+    { initialValue: '' }
+  );
   private readonly _selectedSupplier = signal<Supplier | null>(null);
   readonly selectedSupplier = this._selectedSupplier.asReadonly();
   readonly filteredSuppliers = computed(() => {
-    const term = (this.supplierSearchControl.value ?? '').toLowerCase();
+    const term = (this.supplierSearchTerm() ?? '').trim().toLowerCase();
     if (!term) return this.suppliersService.suppliers().slice(0, 10);
     return this.suppliersService
       .suppliers()
@@ -91,8 +97,21 @@ export class PurchaseOrderFormComponent implements OnInit {
     await this.suppliersService.loadAll();
     this.productsService.loadAll();
 
+    this.supplierSearchControl.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((term) => {
+        const value = (term ?? '').trim();
+        const selectedSupplier = this._selectedSupplier();
+
+        if (selectedSupplier && value !== selectedSupplier.name) {
+          this._selectedSupplier.set(null);
+        }
+
+        void this.suppliersService.loadAll(value || undefined);
+      });
+
     this.variantSearchControl.valueChanges
-      .pipe(debounceTime(200), distinctUntilChanged())
+      .pipe(debounceTime(200), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe((term) => this.filterVariants(term ?? ''));
 
     const supplierId = this.route.snapshot.queryParamMap.get('supplierId');
@@ -125,7 +144,7 @@ export class PurchaseOrderFormComponent implements OnInit {
 
   onSupplierSelected(supplier: Supplier): void {
     this._selectedSupplier.set(supplier);
-    this.supplierSearchControl.setValue(supplier.name, { emitEvent: false });
+    this.supplierSearchControl.setValue(supplier.name);
   }
 
   clearSupplier(): void {
